@@ -11,17 +11,17 @@ These skills work with any AI coding agent that supports the SKILL.md format —
 ## Install
 
 ```bash
-npx skills@latest add jsmastery/skills
+npx skills@latest add JavaScript-Mastery-Pro/skills
 ```
 
 Install individual skills:
 
 ```bash
-npx skills@latest add jsmastery/skills/architect
-npx skills@latest add jsmastery/skills/remember
-npx skills@latest add jsmastery/skills/review
-npx skills@latest add jsmastery/skills/recover
-npx skills@latest add jsmastery/skills/imprint
+npx skills@latest add JavaScript-Mastery-Pro/skills/architect
+npx skills@latest add JavaScript-Mastery-Pro/skills/remember
+npx skills@latest add JavaScript-Mastery-Pro/skills/review
+npx skills@latest add JavaScript-Mastery-Pro/skills/recover
+npx skills@latest add JavaScript-Mastery-Pro/skills/imprint
 ```
 
 ---
