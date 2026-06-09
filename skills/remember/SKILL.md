@@ -7,6 +7,20 @@ AI has no memory between sessions. Every new session starts blank. This skill fi
 
 Run it at the end of a session to save. Run it at the start of a new session to restore. That is all it does — but done consistently, it means nothing ever gets lost.
 
+## Security Boundary
+
+This skill must never persist secrets. If any sensitive value appears in the conversation or context, do not copy it to `memory.md`.
+
+Sensitive data includes (non-exhaustive):
+
+- API keys, access tokens, refresh tokens, session tokens
+- Passwords, passphrases, one-time codes, private keys, certificates
+- Cookies, auth headers, connection strings, webhook secrets
+- Any credential-like value or secret-looking string
+
+If a detail is useful but sensitive, store a redacted placeholder instead (for example: `[REDACTED_API_KEY]`).
+If unsure whether something is sensitive, treat it as sensitive and omit or redact it.
+
 ## How to Invoke
 
 **To save at end of session:**
@@ -55,6 +69,14 @@ Capture:
 - Decisions already documented in context files
 - Anything that can be inferred by reading the codebase
 - The process of how something was built — only what was built and what was decided
+- Any secrets or credential-like values (tokens, keys, passwords, cookies, auth headers, connection strings)
+
+### Safety check before writing
+
+Before writing `memory.md`, run a final pass over the content to ensure no sensitive value is present.
+
+- If sensitive content is found, remove or redact it before writing.
+- Keep only the minimal non-sensitive context needed to continue next session.
 
 ### Where to save
 
@@ -150,6 +172,8 @@ Read `memory.md` first. Then check for these specific context files if they exis
 - `context.md` — generic fallback
 
 Do not scan or read other files beyond this list. Build the most complete picture possible from what is available.
+
+When restoring, never repeat or surface raw secrets from any source. If a secret appears in restored context, summarise it in redacted form only.
 
 ### Step 3 — Confirm what was restored
 
