@@ -2,340 +2,287 @@
 
 ---
 name: ui
-description: Use this skill to implement any UI component, screen, or page on any platform — web (React, Next.js, Vue, Svelte), mobile (React Native, Expo, Flutter, SwiftUI, Jetpack Compose), or cross-platform. If the project already has a design.md file at the root, the skill reads it and acts as a professional frontend/mobile engineer who implements strictly to that design system. Run /ui with a screenshot or image for pixel-perfect replication. Run /ui without an image to pick from 5 curated design templates, provide a URL to a design.md, or describe a custom style — in all cases the skill auto-detects the tech stack, generates design.md at the project root, creates the matching platform-native token files, and implements the UI. Do not run /ui for backend logic, API routes, server actions, or data queries — those are driven by the ADR and implemented separately.
+description: Use this skill to implement any web UI — components, pages, or full layouts — using semantic HTML, design tokens, and strict accessibility standards. Works on any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). If the project has a design.md at the root, enforces it as the single source of truth. Run /ui with a screenshot for pixel-perfect replication, or without one to choose from 5 curated design templates, paste a design.md URL, or describe a style. Do not use for backend logic, API routes, server actions, or data fetching.
 ---
 
 ## What this skill does
 
-Three entry points — checked in this order:
+Three entry points — checked in order:
 
-1. **Existing design.md** — `./design.md` already present → professional engineer role, implement strictly to spec for the detected platform.
-2. **Image provided** — pixel-perfect replication: vision analysis → token extraction → platform-native token files → implementation.
-3. **No image, no design.md** — template / URL / custom style → generate `./design.md` + platform-native token files → implementation.
+1. **Existing `design.md`** — reads it and acts as a professional frontend engineer, implementing strictly to that system.
+2. **Image provided** — extracts tokens from the image and replicates pixel-perfectly.
+3. **No image, no `design.md`** — guides through template selection or custom style generation, creates `design.md`, then implements.
 
-All paths go through: **stack detection → token files → five implementation phases**.
+All paths: **component-or-screen → stack detection → styling library → dark mode → token sync → font → five phases**.
 
 ---
 
 ## Step 0 — Check for existing design.md
 
-Run this first, before anything else:
-
 ```bash
 find . -maxdepth 3 -name "design.md" \
-  -not -path '*/node_modules/*' \
-  -not -path '*/.git/*' \
-  -not -path '*/.claude/*' | head -5
+  -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.claude/*' | head -5
 ```
 
-**Found** → **Design.md path** (below). Skip Steps 1 onward.
+**Found** — validate before using: must have at least a `colors:` block and a `typography:` block. If either is missing or the file is empty, treat as **not found** and warn the user.
 
-**Not found** → **Step 1**.
+**Found and valid** → **Design.md path**. Skip Steps 1 onward.
+**Not found** → **Step 0.5**.
 
 ---
 
-## Stack detection (run once, used by all paths)
+## Step 0.5 — Component or screen?
 
-Before creating or updating any token files, identify the tech stack:
+Determines prop API design, routing integration, and file placement.
+
+| Prompt contains | Build type |
+|---|---|
+| "screen", "page", "layout", "route", "dashboard", "view" | **Screen** |
+| "component", "button", "card", "input", "modal", "badge", "dropdown", "toggle", "chip" | **Component** |
+| Ambiguous | Ask |
+
+If ambiguous:
+```
+AskUserQuestion:
+  "Is this a reusable component or a full page?"
+  - Reusable component — isolated, takes props, no routing
+  - Full page / screen — owns layout, integrates with router
+```
+
+**Component rules** — apply throughout all phases:
+- Define the `interface Props` before any markup
+- Named export from its own file
+- No router imports, no page-level data fetching inside the component
+- Check for Storybook (`*.stories.*`) — if found, create a story file alongside
+- File naming: scan existing components to match the project's convention
+
+**Screen rules** — apply throughout all phases:
+- Integrate with the detected router (Next.js App Router, Vite React Router, Nuxt, SvelteKit)
+- Include loading, error, and empty states at page level
+- Wrap with existing layout component if the project has one
+
+---
+
+## Stack detection
 
 ```bash
-# React Native / Expo
-find . -maxdepth 2 -name "package.json" -not -path '*/node_modules/*' \
-  | xargs grep -l '"react-native"\|"expo"' 2>/dev/null | head -1
-
-# Flutter
-find . -maxdepth 3 -name "pubspec.yaml" -not -path '*/node_modules/*' | head -1
-
-# SwiftUI
-find . -maxdepth 6 -name "*.swift" | head -1
-
-# Jetpack Compose / Android Kotlin
-find . -maxdepth 8 -name "*.kt" | head -1
-
-# Web (default if none of the above match)
 find . -maxdepth 2 \( -name "next.config.*" -o -name "vite.config.*" \
   -o -name "nuxt.config.*" -o -name "svelte.config.*" \) \
   -not -path '*/node_modules/*' | head -1
+cat package.json 2>/dev/null | grep -E '"next"|"vite"|"nuxt"|"svelte"|"astro"' | head -5
 ```
 
-**Detected stack → token format → structure primitives:**
+Identifies the framework. Affects routing integration, image primitives, and font loading method.
 
-| Detected | Stack label | Token file | Token format |
-|---|---|---|---|
-| `react-native` or `expo` in package.json | **React Native** | `src/theme/tokens.ts` | Exported TS const object with numeric spacing, string colors |
-| `pubspec.yaml` present | **Flutter** | `lib/core/theme/app_tokens.dart` | Dart `const` — `Color(0xFF...)`, `double` spacing |
-| `*.swift` files present | **SwiftUI** | `Sources/DesignSystem/Tokens.swift` | Swift `extension Color`, `struct Tokens` with `CGFloat` |
-| `*.kt` files present | **Jetpack Compose** | `ui/theme/Tokens.kt` | Kotlin `object` with `Color(0xFF...)`, `Dp` values |
-| Everything else | **Web** | `app/globals.css` or `src/styles/tokens.css` | CSS custom properties in `:root {}` |
+---
 
-If a token file already exists in a different location, use that path instead of the default above.
+## Styling library, dark mode, and icon detection
+
+```bash
+# Styling
+cat package.json 2>/dev/null | grep -E \
+  '"@shadcn|"@radix-ui|"@mui|"antd|"@chakra-ui|"@mantine|"styled-components|"@emotion|"tailwindcss"' | head -5
+find . -maxdepth 4 -type d -name "ui" -path "*/components/ui" | head -1
+find . -maxdepth 4 \( -name "*.module.css" -o -name "*.module.scss" \) -not -path '*/node_modules/*' | head -3
+
+# Dark mode strategy
+cat package.json 2>/dev/null | grep '"next-themes"'
+grep -r "darkMode" tailwind.config.* 2>/dev/null | head -2
+
+# Icon library
+cat package.json 2>/dev/null | grep -E \
+  '"lucide-react|"@heroicons|"phosphor-react|"@phosphor-icons|"react-icons|"@tabler/icons' | head -3
+```
+
+**Styling decision:**
+
+| Detected | Approach |
+|---|---|
+| `components/ui/` (shadcn) | Use shadcn primitives with `cn()` + Tailwind token classes |
+| `tailwindcss` only | Utility classes only — no `style={}` props |
+| `*.module.css` | One `.module.css` per component |
+| `styled-components` / `@emotion` | Tagged template literals referencing CSS variables |
+| Nothing | Semantic HTML + external CSS referencing CSS custom properties |
+
+**Dark mode strategy:**
+
+| Detected | Approach |
+|---|---|
+| `next-themes` in package.json | `.dark {}` class only — no `@media` as primary |
+| `darkMode: 'class'` in tailwind config | `.dark {}` class only |
+| `darkMode: 'media'` in tailwind config | `@media (prefers-color-scheme: dark)` |
+| Nothing detected | Both: `@media` query + `.dark {}` fallback |
+
+**Icon library:** Use whatever is installed. If nothing is installed, note it in the report rather than using emoji or placeholder SVGs.
+
+Icon sizing rule: always reference a spacing token for the icon size, never hardcode. Decorative icons get `aria-hidden="true"`. Standalone interactive icons get a visually-hidden label or `aria-label` on the wrapping button.
 
 ---
 
 ## Design.md path — existing design system
 
-You are a **professional frontend/mobile engineer** maintaining this project's design system. Your primary directive:
+You are a **professional frontend engineer** on this project. Every colour, font family, spacing value, radius, shadow, and motion curve must come from `design.md`. You do not invent values. If something is unspecified, derive it from the nearest specified token.
 
-> Every colour, font family, spacing value, border radius, shadow, and component pattern in your implementation must be sourced from `design.md`. You do not invent visual values. If something is not specified in design.md, derive it from the closest specified value rather than guessing freely.
+**Naming note:** `colors.primary` and `colors.accent` are synonyms for the brand accent colour in this skill. Template files use `primary`; generated files use `accent`. Treat them identically when reading or writing.
 
-### DS1 — Read and internalize design.md
+**Component spec resolution:** The `## Components` section in `design.md` uses `{token.path}` references (e.g. `{colors.accent}`, `{rounded.md}`). Resolve these to the actual token value when generating CSS. Do not paste the reference literal into code.
 
-Read `./design.md` in full. Extract:
+### DS1 — Read design.md
 
-- **Color palette**: canvas, surface(s), ink, body, muted, accent(s), border, semantic colors
-- **Typography**: font family + open-source substitute if proprietary, type scale, weight ladder, line-heights, letter-spacing rules
-- **Spacing system**: base unit, named steps, section rhythm
-- **Border radius**: per-element mapping (buttons, cards, inputs, badges, pills)
-- **Shadows / elevation**: shadow values, surface-color ladder, or border-only approach
-- **Component patterns**: button hierarchy, card structure, input style, any signature components
-- **Do's and Don'ts**: apply every constraint listed without exception
+Read the full file. Extract:
+- Color palette (light + dark variants if `colors-dark:` is present)
+- Typography: families, scale, weights, line-heights, letter-spacing
+- Spacing scale and section rhythm
+- Border radius per element type
+- Shadows / elevation approach
+- Motion: durations and easing curves (default to `200ms ease-out` if absent)
+- Component specs from the `## Components` section
+- Every rule in `## Do's and Don'ts`
 
-### DS2 — Detect stack and sync token files
+### DS2 — Sync token files
 
-Run **Stack detection** above. Then:
+Run stack, styling, and dark mode detection. Find existing token files:
 
 ```bash
-find . -not -path '*/node_modules/*' -not -path '*/.git/*' \
-  \( -name "tokens.ts" -o -name "tokens.swift" -o -name "Tokens.kt" \
-     -o -name "app_tokens.dart" -o -name "globals.css" -o -name "tokens.css" \
-     -o -name "tailwind.config.*" -o -name "theme.ts" \) | head -10
+find . -not -path '*/node_modules/*' \
+  \( -name "globals.css" -o -name "tokens.css" -o -name "tailwind.config.*" \) | head -5
 ```
 
-Cross-check existing token files against design.md. Add absent tokens. **Never remove existing tokens** — only add or update. If no token file exists, create one in the stack-appropriate format (see **Token formats** section).
+Compare existing token values against `design.md`. Add absent tokens freely. If conflicts exist between the token file and `design.md`, **do not silently overwrite** — list them in the report and let the engineer decide.
 
 ### DS3 — Implement
 
-Proceed to **Implementation phases** using the detected stack. Apply design.md as the single source of truth throughout.
+Proceed to implementation phases with the design.md as sole source of truth.
 
 ---
 
-## Step 1 — Detect image vs no image
+## Step 1 — Image vs no image
 
-**Image is attached to the prompt** → **Path A**.
-
+**Image attached** → **Path A**.
 **No image** → **Path B**.
 
 ---
 
 ## Path A — Pixel-perfect from image
 
-### A1 — Vision analysis
+### A0 — Multiple images?
 
-Examine the image with full attention. Extract every visual property:
+If more than one image is attached, identify what each represents before analysis:
+- **Same UI at different widths** → responsive breakpoints — extract layout changes per width, feed into Phase 3
+- **Same UI in different states** → default/hover/active/error — extract the visual diff per state, feed into Phase 4
+- **One light + one dark** → extract `colors:` from the light image and `colors-dark:` from the dark image
 
-**Colors** — exact hex values, not approximations:
-- Canvas / page background
-- Card or surface background (if different)
-- Hover and selected state backgrounds
-- Primary text, secondary/muted text, disabled text
-- Accent / brand color and its pressed state
-- Semantic: success, warning, error, info (if visible)
-- Border, divider, overlay colors
+Then run A1 on the primary (default/light) image.
 
-**Typography**:
-- Font family — name it if recognizable (Inter, SF Pro, Roboto, Geist…); otherwise describe character
-- Font sizes — assign body text as 16px anchor, derive others proportionally
-- Font weights — thin 300, regular 400, medium 500, semibold 600, bold 700
-- Line height — estimate from vertical rhythm
-- Letter spacing — note tight or tracked-out headings
+### A1 — Extract tokens from the image
 
-**Spacing** — use 4px base unit:
-- Internal card/container padding
-- Gap between items and grid columns
-- Section-level vertical rhythm
-- Page margins and max-width
+Extract exactly what is visible. Do not fabricate values.
 
-**Geometry**:
-- Border radius per element type
-- Border width and color
-- Box shadows: `x y blur spread color/opacity`
-- Gradients: direction and stops
-- Glassmorphism or backdrop-blur
+- **Colors**: canvas, surface(s), ink, body, muted, accent, accent-pressed, border, semantic colors — exact hex, not approximations
+- **Typography**: family name if recognizable, size scale anchored to body = 16px, weights, line-heights, letter-spacing
+- **Spacing**: use 4px base unit — pad, gap, section rhythm, max-width
+- **Geometry**: radius per element type, border widths, shadows (`x y blur spread color/opacity`), gradients, backdrop blur
+- **Motion**: infer from context — micro-interactions (~100ms), standard (~200ms), reveals (~350ms), easing character
+- **Mode**: light or dark, contrast level, sharpness
 
-**Mode**: dark or light? High or low contrast? Sharp or rounded?
+### A2 — Token schema
 
-### A2 — Produce the token schema
+Produce a YAML token schema using `accent` (not `primary`) as the canonical accent colour name. Include `colors-dark:` if the design has or implies a dark mode.
 
-Define tokens in the universal design.md YAML format (used across all platforms):
+### A3 — Token file conflict check
 
-```yaml
-colors:
-  canvas: "<hex>"
-  surface: "<hex>"
-  surface-elevated: "<hex>"
-  ink: "<hex>"
-  body: "<hex>"
-  muted: "<hex>"
-  accent: "<hex>"
-  accent-pressed: "<hex>"
-  border: "<hex>"
-  on-primary: "<hex>"
-  success: "<hex>"    # only if visible
-  error: "<hex>"      # only if visible
-
-typography:
-  body-md:
-    fontFamily: "<Family>, system-ui, sans-serif"
-    fontSize: 16px
-    fontWeight: 400
-    lineHeight: 1.5
-  heading-lg:
-    fontFamily: "<same>"
-    fontSize: 24px
-    fontWeight: 600
-    lineHeight: 1.2
-  button-md:
-    fontFamily: "<same>"
-    fontSize: 14px
-    fontWeight: 500
-
-rounded:
-  sm: <px>
-  md: <px>
-  lg: <px>
-  xl: <px>
-  full: 9999px
-
-spacing:
-  sm:      <px>
-  md:      <px>
-  lg:      <px>
-  xl:      <px>
-  section: <px>
-```
-
-Only define tokens actually needed. Do not fabricate values not visible in the image.
-
-### A3 — Token file management
-
-Run **Stack detection**, then find existing token files:
-
-```bash
-find . -not -path '*/node_modules/*' -not -path '*/.git/*' \
-  \( -name "tokens.ts" -o -name "tokens.swift" -o -name "Tokens.kt" \
-     -o -name "app_tokens.dart" -o -name "globals.css" -o -name "tokens.css" \
-     -o -name "tailwind.config.*" -o -name "theme.ts" \) | head -10
-```
-
-**Three cases:**
-
-**No token file** → create one using the **Token formats** section below. Report path.
-
-**File exists, no conflicts** → append new tokens. Report what was added.
-
-**File exists, conflicts** → stop and show before writing:
-
-```
-I found `<path>` with values that differ from the image:
-
-| Token | Current value | Value from image |
-|---|---|---|
-| accent | #0070f3 | #5E6AD2 |
-| font-sans | 'Inter' | 'Geist' |
-
-Reply with:
-- `update` — overwrite conflicting tokens with image values
-- `extend` — add image tokens under new names alongside existing
-- `skip` — keep existing (implementation may not be pixel-perfect)
-```
-
-Wait for reply before writing.
+Find existing token files. If conflicts exist between current values and the image, stop and list them before writing. Offer: `update` / `extend` / `skip`.
 
 ---
 
-## Path B — No image, no design.md yet
+## Path B — No image, no design.md
 
-### B1 — Read templates and present options
+### B1 — Present options
 
-Before calling `AskUserQuestion`, read all five template files:
+Read only the **frontmatter (first 30 lines)** of each template for the picker — not the full file:
 ```
-.claude/skills/ui/templates/stripe.md
-.claude/skills/ui/templates/posthog.md
-.claude/skills/ui/templates/nike.md
-.claude/skills/ui/templates/supabase.md
-.claude/skills/ui/templates/raycast.md
+.claude/skills/ui/templates/stripe.md    (lines 1–30)
+.claude/skills/ui/templates/posthog.md   (lines 1–30)
+.claude/skills/ui/templates/nike.md      (lines 1–30)
+.claude/skills/ui/templates/supabase.md  (lines 1–30)
+.claude/skills/ui/templates/raycast.md   (lines 1–30)
 ```
+Read the full selected file in B2, after the user chooses.
 
-`AskUserQuestion` supports max 4 options — use a **two-question flow**:
-
-**Question 1 — Mood:**
 ```
-question: "No design was provided. What mood should this UI have?"
-header: "Visual mood"
-options:
-  - label: "Dark & developer"       description: "Near-black, command-palette precision, technical — Raycast style"
-  - label: "Light & professional"   description: "White/off-white, trustworthy, technical — Stripe or Supabase style"
-  - label: "Playful & editorial"    description: "Bold personality — warm cream (PostHog) or sport editorial (Nike)"
-  - label: "Custom — I'll describe" description: "Describe a style, name a company, or paste a URL to a design.md file"
+AskUserQuestion 1 — "What mood should this UI have?"
+  - Dark & focused       → near-black, precise, technical (Raycast)
+  - Light & professional → white/off-white, trustworthy (Stripe or Supabase)
+  - Bold & editorial     → strong personality (PostHog or Nike)
+  - Custom               → describe a style, brand, or paste a design.md URL
 ```
 
-**Question 2 — Specific template** (skip if "Dark & developer" → auto-select Raycast; skip if "Custom"):
-
-For "Light & professional":
 ```
-question: "Which professional style?"
-options:
-  - label: "Stripe"    description/preview: <from stripe.md frontmatter>
-  - label: "Supabase"  description/preview: <from supabase.md frontmatter>
-```
-
-For "Playful & editorial":
-```
-question: "Which personality fits best?"
-options:
-  - label: "PostHog"  description/preview: <from posthog.md frontmatter>
-  - label: "Nike"     description/preview: <from nike.md frontmatter>
+AskUserQuestion 2 — (only for Light or Bold)
+  Light: Stripe vs Supabase
+  Bold:  PostHog vs Nike
+  Dark:  auto-select Raycast
 ```
 
 ### B2 — Acquire the design system
 
-**Template selected** → copy to project root:
-```bash
-cp .claude/skills/ui/templates/<name>.md ./design.md
-```
-Confirm: "`<name>` design system copied to `./design.md`. Future `/ui` runs will use it automatically."
+**Template selected** → read the full file, then `cp .claude/skills/ui/templates/<name>.md ./design.md`.
 
----
+**URL provided** → fetch, validate it has `colors:` and `typography:`, save as `./design.md`.
 
-**URL provided** (engineer's text contains a URL) → fetch and save:
-```bash
-# Convert GitHub blob URL to raw if needed:
-# github.com/<o>/<r>/blob/<b>/<p> → raw.githubusercontent.com/<o>/<r>/<b>/<p>
-```
-Fetch the content. Save to `./design.md`. Confirm source URL.
+**Style description** → generate `./design.md` using this schema:
 
----
-
-**Style description provided** (e.g. "cyberpunk", "brutalist", "neon green dark", "like Notion") → generate `./design.md` using the exact format of the template files:
-
-```
+```yaml
 ---
 version: alpha
-name: <StyleName>-design-analysis
-description: <2–3 sentence character description>
+name: <style>-design-system
+description: <2–3 sentence character summary>
 
 colors:
-  primary: "<hex>"
-  on-primary: "<hex>"
-  canvas: "<hex>"
-  surface: "<hex>"
-  ink: "<hex>"
-  body: "<hex>"
-  muted: "<hex>"
-  hairline: "<hex>"
-  <all remaining semantic + accent colors>
+  accent: ""
+  on-accent: ""
+  canvas: ""
+  surface: ""
+  ink: ""
+  body: ""
+  muted: ""
+  hairline: ""
+  success: ""
+  error: ""
+
+colors-dark:
+  accent: ""
+  on-accent: ""
+  canvas: ""
+  surface: ""
+  ink: ""
+  body: ""
+  muted: ""
+  hairline: ""
 
 typography:
-  <each role: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing>
+  body-md:    { fontFamily: "", fontSize: "16px", fontWeight: 400, lineHeight: 1.5 }
+  heading-lg: { fontFamily: "", fontSize: "24px", fontWeight: 600, lineHeight: 1.2 }
+  button-md:  { fontFamily: "", fontSize: "14px", fontWeight: 500 }
 
 rounded:
-  <xs through full with px values>
+  xs: ""  sm: ""  md: ""  lg: ""  xl: ""  full: "9999px"
 
 spacing:
-  <xxs through section with px values>
+  xxs: "2px"  xs: "4px"  sm: "8px"  md: "12px"  lg: "16px"
+  xl: "24px"  2xl: "32px"  section: "48px"
+
+motion:
+  duration-instant: "0ms"
+  duration-fast: ""
+  duration-normal: ""
+  duration-slow: ""
+  easing-standard: ""
+  easing-out: ""
+  easing-spring: ""
 
 components:
-  <key components referencing {colors.*}, {typography.*}, {rounded.*}>
+  <key components with {token.path} references>
 ---
 
 ## Overview
@@ -346,453 +293,263 @@ components:
 ## Shapes
 ## Components
 ## Do's and Don'ts
-  ### Do / ### Don't
+  ### Do
+  ### Don't
 ## Responsive Behavior
 ```
 
-Aesthetic derivation guide:
-- **Cyberpunk** → near-black canvas, neon cyan `#00FFFF` / magenta `#FF00FF` accents, 0–2px radius, `'Share Tech Mono'` display, tight dense spacing
-- **Brutalist** → pure `#000000` / `#FFFFFF`, 0px radius everywhere, thick 2–4px borders, oversized mismatched type, raw grid
-- **Glassmorphism** → dark canvas, semi-transparent `rgba()` surfaces, `backdrop-filter: blur()`, 16–24px radius, neon border glow
-- **Notion-like** → `#FFFFFF` / `#F7F6F3` canvas, Georgia + Inter, 3px radius, generous line-height, block-based structure
-- **Apple consumer** → `#FFFFFF` canvas, `-apple-system` font stack, 10–20px radius, generous touch targets, system colors
-- For any other description: choose values that are aesthetically correct for that mood — do not leave placeholders
+Aesthetic guide:
+- **Cyberpunk**: near-black canvas, neon cyan/magenta accent, 0–2px radius, mono font, dense spacing, fast motion (80ms), harsh easing
+- **Brutalist**: pure black/white, 0px radius, thick borders, oversized type, zero motion (all durations 0ms)
+- **Glassmorphism**: frosted canvas, translucent surfaces, 16–24px radius, slow transitions (200–400ms), gentle spring
+- **Notion-like**: off-white canvas, Georgia display + Inter UI, 3px radius, generous line-height, fast subtle motion (100ms)
+- **Apple consumer**: white canvas, system font stack, 10–20px radius, spring motion (200–350ms)
+- **Named brand**: use that brand's documented colours/fonts; substitute proprietary fonts (see font installation)
 
-Write the full file to `./design.md`.
+Fill every field. No placeholders.
 
-### B3 — Create token code files
+### B3 — Create CSS token file
 
-Run **Stack detection**. Read `./design.md` YAML frontmatter. Create the token file in the detected format:
+Create `app/globals.css`, `src/styles/tokens.css`, or add to an existing globals file.
 
----
+Define CSS custom properties for:
+- All colors (light): `--color-canvas`, `--color-surface`, `--color-ink`, `--color-body`, `--color-muted`, `--color-accent`, `--color-on-accent`, `--color-border`, `--color-success`, `--color-error`
+- Icon sizes: `--icon-sm: 16px`, `--icon-md: 20px`, `--icon-lg: 24px`
+- Typography: `--font-sans`, size scale (`--text-xs` through `--text-4xl`), weight scale
+- Spacing: `--space-xxs` through `--space-section`
+- Radius: `--radius-sm` through `--radius-full`
+- Motion: `--duration-instant` through `--duration-slow`, `--ease-standard`, `--ease-out`, `--ease-spring`
 
-#### Web (CSS)
+Apply dark color overrides using the detected strategy (`.dark {}` class or `@media (prefers-color-scheme: dark)`). Only override tokens that differ in dark mode.
 
-`app/globals.css` or `src/styles/tokens.css`:
-```css
-:root {
-  /* Colors */
-  --color-canvas:   <colors.canvas>;
-  --color-surface:  <colors.surface>;
-  --color-ink:      <colors.ink>;
-  --color-body:     <colors.body>;
-  --color-muted:    <colors.muted>;
-  --color-accent:   <colors.primary>;
-  --color-border:   <colors.hairline>;
-  /* ... all colors ... */
-
-  /* Typography */
-  --font-sans: <typography.body-md.fontFamily>;
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
-  --text-2xl:  1.5rem;
-  --text-3xl:  1.875rem;
-  --text-4xl:  2.25rem;
-  /* ... weight variables ... */
-
-  /* Spacing */
-  --space-xs:  <spacing.xs>;
-  --space-sm:  <spacing.sm>;
-  --space-md:  <spacing.md>;
-  --space-lg:  <spacing.lg>;
-  --space-xl:  <spacing.xl>;
-  --space-section: <spacing.section>;
-
-  /* Radius */
-  --radius-sm:   <rounded.sm>;
-  --radius-md:   <rounded.md>;
-  --radius-lg:   <rounded.lg>;
-  --radius-xl:   <rounded.xl>;
-  --radius-full: 9999px;
-}
-```
-
-If Tailwind: add to `tailwind.config.ts` under `theme.extend.colors`, `.fontSize`, `.spacing`, `.borderRadius`.
+If Tailwind is in use, also extend `tailwind.config.ts` under `theme.extend` with all token values. Wire color tokens via `var(--color-*)` references so dark mode works automatically.
 
 ---
 
-#### React Native / Expo
+## Font installation
 
-`src/theme/tokens.ts`:
-```typescript
-export const colors = {
-  canvas:   '<colors.canvas>',
-  surface:  '<colors.surface>',
-  ink:      '<colors.ink>',
-  body:     '<colors.body>',
-  muted:    '<colors.muted>',
-  accent:   '<colors.primary>',
-  border:   '<colors.hairline>',
-  // ...
-} as const;
+Identify fonts from `design.md` `typography.*.fontFamily`.
 
-export const typography = {
-  fontFamily: {
-    sans: '<fontFamily fallback — no web fonts, use system fonts>',
-    mono: 'Courier New',
-  },
-  fontSize: {
-    xs:   12,   // numeric, not rem — RN uses pt/dp not css units
-    sm:   14,
-    base: 16,
-    lg:   18,
-    xl:   20,
-    '2xl':24,
-    '3xl':30,
-    '4xl':36,
-  },
-  fontWeight: {
-    regular:  '400' as const,
-    medium:   '500' as const,
-    semibold: '600' as const,
-    bold:     '700' as const,
-  },
-  lineHeight: {
-    tight:  1.2,
-    normal: 1.5,
-    relaxed:1.7,
-  },
-} as const;
+**System fonts** (`system-ui`, `-apple-system`): no action needed.
 
-export const spacing = {
-  xs:      4,    // numeric dp/pt — no units in RN
-  sm:      8,
-  md:      12,
-  lg:      16,
-  xl:      24,
-  '2xl':   32,
-  section: 48,
-} as const;
+**Proprietary fonts** — check for font files (`*.ttf`, `*.otf`, `*.woff2`) in the project first. If none found, substitute and inform the user:
 
-export const radius = {
-  sm:   <rounded.sm as number>,
-  md:   <rounded.md as number>,
-  lg:   <rounded.lg as number>,
-  xl:   <rounded.xl as number>,
-  full: 9999,
-} as const;
+| Proprietary | Substitute |
+|---|---|
+| Futura / Futura ND | Jost |
+| Circular | DM Sans |
+| Helvetica Now | Inter |
+| Söhne / Graphik | Inter |
+| GT Walsheim | Nunito |
+| Canela | Playfair Display |
+| Tiempos | Libre Baskerville |
+| SF Pro | Inter |
 
-// Font note: React Native cannot load arbitrary web fonts without expo-font or
-// react-native-vector-icons. Use system fonts by default:
-// iOS: 'SF Pro' equivalent via '-apple-system' → use undefined (system default)
-// Android: 'Roboto' → use undefined (system default)
-// Custom font: load with expo-font, then reference by postscript name.
-```
+**Loading:**
+- **Next.js**: `next/font/google` with the `variable` option, applied to `<html>` in the root layout
+- **Vite / other**: `@import url(...)` at the top of the globals CSS file, or `<link>` in the HTML entry point
+
+Update the `--font-sans` token to match whatever was loaded.
 
 ---
 
-#### Flutter
+## Implementation phases
 
-`lib/core/theme/app_tokens.dart`:
-```dart
-import 'package:flutter/material.dart';
+### Phase 1 — Semantic structure
 
-abstract class AppColors {
-  static const Color canvas   = Color(0xFF<canvas hex without #>);
-  static const Color surface  = Color(0xFF<surface hex>);
-  static const Color ink      = Color(0xFF<ink hex>);
-  static const Color body     = Color(0xFF<body hex>);
-  static const Color muted    = Color(0xFF<muted hex>);
-  static const Color accent   = Color(0xFF<primary hex>);
-  static const Color border   = Color(0xFF<hairline hex>);
-  // ...
-}
+Build with the HTML element that most precisely describes the content. The element choice is not a styling decision — it carries meaning that browsers, assistive technologies, and search engines rely on.
 
-abstract class AppTypography {
-  static const TextStyle bodyMd = TextStyle(
-    fontSize:   16,
-    fontWeight: FontWeight.w400,
-    height:     1.5,     // lineHeight / fontSize
-  );
-  static const TextStyle headingLg = TextStyle(
-    fontSize:   24,
-    fontWeight: FontWeight.w600,
-    height:     1.2,
-  );
-  static const TextStyle buttonMd = TextStyle(
-    fontSize:   14,
-    fontWeight: FontWeight.w500,
-  );
-}
+**Document landmarks** — every page must have exactly one `<main>`. Use `<header>`, `<footer>`, `<nav>`, `<aside>` as landmarks. `<nav>` must have an `aria-label` if more than one appears on the page (e.g. `aria-label="Primary"` and `aria-label="Footer"`).
 
-abstract class AppSpacing {
-  static const double xs  = 4.0;
-  static const double sm  = 8.0;
-  static const double md  = 12.0;
-  static const double lg  = 16.0;
-  static const double xl  = 24.0;
-  static const double section = 48.0;
-}
+**Heading hierarchy** — one `<h1>` per page, always the primary page title. Never skip levels (`<h1>` → `<h3>` is wrong). Use headings to structure content, not for visual size — control size with CSS.
 
-abstract class AppRadius {
-  static const double sm  = <rounded.sm as double>;
-  static const double md  = <rounded.md as double>;
-  static const double lg  = <rounded.lg as double>;
-  static const double xl  = <rounded.xl as double>;
-  static const double full = 9999.0;
-}
-```
+**Interactive elements**:
+- `<button>` for any action that does not navigate (submit, toggle, open modal, increment)
+- `<a href="...">` for any action that navigates somewhere — never `<a>` without `href`, never `<div onClick>`
+- `<button>` and `<a>` must never be nested inside each other
 
-Also create `lib/core/theme/app_theme.dart` wiring `AppColors` into `ThemeData`.
+**Lists** — use `<ul>` / `<ol>` / `<li>` for any repeated set of items. Do not render lists as repeated `<div>`s. Use `<dl>` / `<dt>` / `<dd>` for term–definition pairs (glossaries, metadata tables, key–value pairs).
+
+**Tables** — use `<table>` with `<thead>`, `<tbody>`, `<th scope="col">` (column headers) and `<th scope="row">` (row headers) for tabular data. Never use tables for layout.
+
+**Media** — `<figure>` + `<figcaption>` for images, diagrams, or code blocks with captions. `<picture>` for art direction or format fallback. SVG icons used decoratively must have `aria-hidden="true"` and no title; SVG used as meaningful content needs `role="img"` and `aria-label`.
+
+**Time and data** — `<time datetime="ISO-8601">` for any date or time. `<address>` for contact information. `<data value="">` for machine-readable values alongside human-readable text.
+
+**Text semantics** — `<strong>` for importance, `<em>` for stress emphasis. `<del>` / `<ins>` for content changes (e.g. crossed-out original price). `<abbr title="...">` for abbreviations on first use. `<code>` for inline code, `<pre><code>` for blocks.
+
+**Expandable content** — `<details>` + `<summary>` for accordion-style content that doesn't need JavaScript. Use `<dialog>` for modals — it provides built-in focus trapping, `showModal()`, and native Escape handling.
+
+**Progress and meters** — `<progress>` for upload/task progress. `<meter>` for a scalar value within a known range (battery level, storage used). Never use a styled `<div>` for these.
+
+**Component build type application:**
+- *Component*: define `interface Props` first; named export; no layout wrapper, no router imports
+- *Screen*: include `<main>`, integrate with the detected router, include loading / error / empty states at top level
 
 ---
-
-#### SwiftUI
-
-`Sources/DesignSystem/Tokens.swift`:
-```swift
-import SwiftUI
-
-extension Color {
-  static let canvas  = Color(hex: "<canvas hex>")
-  static let surface = Color(hex: "<surface hex>")
-  static let ink     = Color(hex: "<ink hex>")
-  static let body    = Color(hex: "<body hex>")
-  static let muted   = Color(hex: "<muted hex>")
-  static let accent  = Color(hex: "<primary hex>")
-  static let border  = Color(hex: "<hairline hex>")
-}
-
-// Hex initialiser (add once to the project):
-extension Color {
-  init(hex: String) {
-    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-    var int: UInt64 = 0
-    Scanner(string: hex).scanHexInt64(&int)
-    let r, g, b: Double
-    (r, g, b) = (Double((int >> 16) & 0xFF) / 255,
-                 Double((int >> 08) & 0xFF) / 255,
-                 Double((int >> 00) & 0xFF) / 255)
-    self.init(red: r, green: g, blue: b)
-  }
-}
-
-enum Tokens {
-  enum FontSize {
-    static let xs:   CGFloat = 12
-    static let sm:   CGFloat = 14
-    static let base: CGFloat = 16
-    static let lg:   CGFloat = 18
-    static let xl:   CGFloat = 20
-    static let xl2:  CGFloat = 24
-    static let xl3:  CGFloat = 30
-    static let xl4:  CGFloat = 36
-  }
-  enum Spacing {
-    static let xs:      CGFloat = 4
-    static let sm:      CGFloat = 8
-    static let md:      CGFloat = 12
-    static let lg:      CGFloat = 16
-    static let xl:      CGFloat = 24
-    static let section: CGFloat = 48
-  }
-  enum Radius {
-    static let sm:   CGFloat = <rounded.sm>
-    static let md:   CGFloat = <rounded.md>
-    static let lg:   CGFloat = <rounded.lg>
-    static let xl:   CGFloat = <rounded.xl>
-    static let full: CGFloat = 9999
-  }
-}
-```
-
----
-
-#### Jetpack Compose
-
-`ui/theme/Tokens.kt`:
-```kotlin
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
-object AppColors {
-  val Canvas  = Color(0xFF<canvas hex without #>)
-  val Surface = Color(0xFF<surface hex>)
-  val Ink     = Color(0xFF<ink hex>)
-  val Body    = Color(0xFF<body hex>)
-  val Muted   = Color(0xFF<muted hex>)
-  val Accent  = Color(0xFF<primary hex>)
-  val Border  = Color(0xFF<hairline hex>)
-}
-
-object AppType {
-  val BodyMd   = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal, lineHeight = 24.sp)
-  val HeadingLg = androidx.compose.ui.text.TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold, lineHeight = 29.sp)
-  val ButtonMd  = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium)
-}
-
-object AppSpacing {
-  val Xs      = 4.dp
-  val Sm      = 8.dp
-  val Md      = 12.dp
-  val Lg      = 16.dp
-  val Xl      = 24.dp
-  val Section = 48.dp
-}
-
-object AppRadius {
-  val Sm   = <rounded.sm>.dp
-  val Md   = <rounded.md>.dp
-  val Lg   = <rounded.lg>.dp
-  val Xl   = <rounded.xl>.dp
-  val Full = 9999.dp
-}
-```
-
-Also wire into `MaterialTheme` via `ui/theme/Theme.kt`.
-
----
-
-After token files are written, proceed to **Design.md path → DS3** (Implementation phases).
-
----
-
-## Implementation phases (all paths)
-
-### Phase 1 — Structure
-
-Build the structural skeleton using **platform-appropriate primitives**:
-
-**Web**:
-- `<button>` for actions, `<a>` for navigation — never `<div onClick>`
-- `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>` for landmarks
-- `<ul>/<li>` for lists, `<table>` for tabular data
-- TypeScript: define the prop interface before styling
-
-**React Native**:
-- `Pressable` for touch targets (not `TouchableOpacity` unless required by existing code)
-- `View` for layout, `Text` for text — never raw JSX string nodes outside `<Text>`
-- `ScrollView` or `FlatList` for scrollable content
-- `SafeAreaView` at screen root
-- TypeScript: define prop types with `React.FC<Props>`
-
-**Flutter**:
-- `Scaffold` at screen root
-- `GestureDetector` / `InkWell` for touch targets
-- `Column` / `Row` / `Wrap` for layout
-- `ListView.builder` for scrollable lists
-- Define `Widget build(BuildContext context)` — no logic in build methods
-
-**SwiftUI**:
-- `View` protocol for all components
-- `Button` for actions, `NavigationLink` for navigation
-- `VStack` / `HStack` / `LazyVStack` / `LazyHStack` for layout
-- `List` / `ScrollView` for scrollable content
-- `@State` / `@Binding` / `@ObservedObject` for state — pick the right one
-
-**Jetpack Compose**:
-- `@Composable` for all UI functions
-- `Button` / `IconButton` for actions
-- `Column` / `Row` / `Box` / `LazyColumn` for layout
-- State: `remember` + `mutableStateOf` — hoist state upward
 
 ### Phase 2 — Token application
 
-Apply every visual property from the token files. No hardcoded values.
+Every visual value — colour, font, size, spacing, radius, shadow, duration, easing — comes from the CSS custom properties defined in the token file. No hardcoded hex codes, no hardcoded `px` values that duplicate a token.
 
-**Verify — adapt the check to the stack:**
-
-Web:
+Run a grep to verify before calling the phase complete:
 ```bash
 grep -rn "#[0-9a-fA-F]\{3,6\}\|rgb(\|hsl(\|: [0-9]\+px" <new-files>
 ```
 
-React Native:
-```bash
-grep -rn "color: ['\"]#\|fontSize: [0-9]\+[^,]\|padding: [0-9]\+" <new-files>
+Any match that isn't a `0`, a `1px` border that has no token equivalent, or a known constant is a violation. Replace with the corresponding `var(--token)`.
+
+Cross-check against `design.md ## Do's and Don'ts`. Fix any violation before moving on.
+
+---
+
+### Phase 3 — Responsive layout
+
+Mobile-first CSS. Start with the smallest viewport, layer up with `min-width` breakpoints.
+
+Use breakpoints from `design.md ## Responsive Behavior` if specified. Otherwise default to `sm 640px`, `md 768px`, `lg 1024px`, `xl 1280px`.
+
+If Path A supplied multiple images at different widths, use the layout changes extracted in A0.
+
+Minimum touch target for any interactive element: 44×44px. Use padding to reach this without affecting visual size.
+
+Minimum body text: 16px. Never go below this on any viewport.
+
+Prefer `gap`, `grid`, and `flex` over `margin` for spacing between elements. Use `max-width` on the layout container, centered with `margin-inline: auto`.
+
+For text containers: `max-width` of 60–75 characters (`ch` unit) for readability. Do not let long-form text stretch full-width on large viewports.
+
+---
+
+### Phase 4 — States and motion
+
+Every interactive element must have a visible, distinct style for:
+- **Default** — base token styles
+- **Hover** — `--color-surface` shift or lightened/darkened accent; never remove the cursor affordance
+- **Focus-visible** — 2px offset ring using `--color-accent` (`:focus-visible`, not `:focus`)
+- **Active / pressed** — deeper colour shift using `accent-pressed` token if defined
+- **Disabled** — `--color-muted` for text and icon; `cursor: not-allowed`; `aria-disabled="true"` or native `disabled`
+- **Loading** — skeleton placeholder or spinner; announce via `role="status"` or `aria-live="polite"`
+- **Error** — `--color-error` border and icon; error message below the element linked via `aria-describedby`
+- **Empty** — informative empty state, not a blank space
+
+Apply motion using the token values:
 ```
-(Any hardcoded colour string or raw numeric spacing that bypasses the token object is a violation.)
-
-Flutter:
-```bash
-grep -rn "Color(0x[^A]\|Color\.from\|fontSize: [0-9]\+\." <new-files>
+transition: <property> var(--duration-fast) var(--ease-out)
 ```
+Use `--duration-fast` for colour and opacity changes. `--duration-normal` for layout shifts and reveals. `--duration-slow` for larger panel transitions.
 
-SwiftUI:
-```bash
-grep -rn "Color(red:\|\.padding([0-9]\|\.font(\.system(size:" <new-files>
+Always include:
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 ```
+This is non-negotiable — some users get motion sickness from animations.
 
-Jetpack Compose:
-```bash
-grep -rn "Color(0x[^A]\|\.dp[^,]\|fontSize = [0-9]\+\.sp[^,]" <new-files>
+---
+
+### Phase 5 — Web standards and accessibility
+
+This phase is not a checklist to run at the end — it is built into every decision in Phases 1–4. Review and enforce here.
+
+#### WCAG colour contrast
+
+Normal text (under 18px regular or 14px bold): **4.5:1 minimum** against its background.
+Large text and bold text: **3:1 minimum**.
+UI components (button borders, input borders, focus rings, icons): **3:1 minimum** against adjacent colour.
+Do not rely on colour alone to communicate state, error, or category — always pair colour with a text label, icon, or pattern.
+Check both light and dark mode separately.
+
+#### Keyboard navigation
+
+Every interactive element must be reachable and operable by keyboard alone, in a logical reading order that matches the visual layout.
+
+Tab order must follow the visual reading order. Never use `tabindex` values greater than `0` — they break the natural order.
+
+Composite widgets follow established keyboard interaction patterns (ARIA Authoring Practices Guide):
+- **Tabs**: Arrow keys move between tabs; Tab moves into the active panel
+- **Dropdown menus**: Arrow keys navigate items; Escape closes; Enter/Space select
+- **Modal / dialog**: Focus traps inside; Escape closes; focus returns to the trigger on close
+- **Accordion**: Enter/Space toggles the panel; focus stays on the `<button>`
+- **Listbox / combobox**: Arrow keys navigate options; Enter selects
+
+For modals: when opening, move focus to the first focusable element inside (or the dialog `<h2>` if no input). When closing, return focus to the element that opened the modal.
+
+Add a skip navigation link as the first focusable element in the page:
+```html
+<a href="#main-content" class="sr-only focus:not-sr-only">Skip to main content</a>
 ```
+Use the project's visually-hidden utility class (or create one if none exists).
 
-Any hit that isn't a `1` border or `0` is a violation — replace with the token reference.
+#### Screen reader semantics
 
-**Path A only**: pixel-perfect check after token application:
-- Every colour matches a token derived from the image
-- Layout composition, column count, proportions match
-- Typography ratio, weight contrast, letter-spacing match
-- Spacing proportions match on 4px grid
-- Every visible component present — nothing omitted
+Use the native HTML element before reaching for ARIA. ARIA supplements HTML — it does not replace it.
 
-**Design.md / Path B**: cross-check against `./design.md` Do's and Don'ts section. Fix any violation.
+When ARIA is needed:
+- `aria-label` — when there is no visible text label (icon-only buttons)
+- `aria-labelledby` — when the label is a visible element on the page (point to its `id`)
+- `aria-describedby` — for supplemental descriptions: hint text below an input, an error message, a tooltip
+- `aria-expanded` — on the trigger for dropdowns, accordions, nav menus; toggles `true`/`false`
+- `aria-selected` — on tab and listbox options
+- `aria-checked` — on custom checkboxes and radio buttons
+- `aria-disabled` — on elements that are visually disabled but must remain in the tab order (e.g. a tooltip-bearing button)
+- `aria-hidden="true"` — on decorative icons, SVGs, and any element that adds noise for screen reader users
+- `aria-live="polite"` — on regions that update dynamically without page reload (search results, cart total, notification count)
+- `aria-live="assertive"` — only for critical time-sensitive announcements (session timeout warning)
+- `role="alert"` — for error messages that must be announced immediately on injection
+- `role="status"` — for non-urgent status updates (saved, loading complete)
 
-### Phase 3 — Adaptive layout
+Common component patterns:
+- **Toast / notification**: `role="alert"` for errors; `role="status"` for success; inject into a persistent live region already in the DOM (injecting both the container and the message at once suppresses announcement in some readers)
+- **Breadcrumb**: `<nav aria-label="Breadcrumb"><ol>` with `aria-current="page"` on the last item
+- **Modal**: `<dialog aria-labelledby="dialog-title">` or `role="dialog"` + `aria-modal="true"` + `aria-labelledby`
+- **Progress bar**: `<progress>` element, or `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-valuetext` for human-readable value
+- **Tabs**: `role="tablist"` on the container, `role="tab"` + `aria-selected` on each tab, `role="tabpanel"` + `aria-labelledby` on each panel
+- **Tooltip**: `role="tooltip"` on the tooltip element; `aria-describedby` on the trigger pointing to it; never put interactive content inside a tooltip
 
-**Web**: mobile-first CSS. Breakpoints from `./design.md` `## Responsive Behavior` if present, otherwise `sm:640 md:768 lg:1024 xl:1280`. 44px minimum touch targets. 16px minimum body text.
+#### Images and media
 
-**React Native**: use `useWindowDimensions()` for responsive values. `Platform.select()` for iOS/Android divergence. Avoid fixed pixel widths — use `flex`, `%`, or `Dimensions` relative values. Minimum touch target: 44×44 per Apple HIG / 48×48 per Material.
+Meaningful images: `alt` attribute describing the content and purpose, not "image of…". A logo: `alt="Acme"`. A chart: `alt="Bar chart showing monthly revenue growth of 24% from Q1 to Q4"`.
+Decorative images: `alt=""` (empty string, not omitted). Screen readers skip them.
+Complex diagrams / infographics: brief `alt` + a longer description in adjacent text or `<figure><figcaption>`.
+SVG icons (decorative): `aria-hidden="true"`, no `<title>`.
+SVG used as meaningful content: `role="img"` + `aria-label="..."` or an internal `<title>` referenced by `aria-labelledby`.
 
-**Flutter**: `MediaQuery.of(context).size` for responsive values. `LayoutBuilder` for constraint-based layout. `AdaptiveScaffold` if using Material 3. `SafeArea` at screen edges.
+#### Document structure
 
-**SwiftUI**: `GeometryReader` for dynamic sizing. `@Environment(\.horizontalSizeClass)` for iPad vs iPhone. `.frame(maxWidth: .infinity)` for stretch. Minimum touch target: 44×44 pt.
+- `<html lang="en">` — set the correct language; use inline `lang` for any phrase in a different language
+- `<title>` — unique and descriptive per page; for apps: `Page Name — App Name`
+- One `<main>` per page; give it `id="main-content"` for the skip link
+- `<link rel="canonical">` for pages that may be accessed at multiple URLs
 
-**Jetpack Compose**: `BoxWithConstraints` for constraint-based layout. `WindowSizeClass` from `material3-window-size-class` for compact/medium/expanded breakpoints. Minimum touch target: 48×48 dp.
+#### Visually hidden content
 
-### Phase 4 — States
+For content that must be available to screen readers but not visible:
+```css
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+```
+Never use `display: none` or `visibility: hidden` for this — those hide from assistive technology too.
 
-All interactive elements need these states:
+#### Logical properties for layout direction
 
-| State | Web | React Native | Flutter | SwiftUI | Compose |
-|---|---|---|---|---|---|
-| Default | base styles | base styles | base styles | base styles | base styles |
-| Pressed | `:active` | `Pressable` `pressed` state | `InkWell` splash | `.buttonStyle(.plain)` + `@State isPressed` | `Indication` |
-| Disabled | `disabled` attr + opacity | `disabled` prop + reduced opacity | `onPressed: null` | `.disabled(true)` | `enabled = false` |
-| Loading | skeleton or spinner | `ActivityIndicator` | `CircularProgressIndicator` | `ProgressView` | `CircularProgressIndicator` |
-| Empty | empty state component | empty state component | empty state widget | empty state view | empty state composable |
-| Error | error state component | error state component | error state widget | error state view | error state composable |
-
-Note: **hover does not exist on native mobile**. Do not implement hover states for React Native, Flutter, SwiftUI, or Compose.
-
-### Phase 5 — Accessibility
-
-**Web**: WCAG 2.1 AA. `aria-label`, `aria-describedby`, `role`, `alt` text. Keyboard navigable. Focus visible. Work through `.claude/skills/ui/checklist.md`.
-
-**React Native**:
-- `accessible={true}` on touchable elements
-- `accessibilityLabel` for every interactive element
-- `accessibilityRole` (`button`, `link`, `image`, `header`, `none`)
-- `accessibilityHint` for non-obvious actions
-- `accessibilityState` for checked/selected/disabled
-- Minimum 44×44 pt touch targets (use `hitSlop` if visual is smaller)
-- Test with VoiceOver (iOS) and TalkBack (Android)
-
-**Flutter**:
-- `Semantics` widget wrapping interactive elements
-- `label`, `hint`, `button`, `enabled` properties on `Semantics`
-- `ExcludeSemantics` for decorative elements
-- `MergeSemantics` for grouped elements
-- Minimum 48×48 dp touch targets via `MaterialTapTargetSize`
-
-**SwiftUI**:
-- `.accessibilityLabel()` on interactive elements
-- `.accessibilityHint()` for non-obvious actions
-- `.accessibilityAddTraits(.isButton)` / `.isHeader` etc.
-- `.accessibilityHidden(true)` for decorative elements
-- Support Dynamic Type: use `.font(.body)` style references, not fixed sizes
-
-**Jetpack Compose**:
-- `Modifier.semantics { contentDescription = "..." }` on interactive elements
-- `Modifier.semantics { role = Role.Button }` for interactive roles
-- `Modifier.clearAndSetSemantics {}` for decorative elements
-- `Modifier.minimumInteractiveComponentSize()` for touch targets
-- Support font scaling: use `sp` for text, avoid fixed container heights
+Use CSS logical properties instead of physical ones so layouts work correctly for RTL languages without extra overrides:
+- `margin-inline-start` not `margin-left`
+- `padding-inline` not `padding-left` / `padding-right`
+- `inset-inline-start` not `left`
+- `border-inline-start` not `border-left`
+- `text-align: start` not `text-align: left`
 
 ---
 
@@ -801,24 +558,34 @@ Note: **hover does not exist on native mobile**. Do not implement hover states f
 ```
 ## /ui complete
 
-**Stack**: Web | React Native | Flutter | SwiftUI | Jetpack Compose
-**Path**: Design.md (existing) | A (image) | B (template: <name> | url: <url> | custom: "<description>")
-**design.md**: pre-existing | created | fetched from <url> | none (Path A)
+**Build type**: Component | Screen
+**Stack**: Next.js | Vite | Nuxt | SvelteKit | Plain HTML
+**Styling**: <tailwind | shadcn | css-modules | styled-components | plain css>
+**Dark mode strategy**: .dark class | @media | both
+**Icon library**: <library name> | none — install needed
+**Path**: Design.md (existing) | A (image) | A (multi: <what each image represented>) | B (template: <name> | url: <url> | custom: "<style>")
+**design.md**: pre-existing | created | fetched from <url>
+**Token conflicts**: none | <list — verify manually before next run>
 **Token file**: created | updated | unchanged — <path>
-**Tokens written**: <N>
-**Built**: <component/screen name> — <file paths>
-**Design system adherence**: all values sourced from tokens | <deviations noted>
-**Pixel-perfect check**: matched | <differences> (Path A only)
-**Accessibility**: passed | <deferred items>
+**Fonts**: <family> via <method> | <proprietary> → <substitute> | system
+**Built**: <name> — <file paths>
+**Token adherence**: all sourced from design.md | <deviations>
+**Accessibility**: WCAG AA passed | <items deferred>
+**Semantic HTML**: correct elements used | <issues noted>
+**Keyboard**: fully navigable | <gaps>
+**Screen reader**: announced correctly | <gaps>
 **What /test should verify**:
 - <observable behaviour>
-- <key edge case or platform-specific state>
+- Keyboard-only navigation through all interactive elements
+- VoiceOver / NVDA announces interactive elements and live regions correctly
+- Dark mode rendering
+- Reduced-motion mode (all transitions suppressed)
 ```
 
 ---
 
 ## Reference files
 
-- Web accessibility checklist: `.claude/skills/ui/checklist.md`
+- Accessibility checklist: `.claude/skills/ui/checklist.md`
 - Design templates: `.claude/skills/ui/templates/`
-- Project design system: `./design.md` (created on first /ui run if not present)
+- Project design system: `./design.md`
