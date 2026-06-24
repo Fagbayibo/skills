@@ -1,7 +1,7 @@
 ---
 name: ui
 compatibility: Built for Claude Code — uses interactive questions and stack detection. Installs on any Agent Skills client but is tuned for Claude Code.
-description: Use this skill to implement any web UI — components, pages, or full layouts — using semantic HTML, design tokens, and strict accessibility standards. Works on any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). If the project has a design.md at the root, enforces it as the single source of truth. Run /ui with a screenshot for pixel-perfect replication, or without one to choose from 5 curated design templates, paste a design.md URL, or describe a style. Do not use for backend logic, API routes, server actions, or data fetching.
+description: "Use this skill to implement any web UI — components, pages, or full layouts — using semantic HTML, design tokens, and strict accessibility standards. Works on any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). If the project has a design.md at the root, enforces it as the single source of truth. Run /ui with a screenshot for pixel-perfect replication, or without one to choose from 5 curated design templates, paste a design.md URL, or describe a style. Do not use for backend logic, API routes, server actions, or data fetching."
 ---
 
 ## What this skill does
@@ -239,7 +239,7 @@ AskUserQuestion 2 — (only for Light or Bold)
 ---
 version: alpha
 name: <style>-design-system
-description: <2–3 sentence character summary>
+description: "<2–3 sentence character summary>"
 
 colors:
   accent: ""
