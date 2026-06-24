@@ -4,24 +4,29 @@ A set of [Agent Skills](https://agentskills.io) that encode a tiered, phase-base
 
 ## Install
 
-Using [`npx skills`](https://github.com/vercel-labs/skills):
+Using [`npx skills`](https://github.com/vercel-labs/skills). **The install folder depends on the agent you target with `-a`** — pick the one(s) you use:
 
 ```bash
-# Install all skills into the current project (.claude/skills/ for Claude Code)
+# Claude Code → installs into .claude/skills/
+npx skills@latest add JavaScript-Mastery-Pro/pilot -a claude-code
+
+# No -a → installs into the generic .agents/skills/ (read by Codex and other agents)
 npx skills@latest add JavaScript-Mastery-Pro/pilot
 
-# See what's available first
+# Both at once → creates BOTH .claude/skills/ and .agents/skills/
+npx skills@latest add JavaScript-Mastery-Pro/pilot -a claude-code -a codex
+
+# See what's available, or install just one
 npx skills@latest add JavaScript-Mastery-Pro/pilot --list
+npx skills@latest add JavaScript-Mastery-Pro/pilot --skill review -a claude-code
 
-# Install just one
-npx skills@latest add JavaScript-Mastery-Pro/pilot --skill review
-
-# Target a specific agent, or install globally
-npx skills@latest add JavaScript-Mastery-Pro/pilot -a claude-code
-npx skills@latest add JavaScript-Mastery-Pro/pilot -g
+# Install globally (for your user, all projects) with -g
+npx skills@latest add JavaScript-Mastery-Pro/pilot -a claude-code -g
 ```
 
-Commit the installed `.claude/skills/` to share the same workflow with your team.
+> **Which folder?** Each agent reads its own directory: **Claude Code → `.claude/skills/`**, while Codex and several others read the shared **`.agents/skills/`**. If you want a skill in two tools, install for both (e.g. `-a claude-code -a codex`) — you'll then have both folders, each with its own copy. After installing for Claude Code, **restart it** so the skills load.
+
+Commit the installed skills folder(s) to share the same workflow with your team.
 
 ## Compatibility
 
