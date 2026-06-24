@@ -12,7 +12,7 @@ Takes working, tested code and asks the question tests rarely do: **how does thi
 - **Read-mostly** — it diagnoses and recommends; it writes only the checklist (not application code). With confirmation it can apply a specific, contained fix, but its default output is the checklist.
 - Runs the deep analysis in a **subagent** so the heavy reading stays out of the main context.
 
-Owns the hardening checklist (`docs/hardening/`). Does not write tests (/test), reviews (/review), code, ADRs, or CLAUDE.md.
+Owns the hardening checklist (`docs/hardening/`). Does not write tests (/test), reviews (/review), code, ADRs, or the `AGENTS.md`/`CLAUDE.md` context files.
 
 ## Asks vs acts
 
@@ -55,7 +55,7 @@ De-duplicate; drop lock/generated files from the count. **If the change set is e
 
 Paths and cheap signals only. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), note whether `test-preferences.json` exists (`HAS_TESTS`), and find the latest file under `docs/reviews/` (its findings inform what's already known).
 
-Pass to the subagent: CLAUDE.md contents inline (short), the recent ADR **paths**, the latest review **path**, the diff scope, and whether tests exist.
+Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the recent ADR **paths**, the latest review **path**, the diff scope, and whether tests exist.
 
 ### 3. Spawn the hardening subagent
 
@@ -67,7 +67,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 - `prompt`: filled template with:
   1. The full `harden-guide.md` content (injected, not referenced)
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, changed-file list + the exact `git diff` command
-  3. CLAUDE.md contents (inline)
+  3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback
   4. Recent ADR paths + latest review path (read if relevant; inline their text if your client gives subagents no file access)
   5. `HAS_TESTS` (so it can say "add a test for this" vs "no test harness")
   6. Output path: `docs/hardening/<date>-<branch>.md`

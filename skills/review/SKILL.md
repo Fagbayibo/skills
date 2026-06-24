@@ -12,7 +12,7 @@ Reviews the current change set as a senior engineer would review a teammate's pu
 - **Read-only on code** — produces findings, never edits the code under review.
 - **Want a different provider?** For the most independent review, switch your active model (`/model`, or your other AI tool) and run the review there — a recommendation, not machinery. The skill never sends your code anywhere itself.
 
-Owns review findings (`docs/reviews/`). Does not write code, tests, ADRs, or CLAUDE.md.
+Owns review findings (`docs/reviews/`). Does not write code, tests, ADRs, or the `AGENTS.md`/`CLAUDE.md` context files.
 
 ## Asks vs acts
 
@@ -117,7 +117,7 @@ De-duplicate the file list. Exclude lock files and generated output (`dist/`, `b
 
 Paths and cheap signals only — the subagent reads on demand. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), and note whether `test-preferences.json` exists (is the project tested?).
 
-Pass to the subagent: CLAUDE.md contents inline (short), the 3 recent ADR **paths**, the base ref / merge-base, and the diff scope. The subagent reads ADRs only if they govern the changed code, runs `git diff` itself, and reads the changed files and their tests.
+Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the 3 recent ADR **paths**, the base ref / merge-base, and the diff scope. The subagent reads ADRs only if they govern the changed code, runs `git diff` itself, and reads the changed files and their tests.
 
 ### 4. Spawn the review subagent — on the contrasting Claude model
 
@@ -129,7 +129,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 - `prompt`: filled template with:
   1. The full `review-guide.md` content (injected, not referenced)
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, and the changed-file list with the exact `git diff` command to run
-  3. CLAUDE.md contents (inline) — project conventions the review must enforce
+  3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback — the conventions the review must enforce
   4. Recent ADR paths (read if relevant), or inline the relevant ADR text if your client gives subagents no file access
   5. Whether the project has tests configured (so it can judge test adequacy)
   6. Output path for findings: `docs/reviews/<date>-<branch>.md`

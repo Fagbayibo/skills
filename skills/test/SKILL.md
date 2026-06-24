@@ -13,7 +13,7 @@ Writes a thorough, maintainable test suite for **the code that changed in this b
 - **Subsequent runs**: reads `test-preferences.json` and skips all tool questions.
 - Spawns a subagent to read the changed files and write the tests.
 
-Does not write application code. Does not update CLAUDE.md (/sync owns that).
+Does not write application code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
 ## Asks vs acts
 
@@ -264,7 +264,7 @@ Using your file tools:
 - Read `package.json` and note its `scripts.test` value (decides `RUN_COMMAND`), if any.
 
 What the main model passes to the subagent:
-- **CLAUDE.md**: inline its contents (it's short by design and already in session context — cheap, and consistent with the other skills).
+- **Project context**: read `AGENTS.md` (canonical) — fall back to `CLAUDE.md` if there's no `AGENTS.md` — and inline its contents (short, cheap, consistent with the other skills).
 - **ADRs**: pass the **3 recent paths**. The subagent reads them itself, and only if relevant to what it's testing.
 - **design.md**: pass the **path**, and only when a **component** or **page/flow** file is in scope. The subagent reads it. Pass `none` otherwise.
 - **Source files**: never read here — the subagent reads each scoped file.
@@ -300,7 +300,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
   3. `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`
   4. **Classified scope** — each file path with its class (logic / component / page-flow / api-server / cli)
   5. `RUN_COMMAND` (resolved in Step 7), `RUN_AFTER` flag
-  6. **CLAUDE.md contents** inline (short)
+  6. **Project context** inline (short) — `AGENTS.md`, or `CLAUDE.md` fallback
   7. **ADR paths** — the 3 recent paths, or `none`. (If the subagent has no file access in your client, read and inline the relevant ADR text instead.)
   8. **design.md path** — only if component/page scope, else `none`
 

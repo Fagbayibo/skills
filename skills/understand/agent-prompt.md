@@ -6,6 +6,25 @@ Main model fills this and passes it as the subagent prompt. Placeholders in ALL_
 
 You are running /understand in **PHASE** mode. Your tools are Read, Bash, Write, and Edit. Use them freely.
 
+## Canonical context file: AGENTS.md (+ a CLAUDE.md pointer)
+
+The durable context goes in **`AGENTS.md`** (root or `<area>/AGENTS.md`) — it's tool-agnostic, read by every agent. For each `AGENTS.md` you create, also create a **sibling `CLAUDE.md` that imports it** via Claude Code's `@` directive (Claude reads CLAUDE.md and auto-loads AGENTS.md; other tools read AGENTS.md directly). The `@AGENTS.md` resolves relative to the CLAUDE.md, so a nested CLAUDE.md imports its sibling nested AGENTS.md:
+
+```markdown
+# CLAUDE.md
+
+This project's context for all AI tools lives in [AGENTS.md](./AGENTS.md).
+Claude Code loads it via the import below:
+
+@AGENTS.md
+```
+
+Hard rules:
+- **Never overwrite an existing `AGENTS.md`.** Create it only when missing; otherwise propose additions via the diff format. Treat it as possibly authored by the user or another tool.
+- **`CLAUDE.md` only ever holds the pointer** — never duplicate AGENTS.md content into it.
+- **Migration** (when told `MIGRATE=yes`): copy the legacy `CLAUDE.md`'s content verbatim into a new `AGENTS.md`, then replace `CLAUDE.md` with the pointer above. Never discard curated content.
+- If a `CLAUDE.md` pointer already exists and points to AGENTS.md, leave it untouched.
+
 ## Phase
 
 PHASE
@@ -20,13 +39,13 @@ SCOPE_OR_AREA
 
 TASK_CONTEXT_OR_NONE
 
-## Existing root CLAUDE.md
+## Existing root AGENTS.md
 
-ROOT_CLAUDE_MD_CONTENTS_OR_MISSING
+ROOT_AGENTS_MD_CONTENTS_OR_MISSING
 
-## Existing area CLAUDE.md
+## Existing area AGENTS.md
 
-AREA_CLAUDE_MD_CONTENTS_OR_MISSING
+AREA_AGENTS_MD_CONTENTS_OR_MISSING
 <!-- "MISSING" if phase is not area, or file doesn't exist -->
 
 ## Selected coding patterns (Phase 1 only)
@@ -47,7 +66,7 @@ ADDITIONAL_STANDARDS_OR_NONE
 
 ### GREENFIELD phase
 
-The project is new — no source files yet. Your job: create a root CLAUDE.md that encodes the engineer's chosen standards so every future decision starts from the right foundation.
+The project is new — no source files yet. Your job: create a root AGENTS.md that encodes the engineer's chosen standards so every future decision starts from the right foundation.
 
 **Step 1 — Minimal discovery**
 
@@ -57,7 +76,7 @@ find . -maxdepth 2 -not -path '*/.git/*' | sort
 
 Read `package.json` / `pyproject.toml` / `go.mod` if present — note language and package manager.
 
-**Step 2 — Create root CLAUDE.md**
+**Step 2 — Create root AGENTS.md**
 
 Use the template below. Populate `## Stack` from what you found.
 
@@ -69,7 +88,7 @@ For `## Rules`: use the SELECTED_PATTERNS content injected above as the basis. I
 
 ### WHOLE-REPO phase
 
-A codebase exists but no CLAUDE.md. Your job: explore enough to write an accurate root CLAUDE.md.
+A codebase exists but no AGENTS.md. Your job: explore enough to write an accurate root AGENTS.md.
 
 **Step 1 — Discover**
 
@@ -83,8 +102,8 @@ Then read whichever exist:
 - `.github/workflows/` — CI and deploy patterns
 - Main entry point (`src/index.*`, `main.*`, `app.*`, `server.*`)
 - Test config (`jest.config.*`, `pytest.ini`, `vitest.config.*`)
-- Any existing `CLAUDE.md` files: `find . -name "CLAUDE.md" -not -path '*/.git/*'`
-  - If nested CLAUDE.md files are found (i.e. not the root): collect their paths. Add a pointer line for each under `## Context files` when writing root CLAUDE.md. Format: `- [<path>](<path>) — <one-line description inferred from the file's ## Overview section>`.
+- Any existing `AGENTS.md` files: `find . -name "AGENTS.md" -not -path '*/.git/*'`
+  - If nested AGENTS.md files are found (i.e. not the root): collect their paths. Add a pointer line for each under `## Context files` when writing root AGENTS.md. Format: `- [<path>](<path>) — <one-line description inferred from the file's ## Overview section>`.
 
 **Step 2 — Extract durable knowledge**
 
@@ -96,7 +115,7 @@ From your reading, answer:
 
 Discard: implementation details, TODO comments, anything that changes frequently.
 
-**Step 3 — Create root CLAUDE.md** using the template below.
+**Step 3 — Create root AGENTS.md** using the template below.
 
 **Step 4 — Report** (use the report format at the bottom of this file).
 
@@ -104,7 +123,7 @@ Discard: implementation details, TODO comments, anything that changes frequently
 
 ### AREA phase
 
-Root CLAUDE.md exists. A specific area needs study. Your job: (1) check if root CLAUDE.md has what it needs for this area, (2) create or update the nested CLAUDE.md.
+Root AGENTS.md exists. A specific area needs study. Your job: (1) check if root AGENTS.md has what it needs for this area, (2) create or update the nested AGENTS.md.
 
 **Step 1 — Explore the area**
 
@@ -116,12 +135,12 @@ Read:
 - Key source files (entry points, main modules — not every file, use judgement)
 - Test files in this area
 - Any local config (tsconfig, .env.example, etc.)
-- The existing root CLAUDE.md (already injected above)
-- The existing area CLAUDE.md if present (already injected above)
+- The existing root AGENTS.md (already injected above)
+- The existing area AGENTS.md if present (already injected above)
 
-**Step 2 — Gap-check root CLAUDE.md**
+**Step 2 — Gap-check root AGENTS.md**
 
-Compare what you found in the area against root CLAUDE.md. Flag a gap only if it is:
+Compare what you found in the area against root AGENTS.md. Flag a gap only if it is:
 - A command that engineers working in this area need but root doesn't mention
 - A stack element, runtime, or major dependency relevant to this area but absent from root
 - A hard project-wide rule that the area makes visible (e.g. "all DB calls go through the repository layer")
@@ -139,28 +158,28 @@ If no gaps: `ROOT_GAPS: none`
 
 Include the exact text to insert so the main model can apply it with Edit without paraphrasing.
 
-**Step 3 — Nested CLAUDE.md**
+**Step 3 — Nested AGENTS.md**
 
 Decide: does this area have enough distinct conventions, constraints, or gotchas to warrant its own context file?
 
 Warrant: the area has its own patterns, non-obvious rules, local commands, or constraints a developer needs to know before touching it.
-Do not warrant: the area is a simple CRUD module with no surprises, or it is already well-covered by root CLAUDE.md.
+Do not warrant: the area is a simple CRUD module with no surprises, or it is already well-covered by root AGENTS.md.
 
-- Area CLAUDE.md **missing + warranted** → create it using the nested template below; then add a pointer to root CLAUDE.md:
+- Area AGENTS.md **missing + warranted** → create it using the nested template below; then add a pointer to root AGENTS.md:
   - If root has `## Context files` with only a placeholder comment (`<!-- ... -->`): replace the comment line with the pointer.
   - If root has `## Context files` with existing entries: append the new pointer line.
   - If root has no `## Context files` section: add the section and the pointer before `## ADRs` (or at the end if no ADRs section).
   - Use Edit tool for all root modifications.
-- Area CLAUDE.md **missing + not warranted** → note why in the report and skip.
-- Area CLAUDE.md **exists** → propose additions only (never overwrite). Use the proposed diff format below.
+- Area AGENTS.md **missing + not warranted** → note why in the report and skip.
+- Area AGENTS.md **exists** → propose additions only (never overwrite). Use the proposed diff format below.
 
 **Step 4 — Report** (use the report format at the bottom of this file).
 
 ---
 
-## Root CLAUDE.md template
+## Root AGENTS.md template
 
-=== ROOT CLAUDE.md TEMPLATE START ===
+=== ROOT AGENTS.md TEMPLATE START ===
 # <Project name>
 
 ## Stack
@@ -199,13 +218,13 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
 
 ## Context files
 
-<!-- Nested CLAUDE.md files are listed here as they are created -->
+<!-- Nested AGENTS.md files are listed here as they are created -->
 
-=== ROOT CLAUDE.md TEMPLATE END ===
+=== ROOT AGENTS.md TEMPLATE END ===
 
 ---
 
-## Nested CLAUDE.md template
+## Nested AGENTS.md template
 
 ```markdown
 # <Area name>
@@ -285,9 +304,9 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 
 - Text output: output ONLY the report block at the end. No running commentary, no intermediate messages like "I found X" while exploring. All findings go in the report. File writes via tool calls (Write, Edit) are expected and correct — this rule applies to text output only.
 - ROOT_GAPS must be included in the report under `Root gaps flagged` — do not output them mid-stream. Include the exact markdown text to insert so the main model can apply it without paraphrasing.
-- Do not create a nested CLAUDE.md unless the area genuinely warrants it.
-- Root CLAUDE.md must stay under ~60 lines. Cut ruthlessly.
-- Never overwrite an existing CLAUDE.md — propose additions only via the diff format.
+- Do not create a nested AGENTS.md unless the area genuinely warrants it.
+- Root AGENTS.md must stay under ~60 lines. Cut ruthlessly.
+- Never overwrite an existing AGENTS.md — propose additions only via the diff format.
 - Do not create ADRs. Do not write plans. Stay in your lane.
 - Proposed additions must be additions only — no rewrites of existing sections.
 - When the engineer selected "Other" for architecture style, use their free-text verbatim in `## Rules`. Do not interpret or paraphrase it.

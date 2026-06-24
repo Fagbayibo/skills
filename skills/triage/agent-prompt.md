@@ -13,7 +13,7 @@ TASK_DESCRIPTION
 
 ## Project context
 
-CLAUDE_MD_CONTENTS
+PROJECT_CONTEXT_CONTENTS
 
 ## Tier decision guide
 

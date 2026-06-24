@@ -57,7 +57,7 @@ ANSWER_R2_ALL
 EXISTING_ADR_PATH_OR_NONE
 EXISTING_ADR_CONTENTS_OR_NONE
 
-**Project context (CLAUDE.md):** CLAUDE_MD_CONTENTS_OR_MISSING
+**Project context (AGENTS.md):** PROJECT_CONTEXT_CONTENTS_OR_MISSING
 **Existing ADRs:** EXISTING_ADR_SUMMARIES_OR_NONE
 **Related ADRs flagged:** RELATED_ADR_PATHS_OR_NONE
 **Source file count:** SOURCE_FILE_COUNT
@@ -76,9 +76,9 @@ COMMUNITY_SKILLS_CONTENT_OR_NONE
 MISSING_COMMUNITY_SKILLS_OR_NONE
 <!-- Skill names only — e.g. "supabase, stripe" — not installed but relevant to this design -->
 
-**Community skills not yet in CLAUDE.md:**
-COMMUNITY_SKILLS_NOT_IN_CLAUDE_MD_OR_NONE
-<!-- Installed and relevant skills whose conventions are not yet referenced in root CLAUDE.md -->
+**Community skills not yet in AGENTS.md:**
+COMMUNITY_SKILLS_NOT_IN_PROJECT_CONTEXT_OR_NONE
+<!-- Installed and relevant skills whose conventions are not yet referenced in root AGENTS.md -->
 
 ---
 
@@ -106,44 +106,44 @@ In the ADR's `## Decision` section, after the chosen option sentence, fill in th
 
 List every installed community skill that shaped this design. During implementation the engineer reads the ADR alongside each listed skill to apply the right conventions. Do NOT copy-paste skill content into the ADR. The field is a pointer, not a paste.
 
-**3. Add Follow-up items for any skill not yet in CLAUDE.md.**
+**3. Add Follow-up items for any skill not yet in AGENTS.md.**
 
-For each skill listed in COMMUNITY_SKILLS_NOT_IN_CLAUDE_MD_OR_NONE, determine where its conventions should live using this rule:
+For each skill listed in COMMUNITY_SKILLS_NOT_IN_PROJECT_CONTEXT_OR_NONE, determine where its conventions should live using this rule:
 
-**Why this matters — how CLAUDE.md loading works:**
-Root CLAUDE.md is loaded on **every task**, regardless of what is being built. It always costs context tokens. Nested CLAUDE.md files are loaded **only when Claude is working in that directory** — automatically, based on which files are being read or edited. A `src/payments/CLAUDE.md` never touches context when Claude is fixing a UI component or editing auth code.
+**Why this matters — how AGENTS.md loading works:**
+Root AGENTS.md is loaded on **every task**, regardless of what is being built. It always costs context tokens. Nested AGENTS.md files are loaded **only when Claude is working in that directory** — automatically, based on which files are being read or edited. A `src/payments/AGENTS.md` never touches context when Claude is fixing a UI component or editing auth code.
 
 **Scope rule**: place conventions at the level that matches their actual reach.
 
 | Technology scope | Right home | Why |
 |---|---|---|
-| Affects every file (framework, ORM, styling, core DB) | Root CLAUDE.md | Needed on every task |
-| Affects one area only | That area's nested CLAUDE.md | Only loaded when working there — no wasted context |
+| Affects every file (framework, ORM, styling, core DB) | Root AGENTS.md | Needed on every task |
+| Affects one area only | That area's nested AGENTS.md | Only loaded when working there — no wasted context |
 
 Concrete placement:
-- `nextjs`, `react`, `tailwind`, `prisma`, `drizzle`, `postgres` → **root CLAUDE.md** (every file in the project uses these)
-- `stripe`, `lemonsqueezy` → **`src/payments/CLAUDE.md`** (only payment code uses Stripe)
-- `clerk`, `nextauth`, `lucia`, `auth0` → **`src/auth/CLAUDE.md`** (only auth code uses these)
-- `uploadthing`, `s3` → **`src/storage/CLAUDE.md`** or `src/uploads/CLAUDE.md`
-- `resend`, `sendgrid`, `postmark` → **`src/email/CLAUDE.md`** or `src/notifications/CLAUDE.md`
+- `nextjs`, `react`, `tailwind`, `prisma`, `drizzle`, `postgres` → **root AGENTS.md** (every file in the project uses these)
+- `stripe`, `lemonsqueezy` → **`src/payments/AGENTS.md`** (only payment code uses Stripe)
+- `clerk`, `nextauth`, `lucia`, `auth0` → **`src/auth/AGENTS.md`** (only auth code uses these)
+- `uploadthing`, `s3` → **`src/storage/AGENTS.md`** or `src/uploads/AGENTS.md`
+- `resend`, `sendgrid`, `postmark` → **`src/email/AGENTS.md`** or `src/notifications/AGENTS.md`
 
-**Root CLAUDE.md always gets a one-line pointer — never the full content:**
+**Root AGENTS.md always gets a one-line pointer — never the full content:**
 ```markdown
-- [src/payments/CLAUDE.md](src/payments/CLAUDE.md) — Stripe payment and webhook conventions
+- [src/payments/AGENTS.md](src/payments/AGENTS.md) — Stripe payment and webhook conventions
 ```
 
-The pointer is what makes root CLAUDE.md aware of the nested file without bloating it.
+The pointer is what makes root AGENTS.md aware of the nested file without bloating it.
 
-Generate one Follow-up item per relevant skill that is not yet in CLAUDE.md:
+Generate one Follow-up item per relevant skill that is not yet in AGENTS.md:
 
 For area-scoped skills (Stripe, Clerk, Resend, etc.):
 ```markdown
-- [ ] `stripe` conventions not yet captured — `src/payments/CLAUDE.md` should contain them before implementation begins (do not add Stripe conventions to root CLAUDE.md; root loads on every task, payment conventions are only needed when working in that area)
+- [ ] `stripe` conventions not yet captured — `src/payments/AGENTS.md` should contain them before implementation begins (do not add Stripe conventions to root AGENTS.md; root loads on every task, payment conventions are only needed when working in that area)
 ```
 
 For project-wide skills (Next.js, Prisma, Tailwind):
 ```markdown
-- [ ] `nextjs` conventions not yet in root CLAUDE.md `## Rules` — these apply to every file in the project and belong at root level
+- [ ] `nextjs` conventions not yet in root AGENTS.md `## Rules` — these apply to every file in the project and belong at root level
 ```
 
 State what is missing and where it belongs. Do not prescribe which skill to run or when — that is the engineer's decision.

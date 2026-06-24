@@ -24,7 +24,7 @@ TEMPLATE_CONTENT
 
 ## Context
 
-- **Project (CLAUDE.md, inlined)**: CLAUDE_MD
+- **Project (AGENTS.md, inlined)**: PROJECT_CONTEXT
 - **Recent ADR paths (the "why" — read only if you need the rationale)**: ADR_PATHS
 - **Today**: DATE
 

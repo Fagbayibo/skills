@@ -39,9 +39,9 @@ SCOPE_CLASSIFIED
 - app/api/orders/route.ts       [api/server]
 -->
 
-## Project context (CLAUDE.md — inlined because it is short)
+## Project context (AGENTS.md — inlined because it is short)
 
-CLAUDE_MD
+PROJECT_CONTEXT
 
 ## Pointers to read only if relevant (do not assume; read on demand)
 

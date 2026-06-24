@@ -30,9 +30,9 @@ Read the actual change with:
 DIFF_COMMAND
 ```
 
-## Project conventions (CLAUDE.md — inlined)
+## Project conventions (AGENTS.md — inlined)
 
-CLAUDE_MD
+PROJECT_CONTEXT
 
 ## Prior context (read only if relevant)
 

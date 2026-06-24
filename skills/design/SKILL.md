@@ -19,7 +19,7 @@ Runs a structured discovery process, weighs options, and writes or updates an Ar
 - **Update**: evolving an existing decision → edit existing ADR in place
 - **Supersede**: replacing a past decision → new ADR + update old ADR's status line
 
-Does not write code. Does not update CLAUDE.md (/sync owns that).
+Does not write code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
 ## Asks vs acts
 
@@ -68,8 +68,8 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 # Detect installed community skills (exclude workflow skills)
 ls .claude/skills/ 2>/dev/null
 
-# Read project context
-cat CLAUDE.md 2>/dev/null || echo "MISSING"
+# Read project context — AGENTS.md is canonical; fall back to CLAUDE.md (use your file tool)
+#   read AGENTS.md if present, else CLAUDE.md, else treat as MISSING
 ```
 
 From the ADR list:
@@ -99,8 +99,8 @@ This list is complete for the 13 workflow skills in this system. As additional w
 For each relevant installed skill found:
 1. Read its `SKILL.md` in full (or first 120 lines if longer)
 2. Mark it as **installed and relevant** — inject its content into the subagent prompt
-3. Note which area its conventions should live in (root CLAUDE.md or a nested CLAUDE.md)
-4. Check if root CLAUDE.md already references this skill under `## Context files` or `## Rules` — if not, flag it as missing from CLAUDE.md
+3. Note which area its conventions should live in (root `AGENTS.md` or a nested `AGENTS.md`)
+4. Check if root `AGENTS.md` already references this skill under `## Context files` or `## Rules` — if not, flag it as missing from the context files
 
 For each **relevant but NOT installed** skill:
 - Note it as a suggested install — will appear in ADR Follow-up
@@ -237,7 +237,7 @@ Inject into the template:
 1. Design topic (from the user's original message)
 2. All Round 1 answers (Q1–Q4)
 3. All Round 2 answers — if Round 2 was skipped, inject: `"Round 2 skipped — [reason: Documenting a made decision / already-built documentation task]"` so the subagent knows this was intentional, not an error
-4. CLAUDE.md contents (or "MISSING")
+4. Context-file contents — `AGENTS.md` (canonical), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
 7. Next ADR number and file path

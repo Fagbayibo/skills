@@ -96,10 +96,10 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Bundled files (
 
 ### Pre-flight (main model does this before spawning)
 
-1. Read `CLAUDE.md` at the repo root. If missing, note "no CLAUDE.md found".
+1. Read the repo's canonical context file: `AGENTS.md` at the root (fall back to `CLAUDE.md` if there's no `AGENTS.md`). If neither exists, note "no context file found".
 2. Read `tier-guide.md`.
 3. Read `agent-prompt.md` to get the prompt template.
-4. Fill the template with: task description, CLAUDE.md contents, tier-guide contents.
+4. Fill the template with: task description, context-file contents, tier-guide contents.
 
 ### Spawning
 
