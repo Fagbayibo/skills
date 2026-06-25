@@ -41,7 +41,7 @@ From the argument or task description:
 | No argument, **new project** (no/boilerplate code, no AGENTS.md) | Phase 1 — greenfield setup (ask standards → seed root) |
 | No argument, **established codebase**, no root AGENTS.md | Phase 2 — whole-repo scan (create root **+ judged nested**) |
 | No argument, codebase exists, root AGENTS.md **already exists** | Phase 4 — gap-fill (audit codebase vs existing docs, add what's missing) |
-| No argument, **ambiguous** (scaffold-only, or unfamiliar language) | Phase 0 — ask new-vs-existing, then route |
+| No argument, **ambiguous** (scaffolded but no git history) | Phase 0 — ask new-vs-existing, then route |
 | Path or area name (e.g. `auth`, `src/payments`) | Phase 3 — area scan |
 
 The choice is made from **several signals** (source count, git history, manifests), not a file count alone — see Pre-flight. A content-ful legacy `CLAUDE.md` with no `AGENTS.md` is migrated, then treated as Phase 4.
@@ -107,15 +107,19 @@ ls pnpm-workspace.yaml turbo.json 2>/dev/null; grep -l '"workspaces"' package.js
 find . -maxdepth 2 -path '*/apps/*/package.json' -o -path '*/packages/*/package.json' 2>/dev/null | head
 ```
 
-**Pick the phase from the combined signals:**
+**Pick the phase. Two questions, in order: (1) is there real code to scan? (source files OR a manifest) (2) if yes, is it built (git history) or just scaffolded (no history)?**
 
 | Condition | Phase |
 |---|---|
 | Area path given as argument | Phase 3 (area scan) |
 | `ROOT_EXISTS` (or `ROOT_LEGACY` after migration) | Phase 4 (gap-fill) |
-| `ROOT_MISSING`, **clearly greenfield**: source count < 10 AND git history ≤ 1 commit | Phase 1 (greenfield) |
-| `ROOT_MISSING`, **clearly established**: source count ≥ 10, OR > 5 commits, OR a manifest with real deps + non-boilerplate code | Phase 2 (whole-repo) |
-| `ROOT_MISSING`, **ambiguous**: a scaffold (files present but ~1 commit and only boilerplate), OR a manifest/real history but 0 counted source files (a language not in the set) | **Phase 0 (ask)** |
+| `ROOT_MISSING`, **no source files AND no manifest** | Phase 1 (greenfield) — nothing to scan, even if `docs/`/ADR/roadmap commits exist |
+| `ROOT_MISSING`, has code (source ≥ 10 **or** a manifest), **≥ 2 commits** | Phase 2 (whole-repo) — real work happened, any language |
+| `ROOT_MISSING`, has code (source ≥ 10 **or** a manifest), **≤ 1 commit** | **Phase 0 (ask)** — looks scaffolded; can't tell new from existing |
+
+Why this order (both learned from dry-running it):
+- **Doc commits inflate history.** On greenfield, `/mvp` and `/architect` commit a roadmap and an ADR *before* any code — so "≥2 commits → established" would misroute a code-less project to Phase 2 and skip the standards questions. Gating greenfield on **no source AND no manifest** ignores doc commits.
+- **File count alone misreads a scaffold.** A `create-next-app` scaffold has 10+ files but **one** commit — git history is what separates it from a built codebase, and history works for languages the `find` doesn't recognize. A shallow clone / squash-merge repo showing ≤1 commit falls to Phase 0, where one question resolves it safely.
 
 **Monorepo (`MONOREPO=yes`)**: in Phase 2/4, treat **each app/package as its own area** — give each a nested `AGENTS.md` carrying its stack/commands/conventions, and keep the repo-root `AGENTS.md` to monorepo-wide concerns only (workspace tooling, shared conventions). Note `MONOREPO=yes` + the app list in the subagent prompt.
 
