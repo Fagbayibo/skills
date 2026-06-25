@@ -62,7 +62,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 **The dangerous case is the false negative — building a real decision without noticing it** (which is exactly what "just build the home page" looks like). So when you can't tell, treat it as **owed** and ask (the panel below). One extra question is cheap; a page or feature whose design/behavior you silently invented is expensive to unwind.
 
 **Check, in order:**
-1. If `docs/mvp/01-mvp.md` exists, find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
+1. If a roadmap exists in `docs/mvp/` (one or more numbered files — scan the dir), find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
 2. Search `docs/adr/` for an ADR covering this scope. If one exists, it's the spec — proceed.
 3. Check whether the decision is already captured in the nearest `AGENTS.md` (the convention may have been synced from an earlier feature — e.g. "auth uses Clerk"). If so, proceed without a new ADR.
 
@@ -115,7 +115,7 @@ A thin ADR caught here is a 30-second question; caught mid-build it's a wrong gu
 
 ### Step 3 — Resume check, then build
 
-**Resume first — never rebuild what's already done.** If `docs/mvp/01-mvp.md` has this feature, read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
+**Resume first — never rebuild what's already done.** If a roadmap file in `docs/mvp/` has this feature (scan the dir — it may be `01-mvp.md` or a later numbered slice), read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`. (No roadmap → just build the requested task.)
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 

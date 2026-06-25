@@ -84,7 +84,7 @@ De-duplicate. Then **filter the list to source files** the subagent should sync 
 [ -f AGENTS.md ] && echo "root: AGENTS.md"
 find . -name AGENTS.md -not -path './node_modules/*' -not -path './.git/*' 2>/dev/null   # root + nested
 find docs/adr -name "[0-9]*.md" 2>/dev/null | sort                                        # all ADRs
-[ -f docs/mvp/01-mvp.md ] && echo "roadmap: docs/mvp/01-mvp.md"                   # feature roadmap (if any)
+ls docs/mvp/*.md 2>/dev/null                                                       # feature roadmap(s) — one or more numbered files
 ```
 
 The subagent reads these itself. The main model passes the **paths** (plus the changed-file list and diff command). The one inline exception is root AGENTS.md contents — short and useful for the subagent to anchor on.
@@ -104,7 +104,7 @@ Read `agent-prompt.md`, fill it, then spawn:
   3. Root AGENTS.md contents (inline) + the list of nested AGENTS.md paths
   4. The full ADR path list
   5. The map of changed files → nearest context file
-  6. The `docs/mvp/01-mvp.md` path (if it exists) — for roadmap reconciliation
+  6. The roadmap file path(s) under `docs/mvp/` (if any — scan the dir; pass the file(s) whose features the diff touches) — for reconciliation
 
 ### 4. Relay the result
 

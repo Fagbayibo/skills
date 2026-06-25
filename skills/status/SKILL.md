@@ -47,8 +47,8 @@ Note: behind > 0 → **you're not up to date**; uncommitted entries → **work i
 
 ### Step 2 — Roadmap
 
-If `docs/mvp/01-mvp.md` (or `.workflow/mvp/01-mvp.md`) exists, parse it:
-- Count features by **Status**; for each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
+Scan `docs/mvp/` (or `.workflow/mvp/`) for roadmap files — one or more numbered files (`01-mvp.md`, `02-…`). Parse all of them:
+- Count features by **Status** across every roadmap file; for each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
 - Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
 
 If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brownfield) to establish one.

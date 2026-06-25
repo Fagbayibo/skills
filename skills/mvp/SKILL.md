@@ -54,11 +54,14 @@ Wait for the answer. Use it as the product idea.
 find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \
   -o -name "*.go" -o -name "*.rs" \) -not -path '*/node_modules/*' -not -path '*/.git/*' | head -1
 [ -f AGENTS.md ] && echo "has root AGENTS.md"
-[ -f docs/mvp/01-mvp.md ] && echo "has roadmap"
+ls docs/mvp/*.md 2>/dev/null | sort        # existing roadmap files — note the HIGHEST number
 ```
 
 - **Greenfield**: decompose the whole MVP from scratch. Sequence the roadmap so the **foundations come first, gradually**: (1) **coding guidelines & principles** — run `/audit` (greenfield) to capture the engineer's standards/conventions into root `AGENTS.md`; (2) the **stack** decision (`/architect` → ARCHITECTURE ADR); (3) the **design system / UI foundation** if the product has meaningful UI; then (4) data model, auth, and the rest. Don't jump to feature pages before these exist — every later feature builds on them. Surface this ordering in the Build order and the first foundation feature(s).
-- **Brownfield**: read root `AGENTS.md` and the existing `docs/mvp/01-mvp.md` if present, so you plan the *next* slice on top of what's already shipped — never re-list shipped features. If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give later steps real context.
+- **Brownfield**: read root `AGENTS.md` (and every `ls`-ed roadmap file under `docs/mvp/`) so you plan the *next* slice on top of what's already there. Two things to do:
+  1. **Enroll the already-built features** as `done` overview rows — derive them from `AGENTS.md` (its nested-area docs map to existing features/areas) plus a light code scan, and give each a `Code area` pointer. **No build breakdown** for these — they're shipped; they're in the roadmap only so it's a *complete* picture (and so `/develop`/`/status` can see them). Mark them clearly as pre-existing.
+  2. **Plan the next slice** as `planned` features with full breakdowns. Don't write build plans for already-shipped features.
+  - If there's no root `AGENTS.md`, note in the report that `/audit` should run first to give this real context.
 
 ### Step 2 — Round 1: product & business (generate, then `AskUserQuestion`)
 
@@ -136,9 +139,15 @@ So a single feature's sub-tasks are **spread across layers**: its UI is built in
 
 Deviate only when a page genuinely can't be prototyped without real data (rare — even then, mock it).
 
-### Step 6 — Write `docs/mvp/01-mvp.md`
+### Step 6 — Write the roadmap file (pick the number first)
 
-Create (or merge into) the roadmap with two parts — an overview table and the detailed breakdown:
+**Choose the target file** by scanning `docs/mvp/` (from Step 1):
+- **No roadmap files exist** → create `docs/mvp/01-mvp.md`.
+- **Roadmap files exist** → decide, and **state which (and why) in the report**:
+  - **Continuing the same plan** — the latest file still has unfinished/`planned` features you're extending → **merge** into that latest file: append new features/sub-tasks, leave existing rows and checkbox states untouched.
+  - **A distinct new slice/batch** — a separate planning pass → create the **next number**: highest existing `NN` + 1, zero-padded to two digits, with a kebab slug — e.g. `docs/mvp/02-checkout-and-orders.md`. Re-list `docs/mvp/` immediately before writing (a teammate may have added one); use the next free number; **never overwrite an existing roadmap file**.
+
+When unsure between merge and new-file, prefer a **new numbered file** — it's append-only and merge-safe. Then write that file with two parts — an overview table and the detailed breakdown:
 
 ```markdown
 # Feature Roadmap
@@ -158,6 +167,11 @@ _Seeded by /mvp · status advanced by /develop and /sync. Roadmap files live in 
 | 7 | Product detail page | P0 | yes | planned | — |
 | 8 | Cart | P0 | yes | planned | — |
 | … | … | … | … | … | — |
+
+<!-- Brownfield: already-built features are enrolled here as `done` rows above the planned ones, e.g.
+| — | Auth (existing) | — | — | done | `src/auth/` |
+| — | Product catalog (existing) | — | — | done | `src/catalog/` |
+— Code area filled, no build breakdown; they're here for a complete picture, not to re-build. -->
 
 _(Granular: home and segment landing are separate features; listing, product, and cart are separate — not one "storefront".)_
 
@@ -211,9 +225,10 @@ On a brownfield merge: append new features/sub-tasks; leave existing rows and ch
 ## /mvp complete
 
 **Product**: <one line>
-**Scope**: <N> features (<P0 count> P0, <deferred count> deferred), <total sub-task count> build sub-tasks
+**Roadmap file**: <docs/mvp/NN-name.md> — <created new | merged into existing | new slice (next number) because <reason>>
+**Existing features enrolled** (brownfield): <count, as `done` rows for context — or "n/a (greenfield)">
+**Scope (this plan)**: <N> features to build (<P0 count> P0, <deferred count> deferred), <total sub-task count> build sub-tasks
 **Cross-cutting in scope**: <SEO / analytics / i18n / compliance — or "none">
-**Roadmap**: docs/mvp/01-mvp.md
 **Build order**: <feature 1> → <feature 2> → …
 **First step**: <recommended next command — usually `/architect <first feature>`, or `/audit` first if brownfield has no root AGENTS.md>
 ```
