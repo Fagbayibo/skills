@@ -180,6 +180,7 @@ State it: *"Reading this as a new **FEATURE** on your **Next.js + Supabase** sta
 - **Observability** — what to log, metrics, alerts
 - **Configuration & secrets** — new env vars, feature flags, credentials
 - **UX surface (if UI in scope)** — capture the *requirements* (what each screen must show/do, states, accessibility needs); leave pixel/layout detail to `/develop`
+- **Discoverability & SEO (public-facing features)** — for any publicly-indexed page: metadata, structured data (JSON-LD), OG/social cards, canonical URLs, sitemap/robots, and SSR/SSG vs client-render needs. Skip for internal/auth-walled surfaces.
 - **UI design (when the topic IS a page/screen, e.g. "home page UI", "shop page UI")** — this is a real design decision and the ADR is the page's build spec. Settle:
   - **Design system** — does a `design.md` exist? If yes, it's the source of truth. If not, decide the direction (a template like Stripe/Raycast/Linear, a described style, or "extract from existing UI") so `/develop` isn't inventing a look. A design system that doesn't exist yet is itself ADR-worthy (it's cross-cutting — every page depends on it).
   - **Page composition** — what sections/blocks the page contains and in what order (e.g. home: hero → featured categories → product grid → social proof → footer). This is the "what goes on the page" the engineer alone knows.
