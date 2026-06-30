@@ -103,6 +103,8 @@ Be **strict** to avoid false positives — noise here erodes trust. Read an ADR 
 
 You are the **universal sub-task reconciler.** `/develop` ticks its own sub-tasks as it builds, but `/test`, `/harden`, `/audit`, and `/sync` sub-tasks have no one else to tick them — so for **every feature the diff touched**, re-evaluate **each of its sub-tasks against repo evidence** (not just what this diff added) and tick the ones that are genuinely complete. Use the diff to decide *which features* to re-check; use the **repo state** to decide *which sub-tasks are done*. You have Read/Bash/Grep/Glob — look directly.
 
+**If a roadmap file is malformed** (no overview table / breakdown, non-standard status, broken rows — a bad hand-edit), do **not** edit it: note `roadmap malformed: <file> — needs a human or /mvp re-run` under `ROADMAP_RECONCILED` and skip it. Never act on a misread.
+
 > Note: the source-file *filtering* in Step 1 (dropping `*.test.*`, `docs/**`) governs what you sync **AGENTS.md** from — it does **not** limit reconciliation. Here you may and should inspect test files, `docs/hardening/`, AGENTS.md, and config to judge completion.
 
 Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly present):

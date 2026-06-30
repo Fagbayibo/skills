@@ -43,6 +43,23 @@ Written for any Agent Skills client on macOS, Linux, or Windows. Detection snipp
 
 If a project exists (even a bare scaffold), proceed.
 
+### Pre-check — freshness & collaboration (don't build on stale state or over a teammate)
+
+Before mutating anything, a quick safety pass (skip silently if it's a solo, offline, or non-git context):
+
+```bash
+git fetch --quiet 2>/dev/null
+git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
+git rev-list --count HEAD..origin/$BASE 2>/dev/null   # commits you're BEHIND
+git status --short                                     # uncommitted work
+```
+
+- **Behind the remote** (count > 0) → **stop and warn**: "You're N commits behind `origin/$BASE` — a teammate may have already changed or shipped this. Pull first, then re-run." Don't build on stale code.
+- **Uncommitted work in the area you're about to touch** → warn: "You have uncommitted changes here — commit or stash first so this build doesn't tangle with them." Let them proceed if they insist.
+- **Feature already `in-progress` by someone else** → if the roadmap marks this feature `in-progress` AND its `Code area` has **recent commits by another author** (`git log --format='%an' -- <area> | head` shows names other than yours), warn: "*<feature>* looks like it's mid-build by someone else — coordinate before continuing it." Confirm before proceeding.
+
+These are warnings, not hard blocks (the engineer may have a reason) — but surface them; silent stale/duplicate builds are the worst team foot-gun.
+
 ### Step 0 — The ADR gate (always first)
 
 Decide whether a **decision is owed and unrecorded**. The test is one question:
@@ -62,7 +79,7 @@ Do **not** hardcode this to a list of page names or features — apply the *inve
 **The dangerous case is the false negative — building a real decision without noticing it** (which is exactly what "just build the home page" looks like). So when you can't tell, treat it as **owed** and ask (the panel below). One extra question is cheap; a page or feature whose design/behavior you silently invented is expensive to unwind.
 
 **Check, in order:**
-1. If a roadmap exists in `docs/mvp/` (one or more numbered files — scan the dir), find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.**
+1. If a roadmap exists in `docs/mvp/` (one or more numbered files — scan the dir), find this feature's row. If `Needs ADR? = yes` and the `ADR` column is empty → **a decision is owed and missing.** (If the roadmap or this row is **malformed** — broken table, non-standard status — don't guess; flag it and ask the engineer rather than acting on a misread.)
 2. Search `docs/adr/` for an ADR covering this scope. If one exists, it's the spec — proceed.
 3. Check whether the decision is already captured in the nearest `AGENTS.md` (the convention may have been synced from an earlier feature — e.g. "auth uses Clerk"). If so, proceed without a new ADR.
 
@@ -100,7 +117,7 @@ If genuinely ambiguous, ask once: "Is this the UI, the logic behind it, or both?
 ### Step 2 — Load the decision and conventions (both tracks)
 
 Before building, read:
-1. **The governing ADR** — from the `index.md` pointer, or the one found in Step 0. This is the spec: data model, API surface, invariants, security model, the provider/library already chosen.
+1. **The governing ADR** — from the `index.md` pointer, or the one found in Step 0. This is the spec: data model, API surface, invariants, security model, the provider/library already chosen. **Check its `Status`:** if it's still **`Proposed`** (not `Accepted`), the decision isn't ratified — warn before building: "The governing ADR is still `Proposed`, not accepted — build on an un-agreed decision, or accept it first (re-run `/architect` and confirm)?" Build only on the engineer's go-ahead. A `Superseded` ADR → use the one that superseded it.
 2. **The nearest `AGENTS.md`** to the target code area (proximity — Claude Code auto-loads it; read it explicitly to be sure). This carries decisions synced from earlier features, so you **don't re-ask** what's already settled.
 3. **`design.md`** (UI track only) — the visual source of truth.
 

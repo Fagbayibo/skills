@@ -6,6 +6,10 @@
 
 In the playbooks below, `/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern). For a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate will confirm none is needed and skip straight to building.
 
+## Team norm — branch per feature
+
+Work each feature on its own branch. Two people on the same branch (or both on `main`) collide on code **and** on the shared workflow artifacts (the roadmap, ADRs, `AGENTS.md`). Branch-per-feature is what makes the collaboration safeguards work — `/status` reports who's ahead/behind, and the freshness checks in `/develop`/`/architect`/`/sync` warn before you build on a stale tree or over a teammate.
+
 ## Greenfield vs brownfield order (`/audit` vs `/architect`)
 
 The first two steps **invert** depending on whether code exists yet:

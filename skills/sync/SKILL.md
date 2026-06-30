@@ -54,6 +54,8 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 ### 1. Scope the change set (cheap — with per-file status)
 
+**Freshness first (teams):** `git fetch --quiet`; if you're behind `origin/$BASE` (`git rev-list --count HEAD..origin/$BASE` > 0), warn the engineer to pull before syncing — a teammate may have already synced these docs, and reconciling against a stale tree creates conflicting edits.
+
 Use `--name-status` (not `--name-only`) so the subagent can tell **A**dded from **M**odified from **D**eleted — the net-new-area and orphan-cleanup logic both depend on it.
 
 ```bash

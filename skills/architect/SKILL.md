@@ -63,6 +63,11 @@ Wait for their answer. Use it as the design topic before running pre-flight.
 ### Pre-flight (main model)
 
 ```bash
+# Freshness (teams): if behind the remote, a teammate may have added ADRs or changed this feature
+git fetch --quiet 2>/dev/null
+git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
+git rev-list --count HEAD..origin/$BASE 2>/dev/null   # >0 → warn "pull first" before deciding
+
 mkdir -p docs/adr
 
 # Today's date — inject into ADR
@@ -275,9 +280,10 @@ If a required section is missing or a field is blank/placeholder, add this line 
 
 2. Do not rewrite the ADR from scratch on feedback. Use the **Edit** tool to apply targeted changes to the specific sections the engineer called out.
 3. After any edits, confirm: "ADR updated. Confirm with `yes` or give further feedback."
-4. **Link the roadmap (after confirmation).** If `docs/mvp/01-mvp.md` exists and has a row for this feature, update that row's `ADR` cell to point at the new file — the roadmap is in `docs/mvp/` and the ADR in `docs/adr/`, so the link is `[0007](../adr/0007-auth-approach.md)` and, if the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's **no matching row** (an ad-hoc decision outside the roadmap), don't edit the roadmap — but **note it** in your final message: "This ADR isn't tied to a roadmap feature — run `/mvp` to add a row if you're tracking this as a feature." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
+4. **On `yes` (acceptance) — ratify the decision.** Flip the ADR's status line from `**Status**: Proposed` to `**Status**: Accepted` (one Edit). This is what makes the decision *agreed* — `/develop` builds from `Accepted` ADRs and warns on `Proposed` ones, so leaving it `Proposed` would block/nag downstream. (Do **not** flip on the documentation path if the engineer wants it left as a record only — but default to `Accepted` on confirmation.)
+5. **Link the roadmap (after acceptance).** If `docs/mvp/01-mvp.md` exists and has a row for this feature, update that row's `ADR` cell to point at the new file — the roadmap is in `docs/mvp/` and the ADR in `docs/adr/`, so the link is `[0007](../adr/0007-auth-approach.md)` and, if the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's **no matching row** (an ad-hoc decision outside the roadmap), don't edit the roadmap — but **note it** in your final message: "This ADR isn't tied to a roadmap feature — run `/mvp` to add a row if you're tracking this as a feature." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
 
-/architect is complete when the engineer confirms the ADR. It does not invoke other skills.
+/architect is complete when the engineer confirms the ADR (now `Accepted`). It does not invoke other skills.
 
 ---
 

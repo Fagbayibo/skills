@@ -51,7 +51,7 @@ Scan `docs/mvp/` (or `.workflow/mvp/`) for roadmap files — one or more numbere
 - Count features by **Status** across every roadmap file: `planned` / `in-progress` / `done`, plus `existing` (pre-existing, not pipeline-built) and `dropped` (de-scoped — exclude from active work). For each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
 - Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
 
-If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brownfield) to establish one.
+If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brownfield) to establish one. **If a roadmap file is malformed** (no overview table, non-standard status values, broken rows — likely a bad hand-edit), don't silently misreport — flag it: "`<file>` doesn't match the expected roadmap shape; counts may be off — worth a look or a `/mvp` re-run to repair."
 
 ### Step 3 — Decisions
 
