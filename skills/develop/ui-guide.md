@@ -132,6 +132,8 @@ cat package.json 2>/dev/null | grep -E \
 | `styled-components` / `@emotion` | Tagged template literals referencing CSS variables |
 | Nothing | Semantic HTML + external CSS referencing CSS custom properties |
 
+These are the common cases, **not an exhaustive list**. If `package.json` shows a styling library not named here (UnoCSS, Panda, vanilla-extract, Stylex, …), use it and follow *its* idiom — the rule is "use what's installed, the way it's meant to be used," never "only these."
+
 **Dark mode strategy:**
 
 | Detected | Approach |
@@ -372,6 +374,8 @@ Identify fonts from `design.md` `typography.*.fontFamily`.
 | Canela | Playfair Display |
 | Tiempos | Libre Baskerville |
 | SF Pro | Inter |
+
+For a proprietary font **not in this table**, substitute the closest free font of the **same classification** — geometric sans → Jost/Poppins, grotesque/neo-grotesque → Inter/Manrope, humanist sans → Source Sans, transitional/old-style serif → the nearest free serif — and tell the user what you swapped. The table is a starting set, not the whole world of fonts.
 
 **Loading:**
 - **Next.js**: `next/font/google` with the `variable` option, applied to `<html>` in the root layout

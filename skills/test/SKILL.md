@@ -135,7 +135,7 @@ AskUserQuestion — "No uncommitted source changes found. What should I test?"
 Using your file tools (not shell utilities), determine:
 - **Package manager** — by which lockfile is present: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, `package-lock.json` → npm.
 - **Language & framework** — read `package.json` and look for `next`/`vite`/`nuxt`/`svelte`/`react`; or `pyproject.toml` (pytest/unittest) → Python; `go.mod` → Go; `Cargo.toml` → Rust.
-- **Already-installed test tools** — in `package.json` look for `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*`.
+- **Already-installed test tools** — in `package.json` look for `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` (common ones; if the project already uses a different runner — `bun test`, `node:test`, `ava`, `deno test`, etc. — detect and use that instead of installing a new one).
 
 **Q1 — Framework for unit/integration** (always asked on first run)
 
