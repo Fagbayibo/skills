@@ -126,6 +126,25 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 
 `/develop` ticks sub-tasks as it builds; `/sync` reconciles the rest from what actually shipped; `/status` reports it all and flags drift (code or ADRs that exist but aren't on the roadmap).
 
+### The ADR model (`docs/adr/`) — single file vs umbrella
+
+Most decisions are **one file**: `docs/adr/NNNN-title.md` (in a monorepo, `docs/adr/<workspace>/`). A **broad decision** — one that splits into several sub-decisions, or carries a bulky audit/inventory — becomes a **directory** instead, so the pieces stay discoverable and each ADR stays focused:
+
+```
+docs/adr/0003-checkout/
+  index.md                       # the umbrella decision + a ## Structure manifest linking every file below; carries the Status
+  0001-payment-provider.md       # a child sub-decision — focused, with its own ## References; no Status line (governed by the umbrella)
+  0002-cart-state.md
+  research/
+    0001-provider-comparison.md  # supporting evidence, prefixed by the child it belongs to
+    _shared-checkout-inventory.md # umbrella-wide evidence
+```
+
+- **Status lives on `index.md`** (it mirrors the feature); child ADRs are spec content and carry no status.
+- **`/develop` reads `index.md` (the map + any cross-child contract), then the child ADR(s) its sub-task touches** — not the whole tree. A child's `research/` is *optional depth*, opened only if the build needs the underlying evidence.
+- **Cross-cutting / stack ADRs** that aren't tied to a buildable feature are **decision-status** — `Accepted` once you ratify them (there's no build phase to gate on), rather than feature-mirrored.
+- Children stay flat by default; a child gets its own subfolder only when its research grows. `/architect` decides single-vs-directory from the decision's breadth.
+
 ---
 
 ## Tiers — right-sizing the process
@@ -259,6 +278,12 @@ Validate any skill against the spec with [`skills-ref`](https://github.com/agent
 
 ```bash
 npx skills-ref validate ./skills/<name>
+```
+
+A repo-level guard, `scripts/check-portability.mjs`, enforces the cross-tool conventions so they don't drift — every skill declares `allowed-tools`, no skill hardcodes a Claude-only model alias or names a subagent tool in prose, and no non-portable shell glue leaks into a `SKILL.md`. Run it (and `skills-ref`) before committing:
+
+```bash
+node scripts/check-portability.mjs
 ```
 
 ---
