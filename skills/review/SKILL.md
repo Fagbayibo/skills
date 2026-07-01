@@ -1,7 +1,7 @@
 ---
 name: review
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
-allowed-tools: Bash, Read, Grep, Glob, Task, AskUserQuestion
+allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
 description: "Use this skill for a rigorous, senior-level code review before merge. Run /review after implementing a feature or fix, before opening a PR, or when the triage playbook lists it. It runs on a DIFFERENT Claude model than wrote the code (spawned automatically, no setup) — a fresh model catches what the author is blind to. Severity-ranked findings on correctness, security, performance, maintainability, and tests, across the branch's changes plus uncommitted work, written to docs/reviews/. It doesn't modify your code."
 ---
 
@@ -81,6 +81,7 @@ If detection was unambiguous **and** the user passed an explicit `with <model>` 
 Rules:
 - The reviewer must **never** be the same family as the author — the one invariant this skill exists to guarantee.
 - Never review with `haiku` — review is high-value reasoning; use a strong model.
+- **If no differing strong model is available** — an org `availableModels`/`enforceAvailableModels` restriction, or a client whose subagents inherit the parent's model (e.g. Antigravity's `invoke_subagent`, which runs on the parent model) — fall back to the strongest *available* model that differs from the author. If none differs, run the review **inline on the author's model** and say so plainly: it's a degraded review that shares the author's blind spots, not the cross-model guarantee. When independence matters, prefer switching your active model (below) over accepting the same-model review.
 - If the user passed `with <model>`: honor it only if it differs from the author. If they named the author's own model, refuse and explain: "That's the model that wrote the code — reviewing with it shares its blind spots. Using `<contrast>` instead."
 
 State the final choice plainly before spawning:

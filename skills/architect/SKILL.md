@@ -53,7 +53,7 @@ Two independent choices — **where** the ADR lives (repo shape) and **what shap
 Written for any Agent Skills client on macOS, Linux, or Windows:
 - **Commands**: `git` is the only required CLI and behaves the same on every OS. Other shell snippets (`mkdir -p`, `date`, `find`, `ls`, `cat`, `wc`) are POSIX **reference**, not literal scripts — use your agent's own cross-platform file tools (read, search/glob, write, create-dir) and your knowledge of today's date instead. Creating `docs/adr/` should use your write tool, not `mkdir`.
 - **Bundled files**: the fallback question files (`questions/*.md`), `agent-prompt.md`, and `adr-template.md` are referenced by paths relative to this skill's folder. The main agent reads them; the **ADR template text is injected into the subagent prompt** (subagents can't resolve skill-relative paths).
-- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice rounds assume an interactive picker — both Claude Code features. On a tool without them: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
+- **No subagent / interactive-question support?** The spawn-a-subagent steps assume a Task/subagent tool, and the multiple-choice rounds assume an interactive picker (use whatever your agent provides — a subagent tool, per-step model selection, an options picker — and fall back only where it doesn't). On a tool without them: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
 
 ## Execution
 

@@ -41,7 +41,7 @@ Status lifecycle — **`/mvp` sets the *initial* status, the pipeline advances i
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. This skill runs inline (no subagent). If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
+Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to look for source files and read/write Markdown. The planning runs inline; a brief sourcing subagent runs afterward (Step 6b, via your agent's subagent tool). If your tool has no interactive-question picker, ask the multiple-choice prompts as plain text with the same options.
 
 ## Execution
 
