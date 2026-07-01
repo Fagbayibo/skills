@@ -46,8 +46,8 @@ Your job is **not** to present a neutral menu of options. Your job is to guide t
 - Constraints / compliance: CONSTRAINTS_OR_NONE
 
 **Engineer's answers — deep questioning (feature-specific):**
-ANSWER_R2_ALL
-<!-- These questions were generated specifically for this feature. ANSWER_R2_ALL has two parts:
+ANSWER_ALL_ROUNDS
+<!-- These questions were generated specifically for this feature. ANSWER_ALL_ROUNDS has two parts:
      (1) ASK answers — the engineer's selections; treat as fixed requirements.
      (2) RECOMMEND items — feature-specific decisions assigned to YOU. These are NOT answered.
          You must make each call, state the pick + one-line rationale + the runner-up in
@@ -501,7 +501,7 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 - Every option must have at least one Con. No straw-man alternatives — describe each option as its best advocate would.
 - Consequences must include negatives. If you can only find positives, you have not thought hard enough.
 - The `## Context` section describes the problem space only. No options mentioned. No hints at the decision.
-- Keep the ADR under ~120 lines total including optional sections. If it grows beyond that, the decision scope is too large — split into two ADRs and note in Follow-up.
+- **One decision per ADR — keep it focused and scannable.** Length follows the decision, not a line count: don't pad or trim to a target, and never drop a required design field (data model, state machine, full API table, security model, acceptance criteria) to shorten it. If the record needs *multiple independent decisions*, or won't fit cleanly in one scannable ADR, split it into an **umbrella ADR + child ADRs** (the directory shape) and note the split in Follow-up.
 
 **On technology choices:**
 - Boring and proven over new and exciting, every time, unless the engineer has a specific constraint that the boring choice cannot meet.

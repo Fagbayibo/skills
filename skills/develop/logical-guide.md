@@ -19,7 +19,8 @@ You are a **senior backend engineer** on this project. You implement the decisio
 
 - Read the governing ADR in full — especially `## Feature design` (data model, API surface, invariants, security model, configuration) and `## Consequences`.
 - Read the nearest `AGENTS.md` to the target area and the files the feature must integrate with (entry points, existing models, the router/service layer).
-- List the integration points and the order you'll build in (data → logic → interface → integration). Surface any ADR gap now, before writing code.
+- List the integration points and the order you'll build in (data → logic → interface → integration → cleanup). Surface any ADR gap now, before writing code.
+- If this task **replaces** existing code (a refactor/migration, not a greenfield addition), note upfront *what* it supersedes — the old functions/files/patterns — so you know exactly what Phase 6 must delete once the replacement is in.
 
 ### Phase 2 — Data layer
 
@@ -50,7 +51,16 @@ You are a **senior backend engineer** on this project. You implement the decisio
 - For inbound webhooks: **verify the signature**, make handlers **idempotent** (an events table so a replayed webhook can't double-apply), and reconcile state webhook-driven with a periodic backstop if the ADR calls for it.
 - Add **structured logging** at the boundaries and **audit logs** for any mutation touching money, access control, or compliance scope.
 
-### Phase 6 — Correctness and safety pass
+### Phase 6 — Remove superseded code (after a refactor or replacement)
+
+Applies whenever this build **replaced** an existing pattern or implementation — a refactor, or a rollout that swaps one approach for another (new query builder for hand-rolled queries, new service for an old one, a renamed/relocated module). The old and new implementations **must not coexist**; leaving the dead code behind is the classic miss ("after refactoring it did not remove unused code"). Removing it is part of this build, not a later chore.
+
+- **Delete the superseded code**: the functions/classes now replaced, branches that became unreachable, files orphaned by the change, and any imports/exports left dangling.
+- **Prove nothing still references it**: search the codebase for every removed symbol (its name, its import path) — no lingering callers, re-exports, or `index` barrels pointing at it. If something still needs it, the migration isn't finished — migrate that caller too rather than keeping the old code alive.
+- **Verify clean with the old code gone**: run the project's typecheck/build/lint (and any dead-code/unused-import lint the project has). It must pass *after* the deletion — an unused-import or unresolved-reference error here is the signal you missed a spot. Don't silence it by re-adding the old code.
+- If the ADR called for a **transitional** period where both must run (a feature-flagged migration, a backfill window), that's the one exception — follow the ADR, and leave a note of exactly what remains to be removed and when, so it isn't forgotten.
+
+### Phase 7 — Correctness and safety pass
 
 Not a final checklist — built into every phase, enforced here:
 
@@ -67,6 +77,7 @@ Not a final checklist — built into every phase, enforced here:
 **Feature**: <name>
 **ADR**: <path — the decision implemented>
 **Built**: <files — data layer, services, endpoints>
+**Removed (superseded)**: <old files/functions deleted after refactor/replacement — verified unreferenced> | none
 **Data model**: <tables/entities created or changed>
 **API surface**: <endpoints/actions added>
 **Integrations**: <provider(s) wired> | none

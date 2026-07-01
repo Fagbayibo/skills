@@ -11,7 +11,8 @@ Closes the loop on a change by syncing the durable knowledge to reality:
 
 1. **Maintains existing AGENTS.md** — root and nested — so commands, conventions, and constraints stay accurate after the change. Surgical, additive edits only; it never rewrites curated prose.
 2. **Creates a nested AGENTS.md for a brand-new area** introduced by the change — because the diff *is* the whole area, so it has enough context to write an accurate one. It adds the one root pointer line too.
-3. **Flags stale ADRs** — decisions the change may have contradicted or outgrown — and recommends running /architect to update or supersede them. It does not edit ADRs.
+3. **Reconciles each linked ADR's Status line** — the ADR's status mirrors its feature's build lifecycle, so sync brings the ADR `**Status**:` line in line with the shipped feature's roadmap status as a safety net: `planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted` (an ADR is not `Accepted` until its feature ships and is verified). It edits **only** the `**Status**:` line — never ADR content — and re-reads the file just before writing. If it can't safely resolve a mismatch (e.g. no linked feature), it **flags** rather than guessing.
+4. **Flags stale ADRs** — decisions the change may have contradicted or outgrown, or that a later ADR supersedes — and recommends running /architect to update or supersede them. It does not edit ADR content.
 
 Runs on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model on other agents) in a subagent. Acts — no upfront questions.
 
@@ -25,8 +26,9 @@ Runs on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light m
 | Create nested `<area>/AGENTS.md` for an area **net-new in this change** | ✅ creates (diff = full area context) + adds root pointer | /sync |
 | Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /audit" | /audit |
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
-| Edit / supersede an ADR | ❌ flags as stale | /architect |
-| Reconcile the roadmap (`docs/mvp/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
+| Reconcile an ADR's `**Status**:` line to its feature's roadmap status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) | ✅ Status line only | /sync |
+| Edit an ADR's **content** / supersede it | ❌ flags as stale | /architect |
+| Reconcile the roadmap — for the **relevant workspace's** roadmap file only (not all of `docs/mvp/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
 | Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /mvp |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
@@ -34,11 +36,11 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Asks vs acts
 
-**Acts.** It scopes the change from git, applies conservative AGENTS.md updates, flags stale ADRs, and reports. It pauses only when there is **nothing to sync** (empty change set). Because it edits curated files, every edit it makes is listed in the report so you can review or revert.
+**Acts.** It scopes the change from git, applies conservative AGENTS.md updates, reconciles each linked ADR's Status line, flags stale ADRs, and reports. It pauses only when there is **nothing to sync** (empty change set). Because it edits curated files, every edit it makes is listed in the report so you can review or revert.
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles the roadmap** under `docs/mvp/` — it's the **universal sub-task reconciler**: it ticks *any* completed sub-task it can verify from repo **evidence**, not only the diff's source changes. `/develop` ticks its own sub-tasks as it builds; `/sync` sweeps the rest — the `/test`, `/harden`, `/audit`/tooling, and `/sync` sub-tasks that those skills don't tick themselves — and advances feature status. It never adds, removes, or reorders features/sub-tasks (that's /mvp). Writes nothing else.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change. Never creates or restructures root (that's /audit). Also **reconciles the roadmap** — scoped to the **relevant workspace's** roadmap file for the shipped change, not every file under `docs/mvp/` — it's the **universal sub-task reconciler**: it ticks *any* completed sub-task it can verify from repo **evidence**, not only the diff's source changes. `/develop` ticks its own sub-tasks as it builds; `/sync` sweeps the rest — the `/test`, `/harden`, `/audit`/tooling, and `/sync` sub-tasks that those skills don't tick themselves — and advances feature status. It never adds, removes, or reorders features/sub-tasks (that's /mvp). It also **reconciles each linked ADR's `**Status**:` line** to that feature's roadmap status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) — the Status line only, never ADR content; if it can't safely resolve a mismatch it flags it. Writes nothing else.
 
 **Artifact base.** The ADRs and roadmap it reads/reconciles live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Use whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -79,7 +81,7 @@ Using your agent's file-search/glob tools:
 - Note whether a root `AGENTS.md` exists.
 - Find every `AGENTS.md` (root + nested), excluding `node_modules/` and `.git/`.
 - Find all ADRs under `docs/adr/` whose names start with a digit, sorted.
-- Find the feature roadmap file(s) under `docs/mvp/` — including per-workspace subdirs in a monorepo (`docs/mvp/<workspace>/`).
+- Find the feature roadmap file for the shipped change — **scope to the relevant workspace's roadmap**, not every file under `docs/mvp/`. In a monorepo, a changed file's workspace (`apps/<x>/…`) selects `docs/mvp/<x>/`; pass only the roadmap file(s) whose workspace/features the diff actually touches. Don't read or pass all of `docs/mvp/`.
 
 The subagent reads these itself. The main model passes the **paths** (plus the changed-file list and diff command). The one inline exception is root AGENTS.md contents — short and useful for the subagent to anchor on.
 
@@ -91,14 +93,14 @@ Read `agent-prompt.md`, fill it, then spawn a subagent with:
 
 - Model: a fast, low-cost model (cheap — this is bounded maintenance, not open-ended reasoning)
 - Description: "Sync: update AGENTS.md + flag stale ADRs"
-- Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write` — `Edit` for maintaining existing docs; `Write` strictly for a **net-new-area** nested AGENTS.md. The "no root creation / no ADR edits / no shallow nested docs for established areas" boundaries are rule-based (in the agent prompt), since the tool grant alone can't express them.
+- Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write` — `Edit` for maintaining existing docs, reconciling the roadmap, and reconciling ADR `**Status**:` lines; `Write` strictly for a **net-new-area** nested AGENTS.md. The "no root creation / no ADR *content* edits (Status line only) / no shallow nested docs for established areas" boundaries are rule-based (in the agent prompt), since the tool grant alone can't express them.
 - Prompt: filled template with:
   1. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, the **name-status** changed-source list + exact `git diff` command
   2. The separate **deleted-paths** list (for orphan cleanup)
   3. Root AGENTS.md contents (inline) + the list of nested AGENTS.md paths
-  4. The full ADR path list
+  4. The full ADR path list (for both Status-line reconciliation and staleness flagging)
   5. The map of changed files → nearest context file
-  6. The roadmap file path(s) under `docs/mvp/` (if any — scan the dir; pass the file(s) whose features the diff touches) — for reconciliation
+  6. The roadmap file path(s) for the **relevant workspace(s)** the diff touches — not all of `docs/mvp/` — for reconciliation and as the source of each linked feature's status for ADR Status-line reconciliation
 
 ### 4. Relay the result
 
@@ -118,11 +120,14 @@ Read `agent-prompt.md`, fill it, then spawn a subagent with:
 **Orphans cleaned** (after deletions):
 - `<path>` — <removed orphaned nested doc / fixed broken pointer>
 
-**Roadmap reconciled** (`docs/mvp/`):
+**Roadmap reconciled** (relevant workspace):
 - `<feature>` — <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no roadmap, or already accurate")
 
+**ADR statuses reconciled** (Status line only):
+- `docs/adr/<file>` — <Status Proposed→In Progress→Accepted to match the feature's roadmap status>
+
 **ADRs flagged stale** (run /architect to update or supersede):
-- `docs/adr/<file>` — <why the change makes it stale>
+- `docs/adr/<file>` — <why the change makes it stale, or status mismatch sync couldn't safely resolve>
 
 **Context gaps** (run /audit — area too established for /sync to document from the diff alone):
 - `<area>` — <pre-existing undocumented area only sliced by this change>

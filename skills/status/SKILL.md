@@ -12,7 +12,7 @@ The "you are here" view. Work spans sessions and teammates, so before picking an
 It reports:
 1. **Git state** — branch, uncommitted/staged work, commits ahead/behind the remote, recent commits.
 2. **Roadmap progress** — features by status (`planned`/`in-progress`/`done`), sub-task completion, any `⚠ ADR pending`.
-3. **Decisions** — ADRs by status (`Proposed`/`Accepted`/`Superseded`).
+3. **Decisions** — ADRs by status (`Proposed`/`In Progress`/`Accepted`/`Superseded`).
 4. **Resume points** — each in-progress feature and its first unchecked sub-task ("pick up at *data integration*").
 5. **Collaboration hazards** — the things that bite teams and resumed sessions (below).
 6. **Recommended next action** — the single most sensible next command.
@@ -55,7 +55,7 @@ If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brown
 
 ### Step 3 — Decisions
 
-List ADRs from `docs/adr/` (or `.workflow/adr/`) with their **Status** line: `Proposed` (awaiting acceptance), `Accepted` (ready to build), `Superseded`. Flag any `Proposed` ADR whose feature is already being built — that's building ahead of an unconfirmed decision.
+List ADRs from `docs/adr/` (or `.workflow/adr/`) with their **Status** line — an ADR mirrors its feature's build lifecycle: `Proposed` (feature not yet built), `In Progress` (feature being built), `Accepted` (feature built and verified — "done and dusted"), `Superseded` (replaced by a later ADR). Roadmap mapping: feature `planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`. See Step 4 for ADR-vs-feature drift.
 
 ### Step 4 — Collaboration & session hazards
 
@@ -63,7 +63,7 @@ Surface anything that makes it unsafe to just dive in:
 - **Behind the remote** (`behind > 0`) → "Pull first — N commits on `origin/$BASE` you don't have; a teammate may have changed what you're about to touch."
 - **Uncommitted work** present → list the areas; "finish or stash before starting something new."
 - **In-progress feature overlap** → for each `in-progress` feature, check whether its `Code area` has commits by **other authors** in recent history (`git log --format='%an' -- <area>` shows names other than yours) → "someone else may be mid-build on *<feature>*; coordinate before continuing it."
-- **Proposed ADR being built** → "*<feature>* is in-progress but ADR <NNNN> is still `Proposed`, not `Accepted`."
+- **ADR ↔ feature status drift** → an ADR's status should track its linked feature's status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`). Flag any real mismatch, e.g.: feature `done` but ADR still `Proposed`/`In Progress` (ADR should be `Accepted`); ADR `Accepted` but the feature isn't `done`; feature `in-progress` but ADR still `Proposed`. Report each with the one-command fix — usually **`/sync`** to reconcile. Be conservative: only flag when the two genuinely disagree.
 - **Detached HEAD / non-feature branch** → note it.
 
 ### Step 4b — Drift (plan vs reality)
@@ -88,8 +88,8 @@ Report these and the one-command fix: **`/mvp`** to enroll unplanned work / re-r
 - In progress:
   - <feature> — <c>/<t> sub-tasks · resume at **<first unchecked>**
 
-**Decisions**: <n> Accepted · <n> Proposed · <n> Superseded
-- ⚠ <NNNN> Proposed but <feature> is already building
+**Decisions**: <n> Accepted · <n> In Progress · <n> Proposed · <n> Superseded
+- ⚠ <NNNN> <ADR status> but <feature> is <feature status> → `/sync` to reconcile
 
 **Drift** (plan ≠ reality):
 - Unplanned code: <area> — shipped, no roadmap feature → run `/mvp` to enroll

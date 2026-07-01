@@ -172,11 +172,13 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 
 ## Status values
 
+The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Proposed`, in-progress→`In Progress`, done→`Accepted`):
+
 | Status | Meaning |
 |---|---|
-| `Proposed` | Written but not yet accepted by the team |
-| `Accepted` | Team has agreed to implement this decision |
-| `Deprecated` | No longer applicable but not replaced |
+| `Proposed` | ADR written, decision agreed, feature NOT yet built. Set by /architect at creation. |
+| `In Progress` | The feature governed by this ADR is being built. Set by /develop when the feature goes in-progress. |
+| `Accepted` | The feature is built and verified (roadmap `done`) — the "done and dusted" state. An ADR is NOT `Accepted` until its feature ships. Set by /develop on completion or reconciled by /sync. |
 | `Superseded by [NNNN](NNNN-title.md)` | Replaced by a newer ADR |
 
 ## Writing rules
@@ -186,4 +188,4 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 - Rationale must reference specific forces from Context, not just repeat pros/cons
 - Consequences must include negatives — an ADR with only positives is not credible
 - Follow-up items are optional but recommended for full-tier decisions
-- Keep the whole ADR under ~120 lines including optional sections — if it grows beyond that, the decision scope is too large; split into two ADRs
+- **One decision per ADR — keep it focused and scannable.** Length follows the decision, not a line count: don't pad, and never cut a required design field (data model, state machine, full API table, security model, acceptance criteria) to make the record shorter. If it needs *multiple independent decisions*, or the design won't fit cleanly in one scannable ADR, split it into an **umbrella ADR + child ADRs** (the directory shape) rather than letting one file sprawl.

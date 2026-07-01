@@ -99,7 +99,7 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 | Artifact | Path | Owned by |
 |---|---|---|
 | **Feature roadmap** | `docs/mvp/` | `mvp` creates · `develop`/`sync` advance status |
-| **ADRs** (decisions) | `docs/adr/` | `architect` |
+| **ADRs** (decisions) | `docs/adr/` | `architect` creates · `develop`/`sync` advance status |
 | **Context files** | `AGENTS.md` (root + nested) + a thin `CLAUDE.md` pointer | `audit` creates · `sync` maintains |
 | **App code** | your source tree | `develop` |
 | **Tests** | your test dirs | `test` |
@@ -122,7 +122,7 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 - [ ] Tests — `/test home page`
 ```
 
-**Feature statuses:** `planned` → `in-progress` → `done` (the pipeline lifecycle), plus `existing` (predated this workflow, enrolled for context) and `dropped` (de-scoped, kept for history). **ADR statuses:** `Proposed` → `Accepted` (on your confirmation) → `Superseded`.
+**Feature statuses:** `planned` → `in-progress` → `done` (the pipeline lifecycle), plus `existing` (predated this workflow, enrolled for context) and `dropped` (de-scoped, kept for history). **ADR statuses** mirror the feature's build lifecycle: `Proposed` (decision made, feature not built) → `In Progress` (feature being built) → `Accepted` (feature built and verified — "done and dusted"), plus `Superseded` (replaced by a later ADR). `/develop` advances the ADR as it builds; `/sync` reconciles it; `/status` flags any ADR-vs-feature mismatch.
 
 `/develop` ticks sub-tasks as it builds; `/sync` reconciles the rest from what actually shipped; `/status` reports it all and flags drift (code or ADRs that exist but aren't on the roadmap).
 
