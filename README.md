@@ -154,6 +154,8 @@ The workflow is first-class on monorepos (pnpm/turbo/nx workspaces, or `apps/*`/
 
 So `/mvp web` → `/architect` (reads `apps/web`'s stack) → `/develop` (builds in `apps/web`) flows cleanly, app by app.
 
+**Context & token efficiency on large repos.** The biggest cost on a big monorepo is *reading* code to understand where to build — so the skills follow Anthropic's context-engineering guidance and **isolate that reading in a read-only exploration subagent** that returns a compact map (~1–2k tokens), keeping the main thread's context clean for the decisions and the edits (`/develop` Step 2.5; `/mvp`'s brownfield scan; `/architect`, `/review`, `/test`, `/harden` already read via their subagents). The operating rules: scope to **one workspace / one roadmap file / one governing ADR**; do **one sub-task per run** and `/clear` between features so context doesn't accumulate; and **match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
+
 ---
 
 ## Working in a team

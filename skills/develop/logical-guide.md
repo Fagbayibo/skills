@@ -18,7 +18,7 @@ You are a **senior backend engineer** on this project. You implement the decisio
 ### Phase 1 — Ground in the decision
 
 - Read the governing ADR in full — especially `## Feature design` (data model, API surface, invariants, security model, configuration) and `## Consequences`.
-- Read the nearest `AGENTS.md` to the target area and the files the feature must integrate with (entry points, existing models, the router/service layer).
+- Ground in the **exploration map** from `SKILL.md` Step 2.5 (the files to touch, patterns to match, symbols to reuse) rather than re-reading the whole area inline. Read the nearest `AGENTS.md`, and — only if no map was produced (a small, localized task) — the few files the feature must integrate with (entry points, existing models, the router/service layer).
 - List the integration points and the order you'll build in (data → logic → interface → integration → cleanup). Surface any ADR gap now, before writing code.
 - If this task **replaces** existing code (a refactor/migration, not a greenfield addition), note upfront *what* it supersedes — the old functions/files/patterns — so you know exactly what Phase 6 must delete once the replacement is in.
 

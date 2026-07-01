@@ -137,13 +137,29 @@ This step is why `/develop auth functionality` doesn't re-ask the stack chosen d
 
 A thin ADR caught here is a 30-second question; caught mid-build it's a wrong guess baked into code.
 
+### Step 2.5 — Explore before building (isolate the reading — the top monorepo win)
+
+Knowing *where* to build — which files to touch, which existing patterns and interfaces to match and reuse — means reading code. On a large or monorepo codebase that reading is the **biggest context cost**: done inline, every file you open stays in the main context for the rest of the session, which is what makes a build slow and token-heavy. Per Anthropic's context-engineering guidance, **isolate the exploration in a read-only subagent** — it reads dozens of files in its own context and returns a compact map (~1–2k tokens); the raw reading never lands in your main thread.
+
+- **Skip it** for a tiny, well-localized change where you already know the single file.
+- **Run it** for anything touching an unfamiliar area, several files, or a large/monorepo repo — exactly where inline reading balloons.
+
+Spawn a **read-only exploration subagent** (use your agent's exploration capability — Claude Code / Cursor `Explore`, Antigravity `research`, Codex `spawn_agent`; else a plain subagent, or do it inline if your agent has none):
+- **a fast, low-cost model** (e.g. `haiku`/`sonnet` on Claude Code) — exploration is search-heavy, not deep reasoning; don't spend a strong model on it.
+- **read-only tools**: `Read`, `Grep`, `Glob` — no `Edit`/`Write`.
+- **brief**: the target workspace, the exact sub-task, and the ADR's key interfaces. Tell it to return **only a compact map** — the files to create/edit (paths), the patterns/conventions to match (`file:line`), the symbols/types/helpers to reuse, and any gotchas — **not** file contents or dumps.
+
+Build from that map. The rule: **offload the token-heavy *reading*; keep the *deciding and writing* on the main thread** (Step 3).
+
+**Rules of thumb (large repos & monorepos):** scope to **one workspace, one roadmap file, one governing ADR** (already the rule above). Do **one sub-task per run** and `/clear` between features so context doesn't accumulate across a long session. **Match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
+
 ### Step 3 — Resume check, then build
 
 **Resume first — never rebuild what's already done.** Use the **same file you located in Step 0** (the one roadmap file with this feature — the workspace's, in a monorepo); don't re-open others. If its status is **`existing`** (already shipped) or **`dropped`** (de-scoped), it isn't active — don't auto-build; tell the engineer it's marked `<status>` and confirm they want to revive/modify it (that's a new task, possibly needing an ADR). Otherwise read its build breakdown and find the first **unchecked** `[ ]` sub-task. Everything `[x]` above it is already built (possibly in an earlier session) — do not redo it. Tell the engineer where you're picking up: "This feature is 4/10 done — resuming at *data integration*." Then set the feature's **Status** to `in-progress`, and **mirror it onto the governing ADR**: if this feature has a governing ADR (the row's `ADR` pointer), advance its `**Status**:` line `Proposed` → `In Progress` — a one-line surgical edit (re-read the line first; if it's not `Proposed` — already `In Progress`, `Accepted`, or `Superseded` — flag it, don't clobber; never touch ADR content). (No roadmap → just build the requested task.)
 
 **Gather any remaining inline answers** (the Step 2 spec-gap answer, the UI asset/template questions, an ambiguous business rule) — these need the engineer, so collect them *before* handing off to a build run.
 
-**Build inline by default — subagents only when they earn it.** Inline (on the main thread) is the default for most builds: it stays interactive (you can ask mid-build), it's simpler, and it avoids the token cost of inlining a guide+ADR into a subagent brief. Escalate to a subagent only for:
+**With the exploration map from Step 2.5 in hand, the build is a *write* step — build inline by default, subagents only when they earn it.** Inline (on the main thread) is the default for most builds: it stays interactive (you can ask mid-build), it's simpler, and it avoids the token cost of inlining a guide+ADR into a subagent brief. Escalate to a subagent only for:
 - **A very large *single* build** (many files / long) that would bloat a long session's main context → isolate it in **one subagent** (you've already gathered the answers, so it won't need to ask).
 - **A big multi-file *rollout* of an already-decided pattern** (e.g. "apply the shared SQL builders to 6 routers", "swap inline inputs across 17 files") → **fan out** (below). This is the case where subagents clearly pay — one giant context holding 17 files is the slow, 10k-token path; small parallel ones are faster and cheaper.
 
@@ -173,7 +189,7 @@ Then build the track(s):
 - In the roadmap — **the one numbered file you located in Step 0** (the feature's file, in its workspace subdir for a monorepo; not the whole `docs/mvp/` tree): tick the build sub-task(s) you **verified** complete (`[ ]` → `[x]`), fill in the feature's `Code area` (and `ADR`) pointers, and set its **Status** to `done` only when every sub-task is checked — otherwise leave it `in-progress`.
 - **Mirror `done` onto the governing ADR.** When (and only when) the feature reaches `done` — every sub-task checked, build verified — advance its governing ADR's `**Status**:` line `In Progress` → `Accepted` (the feature is built and verified — "done and dusted"; don't do this while it's still `in-progress`). One-line surgical edit only: re-read the line first, and if it isn't `In Progress` as expected (e.g. already `Accepted`, or `Superseded`) **flag it rather than clobber** — never edit ADR content.
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
-- Recommend the next step per tier: usually `/test`, then `/sync` to promote any new area conventions into `AGENTS.md`.
+- Recommend the next step per tier: usually `/test`, then `/sync` to promote any new area conventions into `AGENTS.md`. On a large or monorepo repo, also suggest `/clear` before starting the next feature so its context starts clean.
 
 `/develop` builds; it does not run `/test`, `/sync`, or `/architect` for you — it points; you decide.
 
