@@ -143,9 +143,11 @@ Discard: implementation details, TODO comments, anything that changes frequently
 
 **Step 3 — Create root AGENTS.md** using the template below. Keep it global and short (≤60 lines) — area-specific detail belongs in nested docs (next step), not here.
 
-**Step 4 — Create nested AGENTS.md for areas that warrant one**
+**Step 4 — Create nested AGENTS.md**
 
-Identify the major areas/modules of the codebase (e.g. `src/auth`, `src/payments`, `src/api`, `src/jobs`). For **each**, decide by judgment whether it warrants its own context file:
+**Monorepo (`MONOREPO_OR_NO` = yes):** don't judge or deep-scan. Give **every** workspace (`apps/*`, `packages/*`) a **light stub** `AGENTS.md` **at its root** — `## Stack` + `## Commands` read from that workspace's manifest (scoped, e.g. `pnpm -F <name> …`), plus a one-line overview; create the sibling `CLAUDE.md` pointer and a root `## Context files` pointer for each. No code scan — deep conventions come later when someone runs `/audit <workspace>`. If a workspace already has a doc buried below its root (e.g. `packages/ui/src/mdx/`) and no root doc, follow the relocation rule the main agent surfaced (move up, or root-doc + linked nested). Then skip the judgment step below.
+
+**Single repo:** identify the major areas/modules of the codebase (e.g. `src/auth`, `src/payments`, `src/api`, `src/jobs`). For **each**, decide by judgment whether it warrants its own context file:
 - **Warrants nested** — the area has distinct conventions, non-obvious rules, local commands, external integrations, or gotchas a developer must know before touching it.
 - **Does not** — it's a simple module with no surprises, or root already covers it. Skip it (don't create one per folder).
 

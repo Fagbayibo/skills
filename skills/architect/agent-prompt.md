@@ -56,7 +56,11 @@ ANSWER_R2_ALL
 **RECOMMEND items (you decide these):** RECOMMEND_ITEMS_OR_NONE
 
 **ADR number**: ADR_NUMBER
-**ADR file path**: ADR_FILE_PATH
+**ADR path & shape**: ADR_FILE_PATH
+<!-- Single decision → write one file at that path. Umbrella → the path is a directory: write its
+     `index.md` (the umbrella decision, listing + linking its children) plus each named child ADR
+     inside it. ANY inventory/audit/research you produce for this decision goes in that directory's
+     `research/` subfolder — NEVER in docs/mvp/ (the roadmap), and never loose in the code tree. -->
 **Operation**: OPERATION
 
 **Existing ADR (update/supersede only):**

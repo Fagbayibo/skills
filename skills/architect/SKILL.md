@@ -35,7 +35,13 @@ Asks targeted questions before spawning any subagent — but **spends the questi
 
 ## Artifact ownership
 
-`docs/adr/NNNN-title.md` — the **ADR files**, created or updated by this skill only. (The roadmap lives separately in `docs/mvp/` and is owned by `/mvp` — not an ADR.) **One narrow exception:** after the ADR is confirmed, it fills in the matching feature's `ADR` pointer cell in the roadmap file under `docs/mvp/` (a single-cell link update, not a rewrite) so the roadmap and the decision are connected. It touches nothing else in that file — status and sub-tasks stay owned by `/mvp`, `/develop`, and `/sync`.
+**ADR files** in `docs/adr/`, created or updated by this skill only — plus any **research it produces** (inventories, audits) which live **beside the ADR they inform**, never in the roadmap folder. (The roadmap lives separately in `docs/mvp/` and is owned by `/mvp` — not an ADR.)
+
+Two independent choices — **where** the ADR lives (repo shape) and **what shape** it takes (decision size):
+
+- **Location = repo shape.** Single repo → `docs/adr/`. Monorepo → `docs/adr/<workspace>/` for a workspace decision, `docs/adr/_root/` for a repo-wide one (mirrors the roadmap). Numbering is **per location** (scan that dir for the next `NNNN`). Call the resolved location `$ADR_DIR`.
+- **Shape = decision size, and applies the SAME in a single repo or a monorepo.** A simple decision is a single file, `$ADR_DIR/NNNN-title.md`. A **broad "strategy/foundation" decision that splits into multiple related sub-decisions** — regardless of repo type — becomes a **directory**: `$ADR_DIR/NNNN-<umbrella>/index.md` (the umbrella) + child ADRs (`NNNN-<child>.md`) + a `research/` subfolder for supporting inventories. Default to a single file; nest only when there are genuinely multiple children + research. (So a big refactor in a plain single-repo project gets `docs/adr/0001-dedup-strategy/{index.md, 0001-…, research/…}` just the same.)
+- **One narrow exception into the roadmap:** after the ADR is confirmed, it fills in the matching feature's `ADR` pointer cell in `docs/mvp/…` — a single-cell link update, nothing else (status/sub-tasks stay `/mvp`/`/develop`/`/sync`).
 
 **Artifact base.** ADRs live under `docs/` by default. If `docs/` is a *published* docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` instead (`.workflow/adr/`) so workflow files don't ship to the site. **Always follow whichever base — `docs/` or `.workflow/` — already exists** (paths in this skill assume `docs/`).
 
@@ -68,13 +74,16 @@ git fetch --quiet 2>/dev/null
 git rev-parse --verify main >/dev/null 2>&1 && BASE=main || BASE=master
 git rev-list --count HEAD..origin/$BASE 2>/dev/null   # >0 → warn "pull first" before deciding
 
-mkdir -p docs/adr
+# Resolve the ADR location = the roadmap workspace, mirrored into docs/adr/:
+#   single repo → docs/adr/ ; monorepo workspace → docs/adr/<workspace>/ ; repo-wide → docs/adr/_root/
+# (Determine <workspace> the same way as the roadmap — from the topic/path/roadmap row. Call it ADR_DIR.)
+mkdir -p "$ADR_DIR"
 
 # Today's date — inject into ADR
 date +%Y-%m-%d
 
-# List existing ADRs — for numbering and detecting related decisions
-find docs/adr -name "[0-9]*.md" | sort
+# List existing ADRs IN THIS LOCATION — for numbering and detecting related decisions (numbering is per-location)
+find "$ADR_DIR" -name "[0-9]*.md" -o -name "index.md" | sort
 
 # Check if codebase has source files — informs how much reading the subagent should do
 find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" \
@@ -89,10 +98,13 @@ find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.py" 
 #   relevance is decided by AGENTS.md + the feature, not by name-matching this list.
 ```
 
-From the ADR list:
-- **Next number**: highest existing number + 1, zero-padded to 4 digits; `0001` if none exist. **Collision guard (teams):** another session or teammate may add an ADR between now and the write. Immediately before the subagent writes, re-list `docs/adr/`; if the chosen `NNNN` already exists, bump to the next free number. **Never overwrite an existing ADR file** — and after writing, confirm you didn't land on a number a concurrent run also took (if the file you wrote isn't the only one with that number, renumber yours).
-- **Filename title**: from the design topic, generate a kebab-case slug — max 5 words, no articles (a/an/the), lowercase. E.g. "We need a notification system" → `notification-system-approach`. Combine: `docs/adr/NNNN-kebab-title.md`.
+From the ADR list (all paths below are relative to `$ADR_DIR`, the resolved location):
+- **Next number**: highest existing number in `$ADR_DIR` + 1, zero-padded to 4 digits; `0001` if none. (An umbrella directory `NNNN-<x>/` counts as one number.) **Collision guard (teams):** re-list `$ADR_DIR` immediately before the subagent writes; if the chosen `NNNN` already exists, bump to the next free number. **Never overwrite an existing ADR** — after writing, confirm no concurrent run took the same number.
+- **Filename / shape**: kebab-case slug from the topic — max 5 words, no articles, lowercase.
+  - Simple decision → `$ADR_DIR/NNNN-kebab-title.md`.
+  - **Umbrella** (splits into ≥2 related sub-decisions + research) → a directory `$ADR_DIR/NNNN-kebab-title/` with `index.md` (the umbrella decision, listing its children), child ADRs `NNNN-child.md` inside it, and any inventories/audits under `$ADR_DIR/NNNN-kebab-title/research/`. Decide this from the topic's breadth *before* the subagent writes; tell the subagent to use the directory shape.
 - **Related ADRs**: read the first 20 lines of each existing ADR — enough to capture the title, status, and opening paragraph of Context — to check for overlap with the current design topic. Flag any that match.
+- **Child-of-umbrella detection**: if the topic is a **sub-decision of an existing umbrella** (`$ADR_DIR/NNNN-<umbrella>/`) — e.g. a new decision that surfaced while building under it — place the new ADR **inside that directory** as the next child (`NNNN-child.md`) and add it to the umbrella's `index.md` list, rather than creating a new top-level ADR. This is also the path when `/develop` hits a decision mid-build: it routes here, and the child lands under its parent. Tell the engineer where it's going.
 - **Update/supersede detection**: if any existing ADR clearly overlaps the current design topic (same domain, same system, same decision), **before the deep questioning**, present it to the engineer: "I found an existing ADR that may be relevant: `[path]` — [title]. Is this a **new** decision (creates a new ADR) or are you **updating/superseding** the existing one?" Wait for their answer. If update or supersede: set OPERATION accordingly, read the existing ADR in full, and skip the deep questioning for in-place updates.
 
 **Community skills — read them from the project's `AGENTS.md`, not from a hardcoded name table** (skill names and stacks change). `AGENTS.md` is the source of truth for what the project uses: project-wide skills/conventions in **root `AGENTS.md`**, area-specific ones in the relevant **nested `<area>/AGENTS.md`** (maintained by `/audit` and `/sync`). So:
@@ -246,7 +258,7 @@ Inject into the template:
 4. Context-file contents — `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
 5. Existing ADR list (filenames + first line of each)
 6. Related ADR paths (flagged in pre-flight)
-7. Next ADR number and file path
+7. The resolved **ADR location** (`$ADR_DIR`), next number, and **shape** — a single file `$ADR_DIR/NNNN-title.md`, or an umbrella directory `$ADR_DIR/NNNN-title/` (`index.md` + child ADRs + `research/`). If umbrella: tell the subagent the child decisions to write and that **any inventory/audit it produces goes in `…/NNNN-title/research/`** — never in `docs/mvp/`, never loose in the code tree.
 8. Source file count (so subagent knows if there's code to read)
 9. Operation: `create` | `update` | `supersede`
 10. Today's date (from pre-flight `date +%Y-%m-%d`)
@@ -284,7 +296,7 @@ If a required section is missing or a field is blank/placeholder, add this line 
 2. Do not rewrite the ADR from scratch on feedback. Use the **Edit** tool to apply targeted changes to the specific sections the engineer called out.
 3. After any edits, confirm: "ADR updated. Confirm with `yes` or give further feedback."
 4. **On `yes` (acceptance) — ratify the decision.** Flip the ADR's status line from `**Status**: Proposed` to `**Status**: Accepted` (one Edit). This is what makes the decision *agreed* — `/develop` builds from `Accepted` ADRs and warns on `Proposed` ones, so leaving it `Proposed` would block/nag downstream. (Do **not** flip on the documentation path if the engineer wants it left as a record only — but default to `Accepted` on confirmation.)
-5. **Link the roadmap (after acceptance).** If a roadmap under `docs/mvp/` (scan the dir, incl. per-workspace subdirs) has a row for this feature, update that row's `ADR` cell to point at the new file, **relative from the roadmap file to `docs/adr/`** — `[0007](../adr/0007-auth-approach.md)` from `docs/mvp/`, or `[0007](../../adr/0007-auth-approach.md)` from a monorepo `docs/mvp/<workspace>/`. If the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's **no matching row** (an ad-hoc decision outside the roadmap), don't edit the roadmap — but **note it** in your final message: "This ADR isn't tied to a roadmap feature — run `/mvp` to add a row if you're tracking this as a feature." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
+5. **Link the roadmap (after acceptance).** If a roadmap under `docs/mvp/` (scan the dir, incl. per-workspace subdirs) has a row for this feature, update that row's `ADR` cell to point at the new file, **computed as a relative path from the roadmap file to the ADR** (both are scoped the same way, so they're usually siblings): from `docs/mvp/api/…` to `docs/adr/api/0001-x.md` the link is `[0001](../../adr/api/0001-x.md)`; to an umbrella, `[0001](../../adr/api/0001-x/index.md)`; single-repo `docs/mvp/` → `docs/adr/` is `../adr/…`. If the feature's first sub-task is "Decision (ADR)", tick it `[x]`. Edit only that cell/checkbox — never status or other rows. If there's **no matching row** (an ad-hoc decision outside the roadmap), don't edit the roadmap — but **note it** in your final message: "This ADR isn't tied to a roadmap feature — run `/mvp` to add a row if you're tracking this as a feature." (Silent orphan ADRs are exactly the drift `/status` later has to surface.)
 
 /architect is complete when the engineer confirms the ADR (now `Accepted`). It does not invoke other skills.
 

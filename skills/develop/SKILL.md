@@ -21,7 +21,7 @@ Because building is where decisions get silently made, `/develop` **gates on the
 
 ## Artifact ownership
 
-Writes **app code** (and CSS/tokens for UI). Advances the feature's row in the roadmap (`docs/mvp/`) — `planned` → `in-progress` on start, `done` when the build lands — and fills in its `Code area` (and `ADR`) pointers. Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
+Writes **app code** (and CSS/tokens for UI). Its **only** touch on `docs/mvp/` is advancing the feature's row — `planned` → `in-progress` on start, `done` when the build lands — and filling its `Code area` (and `ADR`) pointers. It **never creates files in `docs/mvp/`** (no inventories, analyses, or notes — that folder is roadmaps only; analysis/research is `/architect`'s, under `docs/adr/…/research/`). Never writes ADRs (flags the need and defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); records new area conventions only via `/sync` afterwards.
 
 **Artifact base.** The roadmap and ADRs it reads live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Read from whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
