@@ -30,8 +30,8 @@ Runs on a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light m
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
 | Reconcile an ADR's `**Status**:` line to its feature's roadmap status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) | ✅ Status line only | /sync |
 | Edit an ADR's **content** / supersede it | ❌ flags as stale | /architect |
-| Reconcile the roadmap — for the **relevant workspace's** roadmap file only (not all of `docs/mvp/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
-| Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /mvp |
+| Reconcile the roadmap — for the **relevant workspace's** roadmap file only (not all of `docs/roadmap/`) — tick **any** completed sub-task from repo **evidence** (code, tests, hardening entry, AGENTS.md), advance status | ✅ corrects | /sync |
+| Add / reorder features or sub-tasks in the roadmap | ❌ leaves alone | /roadmap |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
 The dividing line on creation is **context, not policy**: create only when this change shows you the whole area; defer to /audit when the area predates the change and you've seen only a slice. When unsure, **flag instead of creating**.
@@ -42,7 +42,7 @@ The dividing line on creation is **context, not policy**: create only when this 
 
 ## Artifact ownership
 
-Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change (never creates or restructures root — that's /audit). Also **reconciles the roadmap** — scoped to the **relevant workspace's** roadmap file for the shipped change, not every file under `docs/mvp/` — as the **universal sub-task reconciler** (it ticks any sub-task it can verify from repo evidence, sweeping the `/test`/`/harden`/`/audit`/`/sync` sub-tasks other skills don't tick, and advances feature status), and **reconciles each linked ADR's `**Status**:` line** to that feature's roadmap status. It never adds/removes/reorders features or sub-tasks, never edits ADR content, and writes nothing else — see `agent-prompt.md` for the exact evidence, mapping, standalone-ADR, and idempotency rules.
+Maintains root `AGENTS.md` and existing nested `<area>/AGENTS.md`; **creates** nested `<area>/AGENTS.md` only for an area net-new in this change (never creates or restructures root — that's /audit). Also **reconciles the roadmap** — scoped to the **relevant workspace's** roadmap file for the shipped change, not every file under `docs/roadmap/` — as the **universal sub-task reconciler** (it ticks any sub-task it can verify from repo evidence, sweeping the `/test`/`/harden`/`/audit`/`/sync` sub-tasks other skills don't tick, and advances feature status), and **reconciles each linked ADR's `**Status**:` line** to that feature's roadmap status. It never adds/removes/reorders features or sub-tasks, never edits ADR content, and writes nothing else — see `agent-prompt.md` for the exact evidence, mapping, standalone-ADR, and idempotency rules.
 
 **Artifact base.** The ADRs and roadmap it reads/reconciles live under `docs/` by default, or `.workflow/` if `docs/` is a published docs site. **Use whichever base — `docs/` or `.workflow/` — exists in the repo** (paths here assume `docs/`).
 
@@ -83,7 +83,7 @@ Using your agent's file-search/glob tools:
 - Note whether a root `AGENTS.md` exists.
 - Find every `AGENTS.md` (root + nested), excluding `node_modules/` and `.git/`.
 - Find all ADRs under `docs/adr/` whose names start with a digit, sorted.
-- Find the feature roadmap file for the shipped change — **scope to the relevant workspace's roadmap**, not every file under `docs/mvp/`. In a monorepo, a changed file's workspace (`apps/<x>/…`) selects `docs/mvp/<x>/`; pass only the roadmap file(s) whose workspace/features the diff actually touches. Don't read or pass all of `docs/mvp/`.
+- Find the feature roadmap file for the shipped change — **scope to the relevant workspace's roadmap**, not every file under `docs/roadmap/`. In a monorepo, a changed file's workspace (`apps/<x>/…`) selects `docs/roadmap/<x>/`; pass only the roadmap file(s) whose workspace/features the diff actually touches. Don't read or pass all of `docs/roadmap/`.
 
 The subagent reads these itself. The main model passes the **paths** (plus the changed-file list and diff command). The one inline exception is root AGENTS.md contents — short and useful for the subagent to anchor on.
 
@@ -102,7 +102,7 @@ Read `agent-prompt.md`, fill it, then spawn a subagent with:
   3. Root AGENTS.md contents (inline) + the list of nested AGENTS.md paths
   4. The full ADR path list (for both Status-line reconciliation and staleness flagging)
   5. The map of changed files → nearest context file
-  6. The roadmap file path(s) for the **relevant workspace(s)** the diff touches — not all of `docs/mvp/` — for reconciliation and as the source of each linked feature's status for ADR Status-line reconciliation
+  6. The roadmap file path(s) for the **relevant workspace(s)** the diff touches — not all of `docs/roadmap/` — for reconciliation and as the source of each linked feature's status for ADR Status-line reconciliation
 
 ### 4. Relay the result
 

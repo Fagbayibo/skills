@@ -47,11 +47,11 @@ Note: behind > 0 → **you're not up to date**; uncommitted entries → **work i
 
 ### Step 2 — Roadmap
 
-Scan `docs/mvp/` (or `.workflow/mvp/`) for roadmap files — one or more numbered files (`01-mvp.md`, `02-…`), **including per-workspace subdirs in a monorepo** (`docs/mvp/<workspace>/`). Parse all of them. **In a monorepo, group the report by workspace** (each app's roadmap reported under its own heading) so apps don't blur together:
+Scan `docs/roadmap/` (or `.workflow/roadmap/`) for roadmap files — one or more numbered files (`01-roadmap.md`, `02-…`), **including per-workspace subdirs in a monorepo** (`docs/roadmap/<workspace>/`). Parse all of them. **In a monorepo, group the report by workspace** (each app's roadmap reported under its own heading) so apps don't blur together:
 - Count features by **Status** across every roadmap file: `planned` / `in-progress` / `done`, plus `existing` (pre-existing, not pipeline-built) and `dropped` (de-scoped — exclude from active work). For each `in-progress` feature, list its checked/total sub-tasks and the **first unchecked** one (the resume point).
 - Note any feature flagged `⚠ ADR pending` or `Needs ADR? = yes` with an empty `ADR` cell (a decision owed before building).
 
-If there's no roadmap, say so — suggest `/mvp` (greenfield) or `/audit` (brownfield) to establish one. **If a roadmap file is malformed** (no overview table, non-standard status values, broken rows — likely a bad hand-edit), don't silently misreport — flag it: "`<file>` doesn't match the expected roadmap shape; counts may be off — worth a look or a `/mvp` re-run to repair."
+If there's no roadmap, say so — suggest `/roadmap` (greenfield) or `/audit` (brownfield) to establish one. **If a roadmap file is malformed** (no overview table, non-standard status values, broken rows — likely a bad hand-edit), don't silently misreport — flag it: "`<file>` doesn't match the expected roadmap shape; counts may be off — worth a look or a `/roadmap` re-run to repair."
 
 ### Step 3 — Decisions
 
@@ -74,7 +74,7 @@ People go off-plan — they redo UI, add a feature the roadmap doesn't mention, 
 - **Orphan ADRs** → top-level ADR files in `docs/adr/` that **no roadmap feature's `ADR` cell links to**. (Child ADRs *inside* an umbrella directory are covered by the umbrella's link — not orphans.) Decisions made outside the plan.
 - **Stale `done`** (light touch) → a feature marked `done`/`existing` whose code area has substantial recent churn — its "done" may no longer match reality. Only flag if obvious; don't over-reach.
 
-Report these and the one-command fix: **`/mvp`** to enroll unplanned work / re-run to reconcile drift, **`/architect`** (or a `/mvp` row) to link an orphan ADR. Be conservative — only flag a real mismatch, not every file without a row.
+Report these and the one-command fix: **`/roadmap`** to enroll unplanned work / re-run to reconcile drift, **`/architect`** (or a `/roadmap` row) to link an orphan ADR. Be conservative — only flag a real mismatch, not every file without a row.
 
 ### Step 5 — Report
 
@@ -84,7 +84,7 @@ Report these and the one-command fix: **`/mvp`** to enroll unplanned work / re-r
 **Branch**: <name>  ·  <ahead> ahead / <behind> behind `origin/<base>`
 **Working tree**: clean | <N> files changed (<areas>)
 
-**Roadmap** (`<base path>/mvp/`):
+**Roadmap** (`<base path>/roadmap/`):
 - done: <n>  ·  in-progress: <n>  ·  planned: <n>  ·  existing: <n> (pre-workflow)  ·  dropped: <n>
 - In progress:
   - <feature> — <c>/<t> sub-tasks · resume at **<first unchecked>**
@@ -94,8 +94,8 @@ Report these and the one-command fix: **`/mvp`** to enroll unplanned work / re-r
 - ⚠ <NNNN> governs a dropped feature — supersede or remove? → `/architect` (or remove the link)
 
 **Drift** (plan ≠ reality):
-- Unplanned code: <area> — shipped, no roadmap feature → run `/mvp` to enroll
-- Orphan ADR: <NNNN> — not linked to any feature → `/mvp` row or `/architect`
+- Unplanned code: <area> — shipped, no roadmap feature → run `/roadmap` to enroll
+- Orphan ADR: <NNNN> — not linked to any feature → `/roadmap` row or `/architect`
 - (or "none — plan matches reality")
 
 **Heads-up**:

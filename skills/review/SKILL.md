@@ -2,7 +2,7 @@
 name: review
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
-description: "Use this skill for a rigorous, senior-level code review before merge. Run /review after implementing a feature or fix, before opening a PR, or when the triage playbook lists it. It runs on a DIFFERENT Claude model than wrote the code (spawned automatically, no setup) — a fresh model catches what the author is blind to. Severity-ranked findings on correctness, security, performance, maintainability, and tests, across the branch's changes plus uncommitted work, written to docs/reviews/ — a persisted findings doc (for a quick inline diff pass instead, use /code-review). It doesn't modify your code."
+description: "Use this skill for a rigorous, senior-level code review before merge. Run /review after implementing a feature or fix, before opening a PR, or when the tier playbook calls for it. It runs on a DIFFERENT Claude model than wrote the code (spawned automatically, no setup) — a fresh model catches what the author is blind to. Severity-ranked findings on correctness, security, performance, maintainability, and tests, across the branch's changes plus uncommitted work, written to docs/reviews/ — a persisted findings doc (for a quick inline diff pass instead, use /code-review). It doesn't modify your code."
 ---
 
 ## What this skill does
@@ -148,7 +148,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 
 Show **all blockers and majors** in chat; collapse minors/nits to a count with a pointer to the file. If there are zero blockers and zero majors, lead with the verdict and keep it short.
 
-For a **high-stakes change** (verdict was Blocked or Changes requested, or triage marked it high/critical severity), append one line:
+For a **high-stakes change** (verdict was Blocked or Changes requested, or the change is high/critical severity), append one line:
 > "For an independent second opinion from a different provider, switch your model with `/model` (or paste the diff into another assistant) and re-run /review — no API keys needed."
 
 This skill is complete after relaying. It does not fix the findings (the implementer does that) and does not invoke other skills. If the engineer wants the issues fixed, that's a normal follow-up — /review's job is the assessment.

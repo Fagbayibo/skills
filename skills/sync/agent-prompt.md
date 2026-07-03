@@ -44,7 +44,7 @@ ROOT_AGENTS_MD
 
 ADR_PATHS
 
-## Feature roadmap for the relevant workspace(s) the diff touches — NOT all of docs/mvp/ (you may RECONCILE status only — never add/remove/reorder features)
+## Feature roadmap for the relevant workspace(s) the diff touches — NOT all of docs/roadmap/ (you may RECONCILE status only — never add/remove/reorder features)
 
 ROADMAP_PATH_OR_NONE
 
@@ -121,11 +121,11 @@ Be **strict** to avoid false positives — noise here erodes trust. Read an ADR 
 
 ### 6. Reconcile the feature roadmap (only if ROADMAP_PATH_OR_NONE is a path)
 
-**Scope:** reconcile only the roadmap file(s) you were handed — the relevant workspace(s) for this shipped change. Do not go hunting for or reconcile other files under `docs/mvp/`; a change to one workspace does not license editing another workspace's roadmap.
+**Scope:** reconcile only the roadmap file(s) you were handed — the relevant workspace(s) for this shipped change. Do not go hunting for or reconcile other files under `docs/roadmap/`; a change to one workspace does not license editing another workspace's roadmap.
 
 You are the **universal sub-task reconciler.** `/develop` ticks its own sub-tasks as it builds, but `/test`, `/harden`, `/audit`, and `/sync` sub-tasks have no one else to tick them — so for **every feature the diff touched**, re-evaluate **each of its sub-tasks against repo evidence** (not just what this diff added) and tick the ones that are genuinely complete. Use the diff to decide *which features* to re-check; use the **repo state** to decide *which sub-tasks are done*. You have Read/Bash/Grep/Glob — look directly.
 
-**If a roadmap file is malformed** (no overview table / breakdown, non-standard status, broken rows — a bad hand-edit), do **not** edit it: note `roadmap malformed: <file> — needs a human or /mvp re-run` under `ROADMAP_RECONCILED` and skip it. Never act on a misread.
+**If a roadmap file is malformed** (no overview table / breakdown, non-standard status, broken rows — a bad hand-edit), do **not** edit it: note `roadmap malformed: <file> — needs a human or /roadmap re-run` under `ROADMAP_RECONCILED` and skip it. Never act on a misread.
 
 > Note: the source-file *filtering* in Step 1 (dropping `*.test.*`, `docs/**`) governs what you sync **AGENTS.md** from — it does **not** limit reconciliation. Here you may and should inspect test files, `docs/hardening/`, AGENTS.md, and config to judge completion.
 
@@ -139,8 +139,8 @@ Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly pr
 
 Then update the feature's **Status** (`planned` → `in-progress`, or → `done` only when **every** sub-task is checked).
 
-- **Strictly status only.** Never add, remove, rename, or reorder features or sub-tasks — that's /mvp's. Skip `existing` and `dropped` rows entirely (no sub-tasks to advance). Never invent a feature for code that has no row; if shipped code clearly matches no row, note it under `ROADMAP_RECONCILED` as "unmapped: <area> — run /mvp to enroll this off-plan work" (this is drift the roadmap should absorb).
-- **Attribution when a diff spans features (or workspaces).** A single diff may touch several features (team branches, or a change crossing areas). Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). **In a monorepo**, a changed file's **workspace** (`apps/<x>/…`) tells you *which* roadmap to update — `docs/mvp/<x>/`; never tick a feature in the wrong workspace's roadmap. If an area maps to **more than one** feature, do **not** guess — note `ambiguous: <area> → <featureA> / <featureB>` under `ROADMAP_RECONCILED`.
+- **Strictly status only.** Never add, remove, rename, or reorder features or sub-tasks — that's /roadmap's. Skip `existing` and `dropped` rows entirely (no sub-tasks to advance). Never invent a feature for code that has no row; if shipped code clearly matches no row, note it under `ROADMAP_RECONCILED` as "unmapped: <area> — run /roadmap to enroll this off-plan work" (this is drift the roadmap should absorb).
+- **Attribution when a diff spans features (or workspaces).** A single diff may touch several features (team branches, or a change crossing areas). Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). **In a monorepo**, a changed file's **workspace** (`apps/<x>/…`) tells you *which* roadmap to update — `docs/roadmap/<x>/`; never tick a feature in the wrong workspace's roadmap. If an area maps to **more than one** feature, do **not** guess — note `ambiguous: <area> → <featureA> / <featureB>` under `ROADMAP_RECONCILED`.
 - **Idempotent**: a box already `[x]` stays `[x]`; re-running changes nothing.
 - **Conservative**: only tick a sub-task whose completion evidence is clearly present. When unsure, leave it.
 

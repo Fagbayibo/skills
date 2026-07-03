@@ -2,7 +2,7 @@
 name: audit
 compatibility: Built for Claude Code — uses subagents, model selection, and interactive questions. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Use this skill to bootstrap a project's AI context — the AGENTS.md files every later skill reads. Run /audit at the start of a greenfield project (it asks your coding standards and seeds root AGENTS.md), on an existing codebase with no or partial docs (it scans and writes root + nested AGENTS.md, adding only what's missing), or on one named area (e.g. /audit src/auth). Writes tool-agnostic AGENTS.md plus a thin CLAUDE.md pointer; never overwrites curated content. Not for ADRs (/architect), post-change upkeep (/sync), or the roadmap (/mvp)."
+description: "Use this skill to bootstrap a project's AI context — the AGENTS.md files every later skill reads. Run /audit at the start of a greenfield project (it asks your coding standards and seeds root AGENTS.md), on an existing codebase with no or partial docs (it scans and writes root + nested AGENTS.md, adding only what's missing), or on one named area (e.g. /audit src/auth). Writes tool-agnostic AGENTS.md plus a thin CLAUDE.md pointer; never overwrites curated content. Not for ADRs (/architect), post-change upkeep (/sync), or the roadmap (/roadmap)."
 ---
 
 ## What this skill does
@@ -13,7 +13,7 @@ The context-bootstrapper. It gives every later skill (and every AI tool) an accu
 - **Brownfield, undocumented** (code, no `AGENTS.md`): scans the whole project, then **writes the root `AGENTS.md` AND creates nested `<area>/AGENTS.md` files** — using judgment about what is global (→ root) versus area-specific (→ nested).
 - **Brownfield, partially documented** (code + some `AGENTS.md` already): checks the existing root and nested docs **against the whole codebase** and **adds only what's missing** — new global facts, and nested docs for undocumented areas — never clobbering curated content.
 
-Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that). Does not write the feature roadmap (/mvp owns `docs/mvp/`).
+Does not create ADRs (/architect owns those). Does not maintain files after changes (/sync owns that). Does not write the feature roadmap (/roadmap owns `docs/roadmap/`).
 
 ## Context-file convention (AGENTS.md is canonical)
 
@@ -104,7 +104,7 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 | `ROOT_MISSING`, has code (source ≥ 10 **or** a manifest), **≤ 1 commit** | **Phase 0 (ask)** — looks scaffolded; can't tell new from existing |
 
 Why this order (both learned from dry-running it):
-- **Doc commits inflate history.** On greenfield, `/mvp` and `/architect` commit a roadmap and an ADR *before* any code — so "≥2 commits → established" would misroute a code-less project to Phase 2 and skip the standards questions. Gating greenfield on **no source AND no manifest** ignores doc commits.
+- **Doc commits inflate history.** On greenfield, `/roadmap` and `/architect` commit a roadmap and an ADR *before* any code — so "≥2 commits → established" would misroute a code-less project to Phase 2 and skip the standards questions. Gating greenfield on **no source AND no manifest** ignores doc commits.
 - **File count alone misreads a scaffold.** A `create-next-app` scaffold has 10+ files but **one** commit — git history is what separates it from a built codebase, and history works for languages the `find` doesn't recognize. A shallow clone / squash-merge repo showing ≤1 commit falls to Phase 0, where one question resolves it safely.
 
 **Monorepo (`MONOREPO=yes`) — root + a light stub per workspace, deepen on demand.** Each workspace (`apps/*`, `packages/*`) is a first-class area, and its **primary doc lives at the workspace root** (`packages/api/AGENTS.md`), never buried deeper.

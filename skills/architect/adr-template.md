@@ -17,6 +17,24 @@ File path: `docs/adr/NNNN-kebab-case-title.md`
 team capabilities, cost, performance requirements, compliance? What is the consequence of not
 deciding? 2–4 paragraphs. Do not mention options here — only the problem space.>
 
+## Requirements
+
+<!-- BUILD SPEC (the WHAT — /develop builds to this; /verify checks against it) -->
+<!-- The contract. Seed the user stories + acceptance criteria from the roadmap feature's intent
+     and its acceptance-criteria seeds when a roadmap row exists, then refine with the engineer.
+     Acceptance criteria are the contract /develop builds to and /verify checks. -->
+
+**User stories**:
+- As a <role>, I want <capability> so that <outcome>.
+
+**Acceptance criteria** (the contract — each criterion is IDed and independently checkable):
+- **AC-1**: <observable, testable outcome that must hold for the feature to be correct>
+- **AC-2**: <the key edge case or failure that must be handled — e.g. "retry after timeout returns the same result (idempotent)">
+- **AC-N**: <…>
+
+<!-- Every task in ## Build plan references the AC(s) it satisfies, and every scenario in
+     Critical test scenarios maps to an AC. No AC without a build task; no build task without an AC. -->
+
 ## Options considered
 
 <!-- DECISION RECORD (the WHY — human context; /develop skips this) -->
@@ -189,7 +207,7 @@ The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Prop
 | `Superseded by [NNNN](NNNN-title.md)` | Replaced by a newer ADR |
 
 **Which status behavior applies depends on whether a buildable roadmap feature links this ADR:**
-- **Feature-linked ADR** (a `docs/mvp/` row's `ADR` cell points to it) → **feature-mirrored**: `Proposed` → `In Progress` → `Accepted`, tracking the feature's build lifecycle (table above). Confirmation ratifies content but does not set `Accepted`; /develop advances it.
+- **Feature-linked ADR** (a `docs/roadmap/` row's `ADR` cell points to it) → **feature-mirrored**: `Proposed` → `In Progress` → `Accepted`, tracking the feature's build lifecycle (table above). Confirmation ratifies content but does not set `Accepted`; /develop advances it.
 - **Standalone decision ADR** (a foundational/stack or cross-cutting standard with **no linked buildable feature**) → **decision-status**: `Proposed` when written, then **`Accepted` once the engineer ratifies it** (on confirmation). There's no build phase to gate on, so it is not feature-mirrored.
 - **ADR documenting already-shipped work** (the "already built" path, or a feature already `existing`) → **born `Accepted`** — it describes reality that already exists.
 

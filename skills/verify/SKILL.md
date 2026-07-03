@@ -52,7 +52,7 @@ Only in refactor mode. Because it drives the app twice and holds two output sets
 
 Pick the base branch `BASE`: `git rev-parse --verify main` — if it succeeds use `main`, otherwise `master`. Then list changed files with `git diff --name-status "$BASE"...HEAD` and `git diff --name-status` (uncommitted too).
 
-From the changed files, write the **2–5 concrete things a human could watch** to know the change works — e.g. "the /pricing page renders all three tiers and the CTA opens checkout", "POST /invites returns 201 and emails the invitee", "the export CLI writes a non-empty CSV". If a feature roadmap exists (in `docs/mvp/`), use the relevant feature's acceptance criteria / sub-tasks to anchor these. Keep them observable, not internal.
+From the changed files, write the **2–5 concrete things a human could watch** to know the change works — e.g. "the /pricing page renders all three tiers and the CTA opens checkout", "POST /invites returns 201 and emails the invitee", "the export CLI writes a non-empty CSV". If a feature roadmap exists (in `docs/roadmap/`), use the relevant feature's acceptance criteria / sub-tasks to anchor these. Keep them observable, not internal.
 
 ### Step 2 — Determine how to run the app
 

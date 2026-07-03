@@ -64,7 +64,7 @@ Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonic
 
 Read two bundled files from this skill's folder (relative paths — you, the main agent, can resolve them): `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Fill the template **and inline the full `harden-guide.md` text into it** — the subagent can't resolve skill paths, so it must receive the rubric as prompt text. Then spawn a subagent with:
 
-- Model: a strong model (e.g. `sonnet`, or `opus` for critical work, on Claude Code) — use the stronger option only if triage marked the change `critical` (deeper reasoning for high blast radius)
+- Model: a strong model (e.g. `sonnet`, or `opus` for critical work, on Claude Code) — use the stronger option only for a `critical`, high-blast-radius change (deeper reasoning)
 - Description: "Harden: <N> changed files"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write` — **no `Edit`** by default (it produces a checklist, not edits). If the engineer later approves a specific fix, re-spawn with `Edit` for that one item.
 - Prompt: filled template with:

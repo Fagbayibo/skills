@@ -64,7 +64,7 @@ ANSWER_ALL_ROUNDS
      decision it supports — so the directory is fully mapped from one place. Give each child ADR a
      `## References` section linking ITS OWN research. ANY inventory/audit/research goes in the
      directory's `research/` subfolder, named by its owner: `research/NNNN-<topic>.md` (the child's
-     number) or `research/_shared-<topic>.md` for umbrella-wide evidence — NEVER in docs/mvp/ (the
+     number) or `research/_shared-<topic>.md` for umbrella-wide evidence — NEVER in docs/roadmap/ (the
      roadmap), and never loose in the code tree. Children are flat files by default; give a child its
      own subfolder (`NNNN-child/{index.md, research/}`) only if it has multiple research/asset files.
      Keep each child ADR self-sufficient to build from — research/ is the optional evidence trail,

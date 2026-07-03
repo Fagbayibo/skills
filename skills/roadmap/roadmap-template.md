@@ -1,4 +1,4 @@
-Roadmap structure `/mvp` writes to — the templates/examples referenced from `SKILL.md` (sub-task format, the full roadmap Markdown, and the completion report block). These are reference material read while writing the roadmap; all rules and guidance live in `SKILL.md`.
+Roadmap structure `/roadmap` writes to — the templates/examples referenced from `SKILL.md` (sub-task format, the full roadmap Markdown, and the completion report block). These are reference material read while writing the roadmap; all rules and guidance live in `SKILL.md`.
 
 ## Standard sub-task table
 
@@ -28,7 +28,7 @@ Write the chosen file with two parts — an overview table and the detailed brea
 ```markdown
 # Feature Roadmap
 
-_Seeded by /mvp · status advanced by /develop and /sync. Roadmap files live in `docs/mvp/` (ADRs are in `docs/adr/`)._
+_Seeded by /roadmap · status advanced by /develop and /sync. Roadmap files live in `docs/roadmap/` (ADRs are in `docs/adr/`)._
 
 ## Overview
 
@@ -88,7 +88,7 @@ _Deferred: advanced search, analytics dashboard_
 ### … (every feature gets its own block with filled-in prompts)
 
 ## Legend
-- **Status**: `planned` → `in-progress` → `done` (pipeline: /mvp seeds → /develop builds → /sync reconciles). Plus **`existing`** — a pre-existing feature enrolled by /mvp for context (built before this workflow; no breakdown; `done` is reserved for pipeline-verified work). Plus **`dropped`** — a de-scoped feature kept for history (set by /mvp on re-planning; excluded from active work; never deleted).
+- **Status**: `planned` → `in-progress` → `done` (pipeline: /roadmap seeds → /develop builds → /sync reconciles). Plus **`existing`** — a pre-existing feature enrolled by /roadmap for context (built before this workflow; no breakdown; `done` is reserved for pipeline-verified work). Plus **`dropped`** — a de-scoped feature kept for history (set by /roadmap on re-planning; excluded from active work; never deleted).
 - **Sub-task checkbox**: `todo` `[ ]` → `done` `[x]` — `/develop` ticks its own sub-tasks as it builds; **`/sync` sweeps the rest** (`/test`, `/harden`, tooling, `/sync`) from repo evidence
 - **Needs ADR?**: `yes` → run `/architect` before building · `no` → `/develop` directly
 - **Priority**: P0 (MVP-critical) · P1 (MVP) · P2 (deferred)
@@ -97,10 +97,10 @@ _Deferred: advanced search, analytics dashboard_
 ## Completion report block
 
 ```
-## /mvp complete
+## /roadmap complete
 
 **Product**: <one line>
-**Roadmap file**: <docs/mvp/NN-name.md> — <created new | merged into latest | new slice (next number) because <reason>>
+**Roadmap file**: <docs/roadmap/NN-name.md> — <created new | merged into latest | new slice (next number) because <reason>>
 **Existing plans read** (re-run): <N files, M features already on the roadmap — or "none (first plan)">
 **Existing features enrolled** (brownfield): <count as `existing` + count as `in-progress` (partial) — or "n/a (greenfield)">
 **Drift enrolled** (off-plan work found in the code/ADRs): <count — or "none">

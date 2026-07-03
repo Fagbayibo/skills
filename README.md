@@ -5,10 +5,10 @@ A set of [Agent Skills](https://agentskills.io) that encode a complete, tiered, 
 The core idea: **one skill per phase, one artifact per skill.** Each skill does a single job well, writes its results to a durable file (a roadmap, an ADR, a context file), and hands off to the next. Because the state lives in files — not in a chat session — work survives across sessions, picks up where it left off, and works for a whole team.
 
 ```
-idea ─▶ /mvp ─▶ /triage ─▶ /audit ─▶ /architect ─▶ /develop ─▶ /verify ─▶ /test ─▶ /review ─▶ /harden ─▶ /document ─▶ /sync
-        scope    plan       map        decide        build       see it      lock     review     stress     write up    keep current
-                                                                   work        in
-        └────────────────────────── /status (orient anytime) ───────────────────────────┘   /debug (root-cause a bug, anytime)
+idea ─▶ /roadmap ─▶ /audit ─▶ /architect ─▶ /develop ─▶ /verify ─▶ /test ─▶ /review ─▶ /harden ─▶ /document ─▶ /sync
+        scope       map        decide        build       see it     lock     review    stress     write up    keep current
+                                                          work       in
+        └──────────────────── /status (orient anytime) ──────────────────────┘   /debug (root-cause a bug, anytime)
 ```
 
 ---
@@ -26,21 +26,22 @@ Then, depending on where you're starting:
 
 **A brand-new product**
 ```
-/mvp a B2B SaaS for managing freelance contracts
+/roadmap a B2B SaaS for managing freelance contracts
 ```
 → asks about scope, monetization, SEO, etc., and writes a prioritized, buildable **roadmap** with paste-ready prompts for every step.
 
 **An existing codebase (first time)**
 ```
 /audit          → reads the repo, writes AGENTS.md context files
-/mvp <next slice>  → plans what's next on top of what's already there
+/roadmap <next slice>  → plans what's next on top of what's already there
 ```
 
 **Any single change**
+
+Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below, then start with the first skill in that tier's playbook. A **fix** (something broken) goes straight to `/debug`:
 ```
-/triage fix the double-charge bug on checkout
+/debug the double-charge bug on checkout
 ```
-→ sizes the work and points you at the right skill (here, `/debug`).
 
 `/status` at any time tells you where things stand and what's safe to pick up.
 
@@ -50,8 +51,7 @@ Then, depending on where you're starting:
 
 | Skill | Phase | What it does |
 |---|---|---|
-| [`mvp`](skills/mvp/) | **Scope** | Turns an idea into a prioritized, granular feature roadmap in `docs/mvp/` — each feature broken into ordered build sub-tasks with **ready-to-paste prompts**. |
-| [`triage`](skills/triage/) | **Plan** | Sizes a change (risk tier + severity) and picks the playbook — including routing bugs to `/debug` rather than the build path. |
+| [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a prioritized, granular feature roadmap in `docs/roadmap/` — each feature broken into ordered build sub-tasks with **ready-to-paste prompts**. |
 | [`audit`](skills/audit/) | **Map** | Writes the `AGENTS.md` context files every other skill reads — asks your standards on greenfield, scans the code on brownfield, per-area (and per-workspace) nesting. |
 | [`architect`](skills/architect/) | **Decide** | Staff-engineer system design: grills you with **feature-specific** questions, recommends choices aligned to your stack, and writes a complete build-spec **ADR** to `docs/adr/`. |
 | [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
@@ -68,16 +68,16 @@ Then, depending on where you're starting:
 
 ## How the workflow flows
 
-You rarely run all thirteen. `/triage` (or the roadmap) tells you which subset a given piece of work needs.
+You rarely run all twelve. The [Tiers table](#tiers--right-sizing-the-process) (or the roadmap) tells you which subset a given piece of work needs.
 
 ### Greenfield — a new product
-1. **`/mvp`** decomposes the idea into a roadmap, foundations first: coding standards → stack → design system → features.
+1. **`/roadmap`** decomposes the idea into a roadmap, foundations first: coding standards → stack → design system → features.
 2. Walk the roadmap. For each foundation/feature it tells you the exact commands to run (e.g. `/audit` to capture standards, `/architect` to choose the stack).
 3. Then the per-feature loop (below), UI-first: build every page against placeholder data so the app is clickable early, then wire in auth, the database, and real data one page at a time.
 
 ### Brownfield — an existing codebase
 1. **`/audit`** reads the repo and writes the `AGENTS.md` context files (root + per-area), so every later skill understands your project.
-2. **`/mvp`** plans the next slice *on top of what exists* — it enrolls already-built features (as `existing`) so the roadmap is a complete picture, and plans only the new work.
+2. **`/roadmap`** plans the next slice *on top of what exists* — it enrolls already-built features (as `existing`) so the roadmap is a complete picture, and plans only the new work.
 3. Per-feature loop.
 
 ### The per-feature loop (the heart of it)
@@ -98,7 +98,7 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 
 | Artifact | Path | Owned by |
 |---|---|---|
-| **Feature roadmap** | `docs/mvp/` | `mvp` creates · `develop`/`sync` advance status |
+| **Feature roadmap** | `docs/roadmap/` | `roadmap` creates · `develop`/`sync` advance status |
 | **ADRs** (decisions) | `docs/adr/` | `architect` creates · `develop`/`sync` advance status |
 | **Context files** | `AGENTS.md` (root + nested) + a thin `CLAUDE.md` pointer | `audit` creates · `sync` maintains |
 | **App code** | your source tree | `develop` |
@@ -109,9 +109,9 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 
 > If `docs/` is a *published* docs site (Docusaurus, VitePress, MkDocs, Starlight, Nextra), the workflow artifacts move to `.workflow/` automatically so they don't ship to your site.
 
-### The roadmap model (`docs/mvp/`)
+### The roadmap model (`docs/roadmap/`)
 
-`/mvp` writes a roadmap with an **overview table** and a **per-feature build breakdown**. Every sub-task carries the exact command to run:
+`/roadmap` writes a roadmap with an **overview table** and a **per-feature build breakdown**. Every sub-task carries the exact command to run:
 
 ```markdown
 ### 4. Home page  ·  Needs ADR: yes  ·  Status: planned
@@ -149,16 +149,24 @@ docs/adr/0003-checkout/
 
 ## Tiers — right-sizing the process
 
-The amount of process scales with risk. `/triage` picks the tier and the subset of skills to run, so a typo doesn't get the full treatment and a payments change doesn't get skipped.
+The amount of process scales with risk. **Right-size each change against the table below, then run the matching playbook** — so a typo doesn't get the full treatment and a payments change doesn't get skipped. When in doubt between two tiers, pick the higher one.
 
-| Tier | When | Playbook |
+| Tier | Triggers (**all** for just-do-it/lean · **any** for medium/full) | Playbook |
 |---|---|---|
-| **just-do-it** | Trivial, reversible, one file | act directly |
-| **lean** | Small, self-contained | `/develop → /verify → /test → /document` |
-| **medium** | Cross-cutting, new dependency, shared state | `/audit → /architect → /develop → /verify → /test → /review → /document` |
-| **full** | Auth, payments, migrations, high blast radius | adds `/harden` and `/sync` |
+| **just-do-it** | One-liner, typo, config value, or copy update · fully reversible with one revert · no production risk · one file, no shared systems | act directly |
+| **lean** | Well-understood, self-contained · single area · low blast radius, easy revert · doesn't touch auth / payments / migrations / shared infra | `/develop → /verify → /test → /document` |
+| **medium** | Cross-cutting (multiple areas) · new external dependency or integration · touches shared state, APIs, or data models · moderate blast radius | `/audit → /architect → /develop → /verify → /test → /review → /document` |
+| **full** | Production auth, payments, data migration, or compliance · large refactor or architectural change · breaking API or infra change · high blast radius · security-sensitive | `/audit → /architect → /develop → /verify → /test → /harden → /review → /document → /sync` |
 
-A **fix** (something broken) takes the fix path — `/debug → /test → /sync` — not the build playbook.
+`/architect` runs **only when a load-bearing decision is owed** (a new provider, data model, or cross-cutting pattern); for a medium/full change that reuses already-decided patterns, `/develop`'s ADR gate confirms none is needed and skips straight to building. `/debug` and `/status` are **on-demand**, not playbook steps — `/debug` whenever `/verify` or `/test` surfaces a failure, `/status` to orient before starting.
+
+**Build vs fix.** Decide what *kind* of task this is first. A **build** (feature, change, addition) takes the tiered playbooks above. A **fix** (something broken, failing, throwing, or behaving wrong) is a defect and takes the fix path — `/debug` (root-cause) → `/test` (regression) → `/sync`, adding `/verify` if it touches a user-facing flow. The tiers still set a fix's severity (a payments bug is `full`), but the skill path is the fix path, not build.
+
+**Starting a whole product or a fresh batch of features** isn't one change — run `/roadmap` first to produce the feature roadmap (in `docs/roadmap/`), then right-size each feature off that list one at a time.
+
+**Greenfield vs brownfield order.** The first two steps invert depending on whether code exists yet:
+- **Brownfield** (existing codebase): `/audit → /architect → …` — understand what's there *before* deciding the change.
+- **Greenfield** (new project): `/roadmap → /architect → /audit → /develop → …` — decide the foundational stack **first** (`/architect`'s ARCHITECTURE ADR), *then* `/audit` seeds root `AGENTS.md` from that decision (auditing before the stack is chosen would seed an empty one).
 
 ---
 
@@ -167,13 +175,13 @@ A **fix** (something broken) takes the fix path — `/debug → /test → /sync`
 The workflow is first-class on monorepos (pnpm/turbo/nx workspaces, or `apps/*`/`packages/*`). The principle: **everything scopes to the target workspace, which has its own stack, conventions, commands, and roadmap.**
 
 - **`/audit`** gives each workspace its own nested `AGENTS.md` (its stack + scoped commands), seeded even on a fresh scaffold; the root `AGENTS.md` holds only monorepo-wide concerns.
-- **`/mvp`** writes a roadmap *per workspace* (`docs/mvp/web/`, `docs/mvp/api/`), with shared foundations and cross-app features in `docs/mvp/_root/`. `/mvp web <idea>` scopes to one app.
+- **`/roadmap`** writes a roadmap *per workspace* (`docs/roadmap/web/`, `docs/roadmap/api/`), with shared foundations and cross-app features in `docs/roadmap/_root/`. `/roadmap web <idea>` scopes to one app.
 - **`/architect`** reads *that workspace's* stack (apps often differ — Next.js web, Go api, RN mobile) and won't assume one.
 - **`/develop`** builds in the right workspace using its commands (`pnpm --filter web …`); **`/verify`** runs the specific app; **`/test`** resolves per package root; **`/sync`** reconciles the right workspace's roadmap; **`/status`** reports per workspace.
 
-So `/mvp web` → `/architect` (reads `apps/web`'s stack) → `/develop` (builds in `apps/web`) flows cleanly, app by app.
+So `/roadmap web` → `/architect` (reads `apps/web`'s stack) → `/develop` (builds in `apps/web`) flows cleanly, app by app.
 
-**Context & token efficiency on large repos.** The biggest cost on a big monorepo is *reading* code to understand where to build — so the skills follow Anthropic's context-engineering guidance and **isolate that reading in a read-only exploration subagent** that returns a compact map (~1–2k tokens), keeping the main thread's context clean for the decisions and the edits (`/develop` Step 2.5; `/mvp`'s brownfield scan; `/architect`, `/review`, `/test`, `/harden` already read via their subagents). The operating rules: scope to **one workspace / one roadmap file / one governing ADR**; do **one sub-task per run** and `/clear` between features so context doesn't accumulate; and **match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
+**Context & token efficiency on large repos.** The biggest cost on a big monorepo is *reading* code to understand where to build — so the skills follow Anthropic's context-engineering guidance and **isolate that reading in a read-only exploration subagent** that returns a compact map (~1–2k tokens), keeping the main thread's context clean for the decisions and the edits (`/develop` Step 2.5; `/roadmap`'s brownfield scan; `/architect`, `/review`, `/test`, `/harden` already read via their subagents). The operating rules: scope to **one workspace / one roadmap file / one governing ADR**; do **one sub-task per run** and `/clear` between features so context doesn't accumulate; and **match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
 
 ---
 
