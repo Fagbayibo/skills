@@ -28,7 +28,7 @@ Then, depending on where you're starting:
 ```
 /roadmap a B2B SaaS for managing freelance contracts
 ```
-→ asks about scope, monetization, SEO, etc., and writes a prioritized, buildable **roadmap** with paste-ready prompts for every step.
+→ asks about scope, monetization, SEO, phasing, etc., and writes a **coarse, living roadmap** — features ordered and weighted, each with an intent and acceptance-criteria seeds.
 
 **An existing codebase (first time)**
 ```
@@ -51,11 +51,11 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 
 | Skill | Phase | What it does |
 |---|---|---|
-| [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a prioritized, granular feature roadmap in `docs/roadmap/` — each feature broken into ordered build sub-tasks with **ready-to-paste prompts**. |
+| [`roadmap`](skills/roadmap/) | **Scope** | Turns an idea into a **coarse, living** feature roadmap in `docs/roadmap/` — each feature with an intent, acceptance-criteria seeds, phasing, and process weight. Build tasks are derived from each feature's ADR, not guessed here. Includes `replan` and `add`. |
 | [`audit`](skills/audit/) | **Map** | Writes the `AGENTS.md` context files every other skill reads — asks your standards on greenfield, scans the code on brownfield, per-area (and per-workspace) nesting. |
-| [`architect`](skills/architect/) | **Decide** | Staff-engineer system design: grills you with **feature-specific** questions, recommends choices aligned to your stack, and writes a complete build-spec **ADR** to `docs/adr/`. |
-| [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
-| [`verify`](skills/verify/) | **Verify** | Runs the *real app* and confirms the change works end-to-end — not just that unit tests are green. |
+| [`architect`](skills/architect/) | **Decide** | Staff-engineer system design as a **staged, gated** conversation (requirements → data model → stack → API → security → edge cases), writing a complete build-spec **ADR** — `## Requirements` (acceptance criteria), Design, `## Build plan` — to `docs/adr/`. |
+| [`develop`](skills/develop/) | **Build** | Builds a feature — UI *and* logic — from its ADR as a **vertical slice**, runs migrations, and emits verify steps. **Gates on the decision first**: if building would mean inventing something undecided, it routes you to `/architect`. |
+| [`verify`](skills/verify/) | **Verify** | Runs the *real app* end-to-end — plus a **spec-conformance** pass: every acceptance criterion met and every specced surface built (catches missed pages / un-applied migrations), not just green tests. |
 | [`test`](skills/test/) | **Verify** | A senior test suite for your uncommitted change; detects/saves your framework. |
 | [`review`](skills/review/) | **Verify** | Rigorous code review on a **different model** than wrote the code, so a fresh set of eyes catches what the author missed. |
 | [`harden`](skills/harden/) | **Verify** | Systems-level adversarial pass for concurrency, scale, and security failure modes (for `full`-tier work). |
@@ -71,24 +71,36 @@ Right-size it against the [Tiers table](#tiers--right-sizing-the-process) below,
 You rarely run all twelve. The [Tiers table](#tiers--right-sizing-the-process) (or the roadmap) tells you which subset a given piece of work needs.
 
 ### Greenfield — a new product
-1. **`/roadmap`** decomposes the idea into a roadmap, foundations first: coding standards → stack → design system → features.
-2. Walk the roadmap. For each foundation/feature it tells you the exact commands to run (e.g. `/audit` to capture standards, `/architect` to choose the stack).
-3. Then the per-feature loop (below), UI-first: build every page against placeholder data so the app is clickable early, then wire in auth, the database, and real data one page at a time.
+1. **`/roadmap`** decomposes the idea into a **coarse, living** roadmap, **foundations first**: coding standards → stack → **data model** → design system → a **walking-skeleton** slice, *then* the feature slices.
+2. Walk the roadmap in order. For each foundation/feature it names the exact command (e.g. `/audit` to capture standards, `/architect` to choose the stack and design the data model).
+3. Then the per-feature loop (below), building each feature as a **vertical slice** (data → logic → API → UI, end-to-end) so every slice ships something real. Run `/roadmap replan` after each slice lands to reconcile and queue what's next.
 
 ### Brownfield — an existing codebase
 1. **`/audit`** reads the repo and writes the `AGENTS.md` context files (root + per-area), so every later skill understands your project.
 2. **`/roadmap`** plans the next slice *on top of what exists* — it enrolls already-built features (as `existing`) so the roadmap is a complete picture, and plans only the new work.
-3. Per-feature loop.
+3. Per-feature loop, then `/roadmap replan` to keep the plan matching what actually shipped.
 
 ### The per-feature loop (the heart of it)
+
+The loop is **spec-driven**: `/roadmap` fixes the *what*, `/architect` designs the *how* as an acceptance-criteria contract, and every later step traces back to that contract.
+
 ```
-/architect   →  /develop   →  /verify  →  /test  →  /harden*  →  /review  →  /document  →  /sync
-(if a decision    build from     see it      lock      stress       fresh-       write it       update
- is owed → ADR)   the ADR        work         in        (risky)*     model        up             context + roadmap
+/roadmap → /architect → /develop → /verify → /test → /harden* → /review → /document → /sync → replan
+ what       how (staged/  build the   spec-      lock    stress    fresh-    write     sync     queue
+ (seed)     gated ADR)    slice       conformance         (full)*   model     up        context  next
 ```
-`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The ADR it produces *is* the build spec. `*`harden only on `full`-tier work (payments, auth, migrations).
+
+- **`/roadmap`** seeds the *what* — a feature's intent plus acceptance-criteria **seeds** (the definition-of-done).
+- **`/architect`** designs the *how* as a **staged, gated** conversation — requirements → **data model (shown & confirmed)** → stack/tool drill-down → API surface → security → edge cases — writing an **ADR** whose spine is `## Requirements` (IDed acceptance criteria `AC-1…`, *the contract*), a Design section, and a `## Build plan` (tasks derived from those criteria).
+- **`/develop`** builds the **vertical slice** (data → logic → API → UI, end-to-end), runs migrations, and emits **verify steps** tied back to each `AC-N`.
+- **`/verify`** runs the **spec-conformance** pass — every acceptance criterion met and every specced surface (page, route, table, migration) actually built. This is what catches a missed page or an un-applied migration that green tests never reveal.
+- **`/test`** locks in the durable checks · **`/harden`** stress-tests `full`-weight work · **`/review`** re-reads on a fresh model · **`/document`** writes it up · **`/sync`** reconciles context + roadmap · then **replan** queues the next slice.
+
+`/develop` **gates** on the ADR: if the feature needs a design system, a provider, a data model, or a behavior you haven't decided, it stops and sends you to `/architect` first. The **vertical slice is the default** for a proper build; UI-first (every page against placeholder data) is a *prototype* option, chosen at roadmap time. `*`harden only on `full`-weight work (payments, auth, migrations).
 
 **Bugs** skip this entirely: `/debug` runs a root-cause loop and hands a regression test to `/test`.
+
+> **Decision panels.** Every user-facing choice — a stage gate in `/architect`, the phasing pick in `/roadmap`, the ADR sign-off — is an **options panel**: 2–4 concrete options with exactly one **(recommended)** pick, plus a free-text "specify your own". On agents with an interactive picker it renders as one; elsewhere it degrades to the same options in plain text.
 
 ---
 
@@ -100,6 +112,7 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 |---|---|---|
 | **Feature roadmap** | `docs/roadmap/` | `roadmap` creates · `develop`/`sync` advance status |
 | **ADRs** (decisions) | `docs/adr/` | `architect` creates · `develop`/`sync` advance status |
+| **Verify plan** | `verify.md` (beside the ADR) | `develop` writes · `verify`/`test` consume |
 | **Context files** | `AGENTS.md` (root + nested) + a thin `CLAUDE.md` pointer | `audit` creates · `sync` maintains |
 | **App code** | your source tree | `develop` |
 | **Tests** | your test dirs | `test` |
@@ -111,24 +124,44 @@ Each skill owns exactly one kind of artifact, so there's no overlap and nothing 
 
 ### The roadmap model (`docs/roadmap/`)
 
-`/roadmap` writes a roadmap with an **overview table** and a **per-feature build breakdown**. Every sub-task carries the exact command to run:
+`/roadmap` writes a **coarse, living** roadmap — the *what*, not an exhaustive task list. An **overview table** rows every feature with its build **Order**, **Phasing**, **Status**, process **Weight** (`lean` / `medium` / `full`), whether it **Needs ADR**, its **ADR** pointer, and its **Code area** — plus a per-feature block with a one- or two-line **intent** and a few **acceptance-criteria seeds**:
 
 ```markdown
-### 4. Home page  ·  Needs ADR: yes  ·  Status: planned
-- [ ] Decision (ADR) — `/architect home page — composition, sections, asset strategy`
-- [ ] UI (placeholder data) — `/develop home page UI — build to design.md with mock data`
-- [ ] Data integration — `/develop home page wire-up — swap mock for real data`
-- [ ] SEO & metadata — `/develop home page SEO — title/meta/OG`
-- [ ] Tests — `/test home page`
+| # | Feature | Order | Phasing | Status | Weight | Needs ADR | ADR | Code area |
+|---|---|---|---|---|---|---|---|---|
+| 4 | Home page | 7 | Slice 2 | planned | medium | yes | — | apps/web |
+
+### 4. Home page
+Intent: the public landing page that turns a visitor into a signup.
+Acceptance-criteria seeds:
+- hero, featured sections, and footer render with real data
+- SEO metadata + social card present
+- empty / error states handled
 ```
 
-**Feature statuses:** `planned` → `in-progress` → `done` (the pipeline lifecycle), plus `existing` (predated this workflow, enrolled for context) and `dropped` (de-scoped, kept for history). **ADR statuses** mirror the feature's build lifecycle: `Proposed` (decision made, feature not built) → `In Progress` (feature being built) → `Accepted` (feature built and verified — "done and dusted"), plus `Superseded` (replaced by a later ADR). `/develop` advances the ADR as it builds; `/sync` reconciles it; `/status` flags any ADR-vs-feature mismatch.
+**The detailed build tasks are not guessed here** — they're **derived from the feature's ADR** (`## Build plan`) when `/architect` designs it. `/roadmap` seeds the *what*; `/architect` designs the *how* and fills the tasks; `/develop` builds them.
 
-`/develop` ticks sub-tasks as it builds; `/sync` reconciles the rest from what actually shipped; `/status` reports it all and flags drift (code or ADRs that exist but aren't on the roadmap).
+- **Phasing choice** — `/roadmap` recommends how to sequence the features: **MVP-first**, **vertical slices**, **user-journey**, or **UI-first prototype**. The recommended default for a production build is **vertical slices + foundations-first**; the others fit fast validation, a funnel, or a throwaway demo.
+- **Foundations-first sequencing** — whatever the phasing, the ground comes first and isn't up for a vote: **coding standards → stack → data model → design system → a walking-skeleton slice**, *then* the features.
+- **Per-feature process weight** — the `Weight` column right-sizes each feature (it turns design-review and `/harden` on or off downstream). This **replaces the old triage step** — right-sizing is one column, not a separate skill.
+- **The replan beat** — the roadmap is *living*. `/roadmap replan` after each feature or phase ships reconciles what landed, enrolls follow-ups surfaced during the build (from the ADR's `## Consequences` / `## Follow-up`), reorders, and queues the next slice. `/roadmap add <feature>` enrolls one ad-hoc feature without re-planning the whole product.
+- **Epic-split** — a small product is a single `roadmap.md`; a big one splits by epic into an `index.md` + one file per epic (mirroring the ADR umbrella and the per-workspace layout).
 
-### The ADR model (`docs/adr/`) — single file vs umbrella
+**Feature statuses:** `planned` → `in-progress` → `done` (the pipeline lifecycle), plus `existing` (predated this workflow, enrolled for context) and `dropped` (de-scoped, kept for history). The linked **ADR's status** mirrors that build lifecycle (`Proposed` → `In Progress` → `Accepted`) — see [The ADR model](#the-adr-model-docsadr) below. `/develop` ticks tasks and advances status as it builds; `/sync` reconciles the rest from what actually shipped; `/status` reports it all and flags drift (code or ADRs that exist but aren't on the roadmap).
 
-Most decisions are **one file**: `docs/adr/NNNN-title.md` (in a monorepo, `docs/adr/<workspace>/`). A **broad decision** — one that splits into several sub-decisions, or carries a bulky audit/inventory — becomes a **directory** instead, so the pieces stay discoverable and each ADR stays focused:
+### The ADR model (`docs/adr/`)
+
+An ADR is the feature's **complete build spec**, and it carries the **acceptance-criteria spine** the rest of the loop hangs off:
+
+- **`## Requirements`** — the user stories plus IDed acceptance criteria (`AC-1`, `AC-2`, …). **This is the contract** `/develop` builds to and `/verify` checks.
+- **Design** — the confirmed data model, API surface, stack/tool picks, security model, and edge cases (the mode-specific `## Feature design` / `## Proposed stack` / equivalent).
+- **`## Build plan`** — the ordered tasks derived from the criteria, each tagged *"satisfies AC-N"*, migration first.
+
+This gives end-to-end **traceability**: **criterion → build task → verify step → conformance check**. Every `AC-N` maps to at least one task; every task yields a verify step in `verify.md`; `/verify` confirms each criterion is met.
+
+`/architect` produces it through a **staged, gated** design conversation — the **data model is shown & confirmed** (never buried in prose), and tool options are **generated fresh & current at runtime**, never a hardcoded list. The finished ADR is confirmed via an **options panel** before anything gets built.
+
+**Single file vs umbrella.** Most decisions are **one file**: `docs/adr/NNNN-title.md` (in a monorepo, `docs/adr/<workspace>/`). A **broad decision** — one that splits into several sub-decisions, or carries a bulky audit/inventory — becomes a **directory** instead, so the pieces stay discoverable and each ADR stays focused:
 
 ```
 docs/adr/0003-checkout/
@@ -142,7 +175,7 @@ docs/adr/0003-checkout/
 
 - **Status lives on `index.md`** (it mirrors the feature); child ADRs are spec content and carry no status.
 - **`/develop` reads `index.md` (the map + any cross-child contract), then the child ADR(s) its sub-task touches** — not the whole tree. A child's `research/` is *optional depth*, opened only if the build needs the underlying evidence.
-- **Cross-cutting / stack ADRs** that aren't tied to a buildable feature are **decision-status** — `Accepted` once you ratify them (there's no build phase to gate on), rather than feature-mirrored.
+- **Feature-linked ADR** → status mirrors the feature lifecycle: `Proposed` (decision agreed, feature not built) → `In Progress` (building) → `Accepted` (built and verified), plus `Superseded`. **Cross-cutting / stack ADRs** not tied to a buildable feature are instead **decision-status** — `Accepted` once you ratify them (there's no build phase to gate on).
 - Children stay flat by default; a child gets its own subfolder only when its research grows. `/architect` decides single-vs-directory from the decision's breadth.
 
 ---

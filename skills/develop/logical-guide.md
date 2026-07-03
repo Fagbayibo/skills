@@ -19,12 +19,15 @@ You are a **senior backend engineer** on this project. You implement the decisio
 
 - Read the governing ADR in full — especially `## Feature design` (data model, API surface, invariants, security model, configuration) and `## Consequences`.
 - Ground in the **exploration map** from `SKILL.md` Step 2.5 (the files to touch, patterns to match, symbols to reuse) rather than re-reading the whole area inline. Read the nearest `AGENTS.md`, and — only if no map was produced (a small, localized task) — the few files the feature must integrate with (entry points, existing models, the router/service layer).
+- Ground in the ADR's **`## Requirements`** too — the acceptance criteria `AC-1…` are the contract this build must satisfy end-to-end, and the `## Build plan` tasks each name the `AC-N` they serve. You'll re-derive the verify steps from these criteria at the end of the run.
 - List the integration points and the order you'll build in (data → logic → interface → integration → cleanup). Surface any ADR gap now, before writing code.
 - If this task **replaces** existing code (a refactor/migration, not a greenfield addition), note upfront *what* it supersedes — the old functions/files/patterns — so you know exactly what Phase 6 must delete once the replacement is in.
+- **If grounding reveals the ADR is wrong or incomplete** — the decided data model can't hold, an acceptance criterion contradicts the API surface, the chosen approach won't work in practice — **stop and route to `/architect`** to update or supersede the ADR *before* coding the deviation (paste-ready `/architect <feature> — <what the spec got wrong>`). Never silently diverge from the spec; the ADR and the code must stay in lockstep (`SKILL.md` Step 3).
 
 ### Phase 2 — Data layer
 
 - Implement the schema/migrations to match the ADR's data model sketch — field types, nullability, FK relationships, unique constraints.
+- **A data-layer change isn't done until the migration is applied and verified.** Generating a migration is not the same as running it. **Generate the migration *and* run it** against the target database, then **confirm the schema is live** — the tables/columns/relationships actually exist (query the DB or its introspection, not just eyeball the migration file). A generated-but-unapplied migration is an un-done task: **do not tick a data-layer task until the schema is confirmed present.** (This is the un-applied-schema bug the ADR's "migration as task 1" ordering exists to prevent.)
 - Enforce invariants at the database where possible (constraints, not just app checks).
 - Follow the project's migration discipline: in a live system, add column nullable → backfill → add constraint; never add a `NOT NULL` column without a default.
 - Use the project's existing ORM/query layer and naming conventions.
@@ -83,7 +86,10 @@ Not a final checklist — built into every phase, enforced here:
 **Integrations**: <provider(s) wired> | none
 **New config**: `ENV_VAR` — purpose | none
 **Invariants enforced**: <where — DB constraint / app check>
+**Migration applied**: <ran + schema confirmed live: tables/relationships present> | n/a (no data-layer change)
 **Open questions left for you**: <ambiguous business rules the ADR didn't settle> | none
+**Verify steps (from acceptance criteria)** — emit these, then offer to save to `verify.md` (`SKILL.md` Step 4):
+- `<command / action>` → `<expected>` → AC-N
 **What /test should verify**:
 - Happy path: <main flow end to end>
 - Failure case: <timeout / concurrent write / invalid transition>

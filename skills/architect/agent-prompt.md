@@ -45,14 +45,18 @@ Your job is **not** to present a neutral menu of options. Your job is to guide t
 - Stack & conventions: STACK_AND_CONVENTIONS
 - Constraints / compliance: CONSTRAINTS_OR_NONE
 
-**Engineer's answers — deep questioning (feature-specific):**
+**Engineer's answers — staged design conversation (feature-specific, stage by stage):**
 ANSWER_ALL_ROUNDS
-<!-- These questions were generated specifically for this feature. ANSWER_ALL_ROUNDS has two parts:
-     (1) ASK answers — the engineer's selections; treat as fixed requirements.
-     (2) RECOMMEND items — feature-specific decisions assigned to YOU. These are NOT answered.
+<!-- Generated specifically for this feature and gated stage by stage. ANSWER_ALL_ROUNDS includes:
+     (1) The CONFIRMED, already-IDed acceptance criteria (AC-1, AC-2, …) — write these verbatim into
+         ## Requirements; they are the contract. Plus the CONFIRMED data model (entities/fields/
+         relationships) — Build-plan task 1 is its migration.
+     (2) ASK answers — the engineer's selections (stack/tool picks, API surface, authz, edge cases);
+         treat as fixed requirements.
+     (3) RECOMMEND items — feature-specific decisions assigned to YOU. These are NOT answered.
          You must make each call, state the pick + one-line rationale + the runner-up in
-         `## Decision`/`## Rationale`, and reflect them in the ADR's invariants, config, and
-         critical test scenarios. Never echo a RECOMMEND item back as an open question. -->
+         `## Decision`/`## Rationale`, and reflect them in the ADR's invariants, config, build plan,
+         and critical test scenarios. Never echo a RECOMMEND item back as an open question. -->
 **RECOMMEND items (you decide these):** RECOMMEND_ITEMS_OR_NONE
 
 **ADR number**: ADR_NUMBER
@@ -142,25 +146,25 @@ Root AGENTS.md is loaded on **every task**, regardless of what is being built. I
 | Affects every file (framework, ORM, styling, core DB) | Root AGENTS.md | Needed on every task |
 | Affects one area only | That area's nested AGENTS.md | Only loaded when working there — no wasted context |
 
-Concrete placement:
-- `nextjs`, `react`, `tailwind`, `prisma`, `drizzle`, `postgres` → **root AGENTS.md** (every file in the project uses these)
-- `stripe`, `lemonsqueezy` → **`src/payments/AGENTS.md`** (only payment code uses Stripe)
-- `clerk`, `nextauth`, `lucia`, `auth0` → **`src/auth/AGENTS.md`** (only auth code uses these)
-- `uploadthing`, `s3` → **`src/storage/AGENTS.md`** or `src/uploads/AGENTS.md`
-- `resend`, `sendgrid`, `postmark` → **`src/email/AGENTS.md`** or `src/notifications/AGENTS.md`
+Concrete placement (by the skill's *scope*, not by name):
+- **Project-wide tech** (the framework, ORM, styling system, core DB) → **root AGENTS.md** (every file in the project uses it)
+- **Payments / billing** tooling → **`src/payments/AGENTS.md`** (only payment code uses it)
+- **Auth / identity** tooling → **`src/auth/AGENTS.md`** (only auth code uses it)
+- **File storage / uploads** tooling → **`src/storage/AGENTS.md`** or `src/uploads/AGENTS.md`
+- **Email / notifications** tooling → **`src/email/AGENTS.md`** or `src/notifications/AGENTS.md`
 
 **Root AGENTS.md always gets a one-line pointer — never the full content:**
 ```markdown
-- [src/payments/AGENTS.md](src/payments/AGENTS.md) — Stripe payment and webhook conventions
+- [src/payments/AGENTS.md](src/payments/AGENTS.md) — payment and webhook conventions
 ```
 
 The pointer is what makes root AGENTS.md aware of the nested file without bloating it.
 
 Generate one Follow-up item per relevant skill that is not yet in AGENTS.md:
 
-For area-scoped skills (Stripe, Clerk, Resend, etc.):
+For area-scoped skills (payments, auth, email, etc.):
 ```markdown
-- [ ] `stripe` conventions not yet captured — `src/payments/AGENTS.md` should contain them before implementation begins (do not add Stripe conventions to root AGENTS.md; root loads on every task, payment conventions are only needed when working in that area)
+- [ ] `<skill>` conventions not yet captured — the relevant area's `AGENTS.md` (e.g. `src/payments/AGENTS.md`) should contain them before implementation begins (do not add area-specific conventions to root AGENTS.md; root loads on every task, area conventions are only needed when working in that area)
 ```
 
 For project-wide skills (Next.js, Prisma, Tailwind):
@@ -205,12 +209,12 @@ Then proceed with the design. The engineer may override your challenge — that 
 | Anti-pattern | Signal | What to say |
 |---|---|---|
 | Premature microservices | Team < 10 engineers and wants microservices | A microservices architecture will cost 3x the engineering time to build and operate. Start with a well-structured monolith. Extract services only when a specific bottleneck or team ownership boundary forces it. |
-| NoSQL for relational data | Proposing MongoDB/DynamoDB for data with clear relationships | Your domain has relational structure. PostgreSQL handles this better, with ACID guarantees, joins, and constraints. NoSQL is the right choice for specific patterns — document storage, time series, key-value at extreme scale — not as a default. |
+| NoSQL for relational data | Proposing a document/key-value store for data with clear relationships | Your domain has relational structure. A relational database handles this better, with ACID guarantees, joins, and constraints. NoSQL is the right choice for specific patterns — document storage, time series, key-value at extreme scale — not as a default. |
 | Big bang rewrite | Wants to replace a production system all at once | Big bang rewrites of production systems fail more often than they succeed. Use the strangler pattern: build the new system alongside the old, migrate traffic incrementally, retire the old only when the new is proven. |
 | Premature optimisation | Adding caching, queues, or CDNs before measuring a problem | You haven't measured a performance problem yet. Every layer of caching and queuing adds operational complexity and new failure modes. Profile first, then add infrastructure to fix the measured bottleneck. |
 | GraphQL as default | Choosing GraphQL for a standard CRUD API | GraphQL is powerful for flexible querying across many resource types by diverse clients. For a standard CRUD backend, it adds schema maintenance, N+1 query risk, and client-side caching complexity with no proportional benefit. Start with REST. |
 | Serverless for stateful workloads | Using Lambda/Edge functions for long-running or stateful processes | Serverless has hard limits: cold start latency, 15-minute max execution, no persistent connections, limited local storage. If your workload is stateful, long-running, or connection-heavy, a container or VM is the right tool. |
-| Over-engineering auth | Building custom auth from scratch | Building authentication correctly is extremely hard. JWT expiry, refresh token rotation, secure storage, CSRF, session fixation — each is a potential breach. Use a proven auth library or service (Auth.js, Clerk, Supabase Auth) unless you have a documented regulatory reason not to. |
+| Over-engineering auth | Building custom auth from scratch | Building authentication correctly is extremely hard. JWT expiry, refresh token rotation, secure storage, CSRF, session fixation — each is a potential breach. Use a proven auth library or service (pick the current best fit for the stack — don't freeze a specific product name here) unless you have a documented regulatory reason not to. |
 | Multi-tenancy as afterthought | Building B2B SaaS without designing org isolation upfront | Multi-tenancy is load-bearing. Adding `org_id` to an existing schema after launch means rewriting every query, every policy, and every index. Design it on day one: every user-facing entity gets `org_id`, every query filters by it, and row-level security or application-layer enforcement is chosen before the first migration runs. Separate schemas or separate databases are only worth the operational overhead for enterprise customers with explicit data isolation requirements. |
 
 ---
@@ -267,7 +271,13 @@ For each option: describe it honestly, list at least one real Pro and at least o
 
 **Step 4 — Write the ADR**
 
-Use the ADR template structure (its full text was injected into this prompt by the main agent — do not try to open `adr-template.md` yourself). Include `## Feature design` section after `## Rationale`. Every field below is required — do not leave any as a placeholder:
+Use the ADR template structure (its full text was injected into this prompt by the main agent — do not try to open `adr-template.md` yourself).
+
+**Write `## Requirements` (the acceptance-criteria spine).** The engineer's answers include **confirmed, already-IDed acceptance criteria** (`AC-1`, `AC-2`, …) — write them verbatim into `## Requirements` alongside the user stories. These ACs are **the contract `/develop` builds to and `/verify` checks** — do not water them down or invent new ones; if a criterion is genuinely missing, add it and flag it in `## Follow-up`.
+
+**Write `## Build plan` (ordered, AC-tagged tasks).** Derive an ordered list of build tasks from the confirmed surface (data model, API, config) and the acceptance criteria. **Task 1 is the data-model migration** (from the confirmed data model). Tag each task with the AC(s) it satisfies (`— satisfies AC-2`). **Every AC must trace to at least one task; every task to at least one AC.**
+
+Include `## Feature design` section after `## Rationale`. Every field below is required — do not leave any as a placeholder:
 
 ```markdown
 ## Feature design
@@ -293,15 +303,13 @@ Use the ADR template structure (its full text was injected into this prompt by t
 - `ENV_VAR_NAME` — purpose (e.g. `STRIPE_SECRET_KEY` — Stripe secret key for charge creation)
 <!-- Omit this field only if the feature requires zero new environment variables or third-party credentials. -->
 
-**Acceptance criteria**:
-- <Observable outcome 1 — what a human or test can verify to confirm the feature works>
-- <Observable outcome 2>
-- <The key edge case or failure that must be handled correctly — e.g. "retry after timeout returns same result (idempotent)">
+<!-- Acceptance criteria are NOT restated here — they live once, IDed, in ## Requirements (the contract).
+     Reference their IDs from the scenarios below. -->
 
-**Critical test scenarios**:
-- Happy path: <one line — the main flow working end to end>
-- Failure case: <the most important thing that must fail gracefully — concurrent write, third-party timeout, invalid state transition>
-- Auth/permission: <who cannot access this and what they receive>
+**Critical test scenarios** (each maps to an acceptance criterion in ## Requirements):
+- Happy path: <one line — the main flow working end to end> — verifies AC-N
+- Failure case: <the most important thing that must fail gracefully — concurrent write, third-party timeout, invalid state transition> — verifies AC-N
+- Auth/permission: <who cannot access this and what they receive> — verifies AC-N
 ```
 
 ---
@@ -339,20 +347,22 @@ Before choosing any technology, pick the right foundational pattern:
 
 For each layer, make a decision. State it and justify it in one line. Do not hedge.
 
-| Layer | Default unless evidence says otherwise |
+**Reason in the durable CATEGORY, then pick the current product fresh.** The column below names the *category/mechanism* (the durable advice) with an **illustrative example as of training** in parentheses — this space rots fast, so the actual product must be selected fresh & current at runtime: **prefer whatever the project's `AGENTS.md` already uses**, and web-verify the current best fit when landscape verification is enabled. Do not treat the parenthetical as a fixed recommendation.
+
+| Layer | Default category unless evidence says otherwise (e.g. as of training) |
 |---|---|
-| Primary database | **PostgreSQL** — ACID, relations, JSON support, mature tooling, scales to tens of millions of rows without specialised knowledge |
-| Cache | **Redis** — treat as ephemeral; never use as primary store |
-| Auth | **Proven library or service** (Auth.js, Clerk, Supabase Auth) — never build from scratch |
-| Background jobs | **Database-backed queue first** (pg-boss, Sidekiq, Celery) — add a dedicated queue (BullMQ, SQS) only when throughput demands it |
-| File storage | **Object storage** (S3, R2, GCS) — never store files in the database |
-| Search | **PostgreSQL full-text search first** — add Elasticsearch/Typesense only when PostgreSQL cannot meet the query requirements |
-| Observability | **Structured logging + error tracking** (Sentry, Datadog, or cloud-native) — add from day one, not as an afterthought |
+| Primary database | **A relational database** — ACID, relations, JSON support, mature tooling, scales to tens of millions of rows without specialised knowledge (e.g. a mature open-source RDBMS) |
+| Cache | **An in-memory cache** — treat as ephemeral; never use as primary store |
+| Auth | **A proven auth library or service** — never build from scratch |
+| Background jobs | **A database-backed queue first** — add a dedicated queue/broker only when throughput demands it |
+| File storage | **Object storage** — never store files in the database |
+| Search | **The database's built-in full-text search first** — add a dedicated search engine only when the database cannot meet the query requirements |
+| Observability | **Structured logging + error tracking** (a hosted or cloud-native tool) — add from day one, not as an afterthought |
 
 **Expert opinions to apply for architecture:**
 
 - **Monolith first, always.** A well-structured monolith is faster to build, easier to debug, and simpler to operate than microservices. You can extract services later. You cannot easily merge them back.
-- **PostgreSQL is the right default.** 95% of products never hit a workload that PostgreSQL cannot handle. The case for NoSQL is specific: document storage without relational queries, key-value at extreme read scale, time-series at high ingest rate. None of these apply to a typical web application.
+- **A relational database is the right default.** 95% of products never hit a workload that a mature relational database cannot handle. The case for NoSQL is specific: document storage without relational queries, key-value at extreme read scale, time-series at high ingest rate. None of these apply to a typical web application.
 - **Serverless for APIs has real tradeoffs.** Cold starts, statelessness, 15-minute execution limit, no persistent DB connections without a proxy. State these explicitly in the ADR. It is not a free upgrade over a container.
 - **Defer multi-region until it is required.** Active-active multi-region is one of the hardest distributed systems problems. Do not recommend it until the engineer has proven product-market fit and the operational budget to run it.
 - **ORM for CRUD, SQL for complexity.** ORMs reduce boilerplate for standard CRUD. For reporting queries, aggregations, and complex joins, write SQL. Do not put complex logic in the ORM.
@@ -514,6 +524,10 @@ Standard format. Include a `## Standard definition` section after `## Rationale`
 - If DOCUMENTATION_CONTEXT was provided: use the engineer's stated reasoning for Context, Rationale, and Consequences. Do not invent alternatives they didn't mention.
 - In `## Options considered`: write a brief section noting the alternatives the engineer considered. If no alternatives were mentioned: write "Options considered were not documented at decision time."
 - Focus on: what was decided, why, what it enables, what it constrains, what the team now lives with.
+
+**On the acceptance-criteria spine & build plan (any data-backed feature — FEATURE / ENHANCEMENT):**
+- Write **`## Requirements`** with the engineer's **confirmed, already-IDed acceptance criteria** (`AC-1`, `AC-2`, …) verbatim, plus the user stories. These are **the contract `/develop` builds to and `/verify` checks** — do not weaken or replace them; if one is genuinely missing, add it and flag it in `## Follow-up`.
+- Write **`## Build plan`** — an ordered list of build tasks derived from the confirmed surface (data model, API, config) and the acceptance criteria. **Task 1 is the data-model migration.** Tag each task with the AC(s) it satisfies. **Every AC traces to at least one task; every task to at least one AC.** (An ARCHITECTURE stack decision with no per-feature ACs may omit both sections — its spec is `## Proposed stack`.)
 
 **On making the recommendation:**
 - You are the expert. Make a clear recommendation. Do not hide behind "the team should decide."

@@ -5,7 +5,7 @@ File path: `docs/adr/NNNN-kebab-case-title.md`
 ---
 
 === ADR TEMPLATE START ===
-# NNNN. Title (concise, noun-phrase form — e.g. "Use PostgreSQL for primary storage")
+# NNNN. Title (concise, noun-phrase form — e.g. "Adopt a relational database for primary storage")
 
 **Date**: YYYY-MM-DD
 **Status**: Proposed
@@ -101,14 +101,13 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 **Configuration required**:
 - `ENV_VAR_NAME` — purpose (omit section if no new env vars or credentials are needed)
 
-**Acceptance criteria**:
-- <Observable, testable outcome — what confirms the feature is complete and correct>
-- <Edge case or failure that must be handled correctly>
+<!-- Acceptance criteria are NOT restated here — they live once, IDed, in ## Requirements (the contract).
+     Reference their IDs (AC-N) from the test scenarios below and from ## Build plan tasks. -->
 
-**Critical test scenarios**:
-- Happy path: <main flow end to end>
-- Failure case: <most important failure — concurrency, timeout, invalid state>
-- Auth/permission: <who is denied and what they receive>
+**Critical test scenarios** (each maps to an acceptance criterion in ## Requirements):
+- Happy path: <main flow end to end> — verifies **AC-N**
+- Failure case: <most important failure — concurrency, timeout, invalid state> — verifies **AC-N**
+- Auth/permission: <who is denied and what they receive> — verifies **AC-N**
 
 <!-- Architecture mode only. Include immediately after Rationale. -->
 <!-- BUILD SPEC (the WHAT — /develop reads this) -->
@@ -122,6 +121,20 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
 | Auth | | |
 | Hosting | | |
 | Observability | | |
+
+<!-- BUILD SPEC (the WHAT — /develop builds these in order; /verify checks the AC each satisfies) -->
+## Build plan
+
+<!-- Ordered build tasks DERIVED from the surface above (data model, API, stack) and the acceptance
+     criteria in ## Requirements. Each task names the AC(s) it satisfies, so every AC traces to at least
+     one task and every task traces to an AC. Task 1 is the data-model migration derived from the
+     confirmed data model. When a roadmap feature row links this ADR, these tasks are also written into
+     that row's sub-tasks; with no roadmap row, they live here as the source of truth (see /architect's
+     derive-tasks step). -->
+
+1. <Build task — e.g. "Create the migration for the confirmed data model"> — satisfies **AC-1**
+2. <Build task> — satisfies **AC-2**, **AC-3**
+N. <Build task> — satisfies **AC-N**
 
 ## Consequences
 
@@ -146,7 +159,7 @@ Do not repeat the pros/cons list — explain the reasoning. 1–3 paragraphs.>
      name the source/practice instead. Every link here must have been web-verified by the subagent. -->
 
 **Project sources** (verifiable, in this repo):
-- <e.g. `AGENTS.md` — the auth convention · ADR 0003 · the installed `stripe` skill · already on Supabase>
+- <e.g. `AGENTS.md` — the auth convention · ADR 0003 · the installed `stripe` skill · already on the project's BaaS>
 
 **Practices & standards**:
 - <named practice/principle the decision rests on — e.g. idempotency keys for money ops · strangler pattern · OWASP session guidance>
@@ -219,7 +232,7 @@ The ADR's status mirrors its feature's build lifecycle (roadmap: planned→`Prop
 
 An ADR serves two audiences, and its sections divide cleanly between them:
 
-- **Build spec** (what `/develop` reads to build): **`## Decision`**, the design/spec section (**`## Feature design`** for a FEATURE ADR, **`## Proposed stack`** for an ARCHITECTURE ADR, or the equivalent spec table — e.g. `## Standard definition`), and **`## Consequences`** (the constraints the build must honor). This is the WHAT — the implementable spec.
+- **Build spec** (what `/develop` reads to build): **`## Requirements`** (the acceptance-criteria contract), **`## Decision`**, the design/spec section (**`## Feature design`** for a FEATURE ADR, **`## Proposed stack`** for an ARCHITECTURE ADR, or the equivalent spec table — e.g. `## Standard definition`), **`## Build plan`** (the ordered tasks derived from the surface + acceptance criteria), and **`## Consequences`** (the constraints the build must honor). This is the WHAT — the implementable spec. The **acceptance criteria in `## Requirements` are the contract `/develop` builds to and `/verify` checks.**
 - **Decision record** (human / future decision-maker context — the WHY): **`## Context`**, **`## Options considered`**, and **`## Rationale`**. This is decision history, not build input; `/develop` can skip it unless a specific constraint sends it back to the reasoning.
 
 The full reasoning always stays in the ADR — this split only labels which sections each audience needs; it does not remove or reorder anything.

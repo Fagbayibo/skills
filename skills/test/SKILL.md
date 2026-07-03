@@ -13,6 +13,7 @@ Writes a thorough, maintainable test suite for **the code that changed in this b
 - **First run**: asks which framework, checks if installed, installs with your confirmation, saves `test-preferences.json`.
 - **Subsequent runs**: reads `test-preferences.json` and skips all tool questions.
 - Spawns a subagent to read the changed files and write the tests.
+- **Traces to the contract**: when a governing ADR exists, it locks in the **durable** acceptance criteria as automated tests, tagging each test with the `AC-N` it covers. Any criterion that can't be automated (a manual/visual check) is recorded in NOT_COVERED and deferred to `/verify`'s manual step.
 
 Does not write application code. Does not update the `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
@@ -269,12 +270,14 @@ The main model stays lean — it discovers **paths and cheap signals only** and 
 
 Using your file tools:
 - List the 3 most-recently-modified ADR files under `docs/adr/` (paths only — don't read them).
+- **Identify the governing ADR** for this change — the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) that these files implement (match by branch/feature name or the touched surfaces; a `docs/roadmap/` entry, if present, points to it). If one exists, note **its** path and whether a **`verify.md`** sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This is the **contract** the tests trace to; it may not be one of the 3 recent paths.
 - Note whether `design.md` exists at the project root.
 - Read `package.json` and note its `scripts.test` value (decides `RUN_COMMAND`), if any.
 
 What the main model passes to the subagent:
 - **Project context**: read `AGENTS.md` (canonical) — fall back to `CLAUDE.md` if there's no `AGENTS.md` — and inline its contents (short, cheap, consistent with the other skills).
 - **ADRs**: pass the **3 recent paths**. The subagent reads them itself, and only if relevant to what it's testing.
+- **Governing ADR + contract**: pass the governing ADR path and the `verify.md` path (or `none` for each). The subagent reads the ADR's `## Requirements` acceptance criteria — preferring `verify.md`'s already-resolved `AC-N`-tagged checklist when present — so it knows the `AC-N` list to trace tests to. Pass `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
 - **design.md**: pass the **path**, and only when a **component** or **page/flow** file is in scope. The subagent reads it. Pass `none` otherwise.
 - **Source files**: never read here — the subagent reads each scoped file.
 
@@ -312,6 +315,7 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
   6. **Project context** inline (short) — `AGENTS.md`, or `CLAUDE.md` fallback
   7. **ADR paths** — the 3 recent paths, or `none`. (If the subagent has no file access in your client, read and inline the relevant ADR text instead.)
   8. **design.md path** — only if component/page scope, else `none`
+  9. **Contract for traceability** — `TRACE_TO_CONTRACT` flag, the governing ADR path, and the `verify.md` path (each `none` if absent). Instruct the subagent: **when `TRACE_TO_CONTRACT = yes`**, read the acceptance criteria (from `verify.md` if present, else the ADR's `## Requirements`) and **lock in the durable ones** — write an automated test for every criterion that *can* be pinned as a stable assertion, and **tag each test with the `AC-N` it covers** (e.g. a `covers: AC-3` comment on the test, or `AC-3` in the test title) so the suite is traceable back to the contract. For any criterion that **can't** be turned into an automated test — a visual/manual/environmental check (e.g. "email actually arrives", "layout looks right") — do **not** fake it; record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`. (If the subagent has no file access, read and inline the acceptance criteria / `verify.md` text into its prompt.)
 
 **Monorepo (multiple package roots from Step 1b)**: spawn **one subagent per root in parallel** with `run_in_background: true`, each scoped to that root's files, tool, and package manager. Isolated contexts keep each subagent lean and prevent one root's files from bleeding into another's. Collect all reports before relaying. For a single root (the common case), spawn one subagent in the foreground.
 
@@ -331,15 +335,20 @@ Read two bundled files from this skill's folder (relative paths — you, the mai
 **Preferences**: loaded | saved to test-preferences.json
 
 **Tests written**:
-- `<file path>` — <N tests> covering <happy path / edges / errors / a11y>
+- `<file path>` — <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
 
 **Run result**: <X passed, Y failed> via `<RUN_COMMAND>`
+
+**Traceability** (only when TRACE_TO_CONTRACT=yes — ADR NNNN):
+- AC-1 ✅ locked in — `<test file · test name>`
+- AC-3 ✅ locked in — `<test file · test name>`
 
 **Bugs caught** (tests failing because the code is wrong, not the test):
 - <file:line — what's broken and the failing expectation>   ← only if BUGS_FOUND is non-empty
 
 **Not covered** (consider adding):
 - <gap and why>
+- AC-N — <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
 
 **What /harden should check**: <only if HARDEN_FLAG=yes — one sentence>
 ```
@@ -356,7 +365,11 @@ If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a 
 **Preferences**: loaded | saved to test-preferences.json
 
 **Tests written**:
-- `<file path>` — <N tests> covering <happy path / edges / errors / a11y>
+- `<file path>` — <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
+
+**Traceability** (only when TRACE_TO_CONTRACT=yes — ADR NNNN):
+- AC-1 ✅ locked in — `<test file · test name>`
+- AC-3 ✅ locked in — `<test file · test name>`
 
 **How to run them**:
 1. <setup step, e.g. install if INSTALL=deferred>
@@ -368,6 +381,7 @@ If `BUGS_FOUND` is non-empty, lead with it — a green suite is the goal, but a 
 
 **Not covered** (consider adding):
 - <gap and why>
+- AC-N — <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
 
 **What /harden should check**: <only if HARDEN_FLAG=yes — one sentence>
 ```
