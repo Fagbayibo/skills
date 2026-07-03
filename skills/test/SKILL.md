@@ -162,7 +162,8 @@ Filter by detected language. If a tool is already installed, list it first with 
 | Python | pytest (recommended), unittest |
 | Go | `testing` + testify (recommended), `testing` stdlib only |
 | Rust | `cargo test` (built-in) — no question needed, skip |
-| Other | free-text |
+
+For a language not listed, ask with whatever tools you detect; the picker's automatic Other covers a free-text framework, so don't add your own Other option.
 
 ```
 Ask (as above) — "Which framework for unit & integration tests?"

@@ -1,7 +1,7 @@
 ---
 name: develop
 compatibility: Built for Claude Code — uses interactive questions and stack detection. Installs on any Agent Skills client but is tuned for Claude Code.
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion, WebSearch, WebFetch
 description: "Use this skill to build a feature — UI or logical/backend — from an approved design. Run /develop to implement a page, component, API, service, data layer, or any slice. It first gates on the decision: if building would require inventing something undecided (a design system, page composition, a provider, data model, or a feature's behavior) and no ADR records it, /develop stops and routes you to /architect. Otherwise it reads the ADR + AGENTS.md (+ design.md for UI) and builds, advancing the roadmap. It doesn't make architecture decisions or write ADRs (/architect)."
 ---
 
@@ -38,7 +38,7 @@ Writes **app code** (and CSS/tokens for UI). Its **only** touch on `docs/roadmap
 
 ## Portability (any OS, any agent)
 
-Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to find files, read `package.json`/config, and read the ADR and `AGENTS.md`. This skill builds inline by default; a very large single build or a multi-file rollout may fan out to subagents (Step 3, via your agent's subagent tool). It writes app code, which is inherently cross-platform. Bundled guides (`ui-guide.md`, `logical-guide.md`, `checklist.md`, `templates/`) are referenced by paths relative to this skill's folder; the main agent reads them. If your tool has no interactive-question picker, ask the prompts as plain text with the same options.
+Written for any Agent Skills client on macOS, Linux, or Windows. Detection snippets are POSIX **reference** — use your agent's own cross-platform file tools to find files, read `package.json`/config, and read the ADR and `AGENTS.md`. This skill builds inline by default; a very large single build or a multi-file rollout may fan out to subagents (Step 3, via your agent's subagent tool), and a current-usage doc-check may use a read-only web subagent (Step 2.6), degrading to build-from-knowledge where the agent has no web capability. It writes app code, which is inherently cross-platform. Bundled guides (`ui-guide.md`, `logical-guide.md`, `checklist.md`, `templates/`) are referenced by paths relative to this skill's folder; the main agent reads them. If your tool has no interactive-question picker, ask the prompts as plain text with the same options.
 
 ## Execution
 
@@ -159,6 +159,18 @@ Spawn a **read-only exploration subagent** (use your agent's exploration capabil
 Build from that map. The rule: **offload the token-heavy *reading*; keep the *deciding and writing* on the main thread** (Step 3).
 
 **Rules of thumb (large repos & monorepos):** scope to **one workspace, one roadmap file, one governing ADR** (already the rule above). Do **one sub-task per run** and `/clear` between features so context doesn't accumulate across a long session. **Match the model to the work** — exploration and mechanical rollouts on a fast/cheap model, deep logic and orchestration on a strong one.
+
+### Step 2.6 — Doc-check (only when needed): offload current-usage lookups to a web subagent
+
+Sometimes a build needs the **current setup or API of a library the ADR already chose** — a fast-moving or newly-released dependency where your training may be stale (e.g. the correct current way to wire an auth library with an ORM adapter, or a framework's latest routing/config shape). This is a real, legitimate build-time need, and in practice the model **reaches for a web search on its own** when it hits it. Done inline that is a token sink: a "22 sites" search dumps all that raw reading straight into your main build context. **Isolate it the same way as the exploration in Step 2.5** — in a subagent — so only the answer lands on the main thread.
+
+**When to do it (gate hard — this is the exception, not the default):**
+- **Only** when you genuinely need the **current usage/setup/API of a tool the ADR already decided**, and you are unsure your knowledge is current. Most builds don't need it: for a stable, well-known stack, build from knowledge and let the **typecheck/build/lint loop** catch a stale API cheaply. Don't web-search by default.
+- **Never to choose or reconsider a tool.** Tool selection is `/architect`'s job. This looks up *how to use* the decided tool, not *whether* to use it. If the docs reveal the chosen tool genuinely can't work, that is the "spec is wrong" path (below) back to `/architect`, not a silent swap.
+
+**How (capability-first):** spawn a **read-only web subagent** (web tools — `WebSearch`/`WebFetch` on Claude Code; your agent's web capability elsewhere; on Cursor/Codex/Antigravity use their web/browse tool), on a **fast, low-cost model**. Brief it with the exact tools and versions from the ADR and the one thing you need to know. Tell it to return **only a compact usage summary** — the correct current call/config/setup steps, version notes, and gotchas — **not** raw pages or a list of sites. Build from that summary. **If the agent has no web capability**, skip this: build from your knowledge and lean on the build/typecheck loop to surface a stale-API mistake, and note the assumption.
+
+The rule is the same as Step 2.5: **offload the token-heavy reading (web or code); keep the deciding and writing on the main thread.**
 
 ### Step 3 — Resume check, then build
 

@@ -39,7 +39,7 @@ It seeds the plan and hands you a coarse, checkable list. Architecting each feat
 Every choice you put to the engineer is an **options panel**, never a neutral menu:
 - **2–4 concrete options**, each a real answer to *this* product — not placeholders.
 - **Exactly one** option marked **`(recommended)`**, with a one-line why. You are the senior engineer; make the call and let them override — never present equal options with no pick.
-- Always include a free-text **Other** so they can override with their own answer.
+- Do not add your own **Other** option — the picker appends a free-text Other automatically, so a manual one just doubles it (offer a free-text option yourself only in a plain-text fallback with no picker).
 - **Capability-first rendering:** use your agent's interactive option picker (`AskUserQuestion` on Claude Code); if it has none, ask the *same* options as plain text. Batched question rounds follow the same rule — up to 4 per round.
 
 ## Artifact ownership
@@ -158,7 +158,6 @@ The **build approach** is the most far-reaching call the roadmap makes: it decid
 - **Skateboard**: MVP-first; ship the thinnest *usable whole* first, then grow it.
 - **Facade**: UI-first; a clickable shell on placeholder data, then wire the back. **Prototype-grade** (fast to demo, not production-complete).
 - **Journey**: a complete user path end-to-end per phase.
-- **Other** (free text).
 
 **Recommend exactly one — reason it out, don't hardcode the pick or its mechanics.** For a proper production build the default is **Tracer Bullet** (every slice ships something real and complete); shift only when this product's goal calls for it — fast validation of one core loop → **Skateboard**; the experience/funnel *is* the product → **Journey**; the explicit goal is a quick clickable prototype → **Facade** (and say plainly it is prototype-grade, not production-complete). State the one-line why in terms of this product. **Capability-first:** use your agent's interactive picker if it has one; otherwise ask the same options as plain text. Never name a tool — the approach shapes *how* features are built, not *with what*.
 
@@ -196,7 +195,7 @@ From the answers, produce the feature list — foundations first (Step 4), then 
 - **Intent (1–2 lines)** — what it is and why it matters. The one-liner a teammate reads to know what this row is for.
 - **Acceptance-criteria seeds** — a few bullet "definition of done" seeds: the **WHAT**, the observable outcomes that mean this feature works (e.g. "user can filter the list by category and the URL reflects the filter"; "empty and error states render"; "SEO metadata present"). These are **seeds, not a spec** — `/architect` refines them into the ADR's full requirements and acceptance criteria. Don't over-specify; capture the load-bearing outcomes.
 - **Weight** — `lean` / `medium` / `full` (see *Artifact ownership*). Set the initial call from risk, scope, and compliance sensitivity.
-- **Approach (optional per-feature override)** — defaults to **inherit the project default** (the header's Build approach). Only when a feature is genuinely best built a different way, run a **Build-approach decision panel for THAT feature**: offer **`(recommended) inherit the project default`** as the top option, plus the named approaches (Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey · Other) as overrides. Same decision-panel + capability-first + no-hardcoded-tool conventions as Step 3. **Record the Approach on the row only when it differs from the default**; leave it empty (inherit) otherwise. Precedence: row Approach if set, else the project default.
+- **Approach (optional per-feature override)** — defaults to **inherit the project default** (the header's Build approach). Only when a feature is genuinely best built a different way, run a **Build-approach decision panel for THAT feature**: offer **`(recommended) inherit the project default`** as the top option, plus the named approaches (Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey) as overrides. Same decision-panel + capability-first + no-hardcoded-tool conventions as Step 3. **Record the Approach on the row only when it differs from the default**; leave it empty (inherit) otherwise. Precedence: row Approach if set, else the project default.
 - **Needs ADR?** — use the *invent-test*: **would building it require a decision the engineer hasn't made?** Flag **yes** when it involves a provider/library choice, a data model, a cross-cutting pattern, the design system, a whole page/screen with no spec yet, or non-trivial behavior (search, filtering, recommendations). Flag **no** only for genuinely pure implementation an existing `design.md`/ADR/convention already covers. When unsure, flag **yes** — an unflagged decision is the expensive miss. A `full`-weight feature is almost always `yes`.
 - **One decision per ADR — don't bundle, don't false-flag.** When a feature carries **multiple distinct decisions**, each is its own `Needs ADR: yes` item — don't lump unrelated decisions into one "strategy" ADR. If several genuinely share **one** broad decision that then splits, model it as an **umbrella** and let dependents reference it — but never mark a dependent `no` when it actually carries its own decision.
 
@@ -223,7 +222,6 @@ Ask ONE consent question that governs both the `(basis: …)` citations and any 
   - `No references, keep it clean (recommended)` (no `## References` section, and no `(basis: …)` citations on the recommendations)
   - `Sources only (named project sources and practices, no web fetch)` (a `## References` section with named project sources and practices, plus `(basis: …)` citations, no links, no subagent)
   - `Sources plus web verified links (fetches pages to confirm the links, costs some extra tokens)` (sources and citations as above, plus web verified links added by a sourcing subagent)
-  - Other (free text)
 
 **If they choose No references** (or there is no answer): add **no `## References`** section and **no `(basis: …)`** citations anywhere (this is what the Basis on recommendations note in Step 6 is gated on). The roadmap keeps its intent and reasoning and stays clean. You're done.
 
