@@ -419,6 +419,30 @@ When the real data source lands — the feature's **data-integration** sub-task,
 
 ## Implementation phases
 
+### Phase 0 — Compose the full product surface (screen builds)
+
+**Before the structure, decide what goes on the page. You are a senior product designer, not a form-wirer.** This applies to **every screen you build, of any kind** — sign-in, dashboard, feed, pricing, profile, a product or item detail, a list or search-results page, onboarding, settings, checkout, an empty state, even a 404 — **not just auth**. When you build a screen (not a lone component) and the ADR did not already hand you a full page composition, **compose the complete product surface** in the chosen design system's language. **Never ship the bare functional widget** — a lone centered form, an unstyled table on a white page, a single box of inputs, a raw list with no header or context. That "bare minimum" is what makes a build feel like a stub instead of a product.
+
+A complete product screen has, cohesive and branded:
+- **Brand presence** — a logo or wordmark, used consistently. No asset? Derive one from the product name (a styled wordmark, or a simple mark), don't leave the corner empty.
+- **Product context and copy** — real, product-specific copy that says what this is and why, written from the product's purpose (read it from `AGENTS.md`, the ADR's intent, or the roadmap — **never lorem ipsum**). A headline or tagline, a supporting line, honest microcopy.
+- **A considered layout, not a lone box.** Compose the page as a whole. **The same completeness applies to every page**; below is how it shows up across a few common types — a **sample to calibrate on, not a checklist, and not the only pages that get this treatment.** Reason about what a senior designer would ship for THIS screen and product:
+  - **Auth (sign in / up):** a branded card, or a two-pane layout (brand, a value proposition, and a visual on one side; the form on the other), with secondary links (forgot password, switch mode, terms), and often light social proof. Not a naked input box.
+  - **Dashboard / feed:** an app shell — header with the logo, primary nav, a user menu — a clear page title and context, the main content with real hierarchy, and a proper empty state.
+  - **List / table / search results:** a header and filters/search, the collection with real hierarchy and pagination, and a designed empty and no-results state, not a raw table.
+  - **Detail / profile / item page:** a header with the entity's identity and key actions, well-grouped content sections, and related or secondary content, not a bare field dump.
+  - **Landing / marketing:** a hero (headline, subcopy, primary CTA, a visual), then supporting sections (how it works, features, social proof), then a footer.
+  - **Settings / long forms / onboarding / checkout:** grouped sections with labels and help text, clear progress or a clear save action.
+  - **Any other page** (pricing, error/404, confirmation, empty state, and so on): the same treatment — brand, context, a real layout with hierarchy, supporting content, and the functional core, composed the way a product would actually ship it.
+- **Supporting content** — a short value prop or trust signals where they fit, secondary CTAs, and a **footer** with the links a product is expected to have (where the page type warrants one).
+- **The functional core** — the form, table, or flow itself, done well (validation, the loading/empty/error states from Phase 4, accessibility from Phase 5).
+
+**This is composition (completeness), not look.** The **design source** (a template, the generated system, or a described style) decides the visual language; **this step** decides that the page is a whole product, not a stub. It applies **whichever design source was used**, and whether the style is the default system or something the engineer requested.
+
+**Assets and copy when nothing is provided:** derive a wordmark from the product name; use a tasteful visual (a gradient, a subtle pattern, an abstract illustration, or a placeholder image via *Asset resolution* above) rather than blank space; write real copy from the product's purpose. **Invent tastefully to make it feel like a product, but surface what you invented** — list the brand name/wordmark, the copy, and any placeholder assets in the completion report so the engineer can correct them. A product feel is wanted here; pretending the invented brand and copy are final is not.
+
+**If the ADR already settled the page composition** (`/architect`'s page-design stage), execute that — this phase fills the gap only when it didn't. And keep it real, not busy: a complete surface is not a cluttered one; every element earns its place in the design system's spacing and hierarchy.
+
 ### Phase 1 — Semantic structure
 
 Build with the HTML element that most precisely describes the content. The element choice is not a styling decision — it carries meaning that browsers, assistive technologies, and search engines rely on.
@@ -630,6 +654,8 @@ Use CSS logical properties instead of physical ones so layouts work correctly fo
 **Token file**: created | updated | unchanged (<path>)
 **Fonts**: <family> via <method> | <proprietary> to <substitute> | system
 **Assets**: project files | placeholders (<service>, swap at <where>) | none needed
+**Surface composed**: bare component | full product surface (brand, copy, layout, footer) | per ADR composition
+**Invented (for review, swap when you have the real thing)**: <brand name/wordmark · tagline/headline · body copy · placeholder assets>, or "none (all provided)"
 **Built**: <name> (<file paths>)
 **Token adherence**: all sourced from design.md | <deviations>
 **Accessibility**: WCAG AA passed | <items deferred>
