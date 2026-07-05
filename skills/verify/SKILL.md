@@ -97,7 +97,7 @@ Pick the base branch `BASE`: `git rev-parse --verify main` — if it succeeds us
 In order:
 1. **A project run skill / documented command** — check for a project-specific "run/start" skill, then `AGENTS.md`, then `package.json` scripts (`dev`, `start`), `Makefile`, `Procfile`, `docker-compose`. Prefer what the project already uses.
 2. **Built-in patterns by project type** if nothing is documented:
-   - **Web app** → start the dev server, then drive a browser to the route.
+   - **Web app** → start the dev server, then drive the route: **prefer a connected browser/Playwright MCP** (real navigation, clicks, form submits, screenshots) if one is available; else your agent's own browser tool; else, in a headless context, request the route over HTTP and check the returned HTML plus a boot-check that the server starts and the health route responds.
    - **API / backend** → start the server, then hit the endpoint (curl/HTTP client).
    - **CLI** → run the command with representative arguments.
    - **Library** → exercise the public API via a tiny scratch script or the REPL.
@@ -107,7 +107,7 @@ If you can't tell how to launch it, **ask** the engineer for the start command b
 
 ### Step 3 — Run and exercise
 
-Launch the app (prefer a background process so you can interact with it). For heavier interaction, **spawn a subagent** with the tools to drive the browser/CLI and capture evidence, so the main context stays clean. For each scoped behavior:
+Launch the app (prefer a background process so you can interact with it). **Use a connected MCP where it makes the check real:** a **browser/Playwright MCP** to drive the UI (navigate, click, type, submit, screenshot), and a **database MCP** to confirm the live schema for a data-layer criterion (this is the migration-applied check in Step 4b — proof the column really exists, not an assumption). For heavier interaction, **spawn a subagent** with the tools to drive the browser/CLI and capture evidence, so the main context stays clean. For each scoped behavior:
 - **UI** → navigate to the route, interact (click, type, submit), capture a screenshot of the result and of any error state. Check the rendered output, not just a 200.
 - **API** → send the request, capture status + body; verify the shape and key fields.
 - **CLI / job** → run it, capture stdout/stderr and any output artifact.

@@ -39,6 +39,13 @@ Using your file-search tool, look for a `design.md` within about 3 levels of the
 
 ---
 
+## Step 0.0 — Follow the design source the ADR recorded (don't assume)
+
+The design **source** is the engineer's choice — made in `/architect` and recorded in the ADR (Figma frames, a screenshot, an existing `design.md`, or a described direction). **Follow what the ADR recorded; don't default to Figma just because an MCP happens to be connected.**
+- **ADR says Figma** → use the connected Figma MCP to pull the real design (tokens, spacing, components, the named frames) into `./design.md` (real values, not invented), show a short summary, confirm, then build to it. If the ADR says Figma but no MCP is connected, tell the engineer and ask them to connect it or pick another source.
+- **ADR says a screenshot / existing UI / a described direction** → go to the matching step below.
+- **No ADR record (a direct UI task, no source given)** → don't assume: **ask** the engineer *"How should I get the design for this?"* with options **From Figma (its MCP)** · **From a screenshot / images** · **From the existing `design.md` / current UI** · **No design, suggest a direction** (the picker adds Other), then proceed by their pick.
+
 ## Step 0.1 — Brownfield check (no design.md, but is there existing UI?)
 
 Before generating a fresh design system, find out if the project **already has a visual language** you must match. Generating a new one on top of an existing app produces UI that clashes with what's shipped.

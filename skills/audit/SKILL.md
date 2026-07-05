@@ -171,15 +171,15 @@ Adapt the list to the project: drop what doesn't apply (no CI question for a thr
 
 ---
 
-### Tool-skills sweep (offer matching Agent Skills — greenfield after scaffold, and whole-repo)
+### Tool-skills & MCP sweep (offer matching Agent Skills and MCP servers — greenfield after scaffold, and whole-repo)
 
-Run this on the **main thread** once the real stack is known (greenfield: from the scaffolded manifests read in Step 1; brownfield: from the repo scan below). It is the setup-time sweep that catches the whole stack at once — `/architect` offers a skill at the moment a tool is *chosen*; this offers one for whatever is *already installed*.
-- For each significant tool in the real stack (framework, database, ORM, auth, payments, email, and so on) **not already covered by an installed skill** (`npx skills list`) or recorded as **declined** in `AGENTS.md`:
-  - **Detect** a matching Agent Skill: `npx skills find <tool>` (the `skills` CLI's registry search; `--owner <org>` if known), else a quick web search for "<tool> agent skill", else skip. **Never hardcode** a list of tools that have skills.
-- **Batch-offer** the ones found as a **multi-select** panel: "Install Agent Skills for the tools that have one? · `<tool A>` (`<owner/repo>`) · `<tool B>` (…) · none of these". Capability-first picker; plain text where there is none. **Never auto-install.**
-- **Install** each selected: `npx skills add <owner>/<repo> -y` (to the project's agent).
-- **Record into `AGENTS.md`** (the subagent writes it, from `INSTALLED_SKILLS` / `DECLINED_TOOLS` you pass): an **`Agent skills:`** line listing `installed: <skill …>` and `declined: <tool …>` — the declines so a later run does not re-offer. Project-wide tech skills go at root; area-specific ones in the nested area doc.
-- **No search/install capability?** Skip the offer and note in the report which tools might have skills worth a manual look (the passive fallback).
+Run this on the **main thread** once the real stack is known (greenfield: from the scaffolded manifests read in Step 1; brownfield: from the repo scan below). It is the setup-time sweep that catches the whole stack at once — `/architect` offers at the moment a tool is *chosen*; this offers for whatever is *already installed*.
+- For each significant tool in the real stack (framework, database, ORM, auth, payments, email, and so on) **not already covered** by an installed skill / connected MCP (`npx skills list`, your connector list) or recorded as **declined** in `AGENTS.md`:
+  - **Detect** a matching **Agent Skill** (`npx skills find <tool>`, the `skills` CLI's registry search, `--owner <org>` if known, else a web search for "<tool> agent skill") **and** a matching **MCP server** (a web search for "<tool> MCP server", or your agent's connector list). **Never hardcode** a list of which tools have skills or servers.
+- **Batch-offer** the ones found as a **multi-select** panel, skills and MCP servers together: "Set up the tools that have one? · Skill: `<tool A>` (`<owner/repo>`) · MCP: `<tool B>` server · … · none of these". Capability-first picker; plain text where there is none. **Never auto-install or auto-connect.**
+- **Install** each selected skill: `npx skills add <owner>/<repo> -y`. **Connecting an MCP is a user config step** (their MCP/connector settings, e.g. `claude mcp add …`) — you can't do it for them, so point them there; once connected the tools are used automatically.
+- **Record into `AGENTS.md`** (the subagent writes it, from `INSTALLED_SKILLS` / `MCP_SERVERS` / `DECLINED_TOOLS` you pass): an **`Agent skills:`** line (`installed: …`, `declined: …`) and an **`MCP servers:`** line (`connected: …`, `declined: …`) — the declines so a later run does not re-offer. Project-wide tech at root; area-specific ones in the nested area doc.
+- **No search/install/connect capability?** Skip the offer and note in the report which tools might have a skill or MCP worth a manual look (the passive fallback).
 
 ---
 
