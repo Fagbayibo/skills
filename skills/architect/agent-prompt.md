@@ -151,7 +151,7 @@ In the ADR's `## Decision` section, after the chosen option sentence, fill in th
 **Implementation skills**: `<skill>` (`.claude/skills/<skill>/`) · `<skill>` (`.claude/skills/<skill>/`)
 ```
 
-List every installed community skill that shaped this design. During implementation the engineer reads the ADR alongside each listed skill to apply the right conventions. Do NOT copy-paste skill content into the ADR. The field is a pointer, not a paste.
+List every installed community skill that shaped this design — **including any skill the main agent just installed during the tool-skills offer** (it is passed in `COMMUNITY_SKILLS_CONTENT_OR_NONE` as a now-installed, relevant skill). During implementation the engineer reads the ADR alongside each listed skill to apply the right conventions. Do NOT copy-paste skill content into the ADR. The field is a pointer, not a paste.
 
 **3. Add Follow-up items for any skill not yet in AGENTS.md.**
 

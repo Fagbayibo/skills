@@ -103,6 +103,8 @@ Use the template below. Populate `## Stack` from the architecture ADR if one exi
 
 For `## Rules`: use the SELECTED_PATTERNS content injected above as the basis. If the engineer selected "Other" (free-text) instead of a named pattern, treat their exact text as the conventions and include it verbatim under `## Rules` — do not interpret or reformat it. Append ADDITIONAL_STANDARDS as extra bullet points at the end of `## Rules`. If nothing was found for stack, write placeholders like `<to be filled>`.
 
+**Agent skills line (from the main agent's tool-skills sweep).** If `INSTALLED_SKILLS_OR_NONE` or `DECLINED_TOOLS_OR_NONE` is provided, add an **`Agent skills:`** line under `## Context files` (or under `## Rules` if there is no Context files section): `installed: <skill …>` and `declined: <tool …>`. The **declined** list is what stops a later `/audit` or `/architect` run from re-offering the same skill, so always record it. Put a project-wide tech skill at root; an area-specific one in that area's nested doc.
+
 **On a monorepo**, keep this root doc to **monorepo-wide** concerns — the workspace tooling (`pnpm`/`turbo`/`nx`), shared standards, and a `## Context files` section pointing at each workspace's nested doc. The per-app stack does **not** go in root.
 
 **Step 2b — Per-workspace nested AGENTS.md (monorepo only)**

@@ -167,13 +167,25 @@ Adapt the list to the project: drop what doesn't apply (no CI question for a thr
 - `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
 - `description: "Audit: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"`
 - Tools: `Read`, `Bash`, `Write`
-- `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<all the other Step 1 selections: the code standards, type strictness, folder structure, AND the tooling choices (lint/format, pre-commit, testing gate, CI)>`, and **`MONOREPO_OR_NO`** (`yes — apps: web, api, …` if detected). The subagent records the code conventions in `AGENTS.md` `## Rules`; capture the **tooling choices** clearly (a short `## Tooling` note or explicit Rules lines) so the `/develop tooling` sub-task installs exactly what was chosen here. The subagent writes root `AGENTS.md` + its `CLAUDE.md` pointer — seeding `## Build approach` from the roadmap header if one is set (else `<TBD — set by /roadmap>`) — **and, if `MONOREPO=yes`, a nested `AGENTS.md` (+ pointer) per workspace** seeded from each scaffold's manifest, with the root pointers baked in.
+- `prompt`: filled `agent-prompt.md` template with `PHASE=greenfield`, `SELECTED_PATTERNS=<file contents>`, `ADDITIONAL_STANDARDS=<all the other Step 1 selections: the code standards, type strictness, folder structure, AND the tooling choices (lint/format, pre-commit, testing gate, CI)>`, and **`MONOREPO_OR_NO`** (`yes — apps: web, api, …` if detected). The subagent records the code conventions in `AGENTS.md` `## Rules`; capture the **tooling choices** clearly (a short `## Tooling` note or explicit Rules lines) so the `/develop tooling` sub-task installs exactly what was chosen here. The subagent writes root `AGENTS.md` + its `CLAUDE.md` pointer — seeding `## Build approach` from the roadmap header if one is set (else `<TBD — set by /roadmap>`) — **and, if `MONOREPO=yes`, a nested `AGENTS.md` (+ pointer) per workspace** seeded from each scaffold's manifest, with the root pointers baked in. **Before spawning, run the Tool-skills sweep (below)** and inject its `INSTALLED_SKILLS` / `DECLINED_TOOLS` so the subagent writes the `Agent skills:` line into `AGENTS.md`.
+
+---
+
+### Tool-skills sweep (offer matching Agent Skills — greenfield after scaffold, and whole-repo)
+
+Run this on the **main thread** once the real stack is known (greenfield: from the scaffolded manifests read in Step 1; brownfield: from the repo scan below). It is the setup-time sweep that catches the whole stack at once — `/architect` offers a skill at the moment a tool is *chosen*; this offers one for whatever is *already installed*.
+- For each significant tool in the real stack (framework, database, ORM, auth, payments, email, and so on) **not already covered by an installed skill** (`npx skills list`) or recorded as **declined** in `AGENTS.md`:
+  - **Detect** a matching Agent Skill: `npx skills find <tool>` (the `skills` CLI's registry search; `--owner <org>` if known), else a quick web search for "<tool> agent skill", else skip. **Never hardcode** a list of tools that have skills.
+- **Batch-offer** the ones found as a **multi-select** panel: "Install Agent Skills for the tools that have one? · `<tool A>` (`<owner/repo>`) · `<tool B>` (…) · none of these". Capability-first picker; plain text where there is none. **Never auto-install.**
+- **Install** each selected: `npx skills add <owner>/<repo> -y` (to the project's agent).
+- **Record into `AGENTS.md`** (the subagent writes it, from `INSTALLED_SKILLS` / `DECLINED_TOOLS` you pass): an **`Agent skills:`** line listing `installed: <skill …>` and `declined: <tool …>` — the declines so a later run does not re-offer. Project-wide tech skills go at root; area-specific ones in the nested area doc.
+- **No search/install capability?** Skip the offer and note in the report which tools might have skills worth a manual look (the passive fallback).
 
 ---
 
 ### Phase 2 — Whole-repo scan (root + judged nested)
 
-**Trigger**: pre-flight classified **clearly established**, or Phase 0 → `Existing codebase`.
+**Trigger**: pre-flight classified **clearly established**, or Phase 0 → `Existing codebase`. **Run the Tool-skills sweep above** once the scan has identified the stack, before/with writing `AGENTS.md`.
 
 The subagent doesn't just write root — it **identifies the major areas with distinct conventions** (e.g. `src/auth`, `src/payments`, `src/api`) and creates a nested `AGENTS.md` for each that warrants one, deciding by judgment what is global (→ root) vs area-specific (→ nested). Root stays short; area detail lives nested.
 
