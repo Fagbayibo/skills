@@ -53,7 +53,7 @@ Note: behind > 0 → **you're not up to date**; uncommitted entries → **work i
 
 ### Step 2 — Roadmap
 
-Scan `docs/roadmap/` (or `.workflow/roadmap/`) for roadmap files — one or more numbered files (`01-roadmap.md`, `02-…`), **including per-workspace subdirs in a monorepo** (`docs/roadmap/<workspace>/`). Parse all of them. **In a monorepo, group the report by workspace** (each app's roadmap reported under its own heading) so apps don't blur together:
+Scan `docs/roadmap/` (or `.workflow/roadmap/`) for roadmap files — a single `roadmap.md`, or an `index.md` + per-epic files (`auth.md`, `checkout.md`, …) when split, **including per-workspace subdirs in a monorepo** (`docs/roadmap/<workspace>/`, with a top-level `docs/roadmap/index.md` mapping them). Parse all of them. **In a monorepo, group the report by workspace** (each app's roadmap reported under its own heading) so apps don't blur together:
 - Count features by **Status** (from the At-a-glance table) across every roadmap file: `planned` / `in-progress` / `done`, plus `existing` (pre-existing, not pipeline-built) and `dropped` (de-scoped — exclude from active work). For each `in-progress` feature, list its checked/total checkbox tasks and the **first unchecked** one (the resume point).
 - Note any feature marked `needs a decision` with **no ADR pointer** on its pointer line (a decision owed before building).
 

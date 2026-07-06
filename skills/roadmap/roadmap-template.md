@@ -125,7 +125,7 @@ Partial catalog; finish the remaining pieces via /develop. code in `src/catalog/
 
 ## Large product — epic-split
 
-When one file outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: a `docs/roadmap/index.md` (the At-a-glance table across all epics + a one-line status rollup per epic) plus one file per epic (`docs/roadmap/<epic>.md`) holding that epic's feature sections. Promote **on demand**; don't pre-split a small product. In a monorepo, each workspace gets its own `docs/roadmap/<workspace>/` the same way.
+When `roadmap.md` outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: **rename `roadmap.md` to `docs/roadmap/index.md`** (keep the At-a-glance table across all epics + a one-line status rollup per epic, each linking its file), and **move each area's feature sections out into its own `docs/roadmap/<epic>.md`**. Promote **on demand**; don't pre-split a small product. File names are always **semantic** (`roadmap.md` / `index.md` / `<epic>.md`), never numbered. In a monorepo, each workspace gets its own `docs/roadmap/<workspace>/` the same way, with a top-level `docs/roadmap/index.md` mapping the workspaces (one line + rollup each).
 
 ## Completion report block
 
