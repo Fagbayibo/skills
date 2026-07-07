@@ -88,7 +88,7 @@ git tag --sort=-creatordate
 
 Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the **absolute paths** of `agent-prompt.md` (lean) and the **one** template for the chosen type, `templates/<type>.md`, in the spawn prompt. Do **not** read their contents into the main context — the subagent's **first action** is to `Read` `agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Spawn a subagent:
 
-- `model`: a fast, low-cost model for `pr`, `changelog`, `release-note` (drafting from real material is well-bounded). **A strong model (e.g. `sonnet` on Claude Code) for `postmortem`** — root-cause synthesis and contributing-factor analysis need stronger reasoning than a cheap model gives.
+- `model`: set explicitly, do not inherit the session model. A fast, low-cost tier for `pr`, `changelog`, `release-note` (drafting from real material is well-bounded; Claude Code: `haiku`). **A strong model (Claude Code: `sonnet`) for `postmortem`** — root-cause synthesis and contributing-factor analysis need stronger reasoning than a cheap model gives.
 - `description: "Document: <type>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write`, `Edit` (Edit for appending to `CHANGELOG.md`; Bash for `gh` only when the engineer opts to create/update a PR)
 - `prompt`: the absolute path to `agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:` — a labeled list supplying:

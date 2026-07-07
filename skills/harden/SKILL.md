@@ -69,7 +69,7 @@ Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonic
 
 Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the **absolute paths** of two bundled files in the spawn prompt: `agent-prompt.md` (the spawn template) and `harden-guide.md` (the threat rubric). Do **not** read their contents into the main context — the subagent's **first action** is to `Read` `agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Then spawn a subagent with:
 
-- Model: a strong model (e.g. `sonnet`, or `opus` for critical work, on Claude Code) — use the stronger option only for a `critical`, high-blast-radius change (deeper reasoning)
+- Model: set explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`, or `opus` for critical work) — use the top tier only for a `critical`, high-blast-radius change (deeper reasoning)
 - Description: "Harden: <N> changed files"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write` — **no `Edit`** by default (it produces a checklist, not edits). If the engineer later approves a specific fix, re-spawn with `Edit` for that one item.
 - Prompt: the absolute path to `agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:` — a labeled list supplying:

@@ -70,7 +70,7 @@ Two independent choices, location (repo shape) and shape (decision size):
 ## Portability (any OS, any agent)
 
 - **Commands**: `git` is the only required CLI, same on every OS. Other shell snippets (`mkdir -p`, `date`, `find`, `ls`, `cat`, `wc`) are POSIX reference, not literal scripts; use your agent's cross-platform file tools (read, search/glob, write, create-dir) and your knowledge of today's date. Create `docs/adr/` with your write tool, not `mkdir`.
-- **Bundled files**: the fallback question files (`questions/*.md`), `agent-prompt.md`, `agent-modes/*.md`, and `adr-template.md` live at paths relative to this skill's folder. The main agent resolves this folder to an absolute path and passes the absolute paths of `agent-prompt.md`, the one matching `agent-modes/<mode>.md`, and `adr-template.md` in the spawn prompt; the subagent reads them itself, and the main agent does not read them into its own context (see Subagent spawn). Fallback: if the client's subagents cannot read files, read and inline the contents instead.
+- **Bundled files**: `agent-prompt.md`, `agent-modes/*.md`, and `adr-template.md` live at paths relative to this skill's folder. The main agent resolves this folder to an absolute path and passes the absolute paths of `agent-prompt.md`, the one matching `agent-modes/<mode>.md`, and `adr-template.md` in the spawn prompt; the subagent reads them itself, and the main agent does not read them into its own context (see Subagent spawn). Fallback: if the client's subagents cannot read files, read and inline the contents instead.
 - **No subagent / interactive-question support?** Use whatever your agent provides (a subagent, per-step model selection, an options picker) and fall back only where missing: do the research/drafting inline yourself, and ask the question rounds as plain text with the same options.
 
 ## Execution
@@ -121,7 +121,7 @@ From the ADR list (paths relative to `$ADR_DIR`):
 
 ### Scope validation, framing, and staged design conversation
 
-For create or supersede operations, read `internal/design-conversation.md` now and follow it. It contains Scope validation (including the already-built documentation path), Framing, and the staged design conversation. Do not read it for in-place ADR updates.
+For create or supersede operations, this is a hard gate: **read `internal/design-conversation.md` in full before you ask the engineer a single design question, and follow it.** It contains Scope validation (including the already-built documentation path), Framing, and the staged design conversation. The *Asks vs acts* section above is only a short summary of the intent; it is NOT the protocol and is not enough to run the conversation from. Do not open the interview, generate questions, or spawn the subagent until you have read that file. (Skip it only for in-place ADR updates.)
 
 ### Subagent spawn
 
@@ -145,7 +145,7 @@ The spawn prompt tells the subagent:
 
 Then spawn a subagent:
 
-- `model`: a strong model (e.g. `sonnet`/`opus` on Claude Code)
+- `model`: set explicitly to a strong model; do not inherit the session model (Claude Code: `sonnet`, reserving the top tier like `opus` for a genuinely hard or high-risk design)
 - `description: "Architect: <mode> — research and draft ADR"`
 - Tools: `Read`, `Bash`, `Write`, `Edit`. Add `WebSearch`, `WebFetch` only when `REFERENCES_LEVEL` is `sources+links` (they verify links, fetch to confirm before linking; sourcing rules in `agent-prompt.md`).
 - `prompt`: the three absolute file paths (`agent-prompt.md`, matching `agent-modes/<mode>.md`, `adr-template.md`), the read instructions above, and the Placeholder values list. Include `MODE_FILE_PATH=<absolute matching mode file path>` in the Placeholder values list.
@@ -194,5 +194,4 @@ If the task is to update or supersede an existing ADR:
 - Research subagent mode instructions: `agent-modes/*.md` (only the matching mode file is passed)
 - Main-thread design conversation: `internal/design-conversation.md` (read only for create/supersede)
 - Main-thread completion flow: `internal/after-subagent.md` (read only after the subagent finishes)
-- The staged design conversation is generated per feature (see *Staged design conversation*, stages a–f), not stored
-- Generic mode files (`questions/`) are a structural fallback only, used when the feature is too vague to generate from
+- The staged design conversation is generated per feature (see *Staged design conversation*, stages a–f), not stored; there are no canned question lists. If a topic is too vague to generate from, narrow it first (scope validation, or one clarifying question), never fall back to generic MCQs

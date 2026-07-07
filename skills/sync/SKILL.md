@@ -99,7 +99,7 @@ Run only when dependency manifests changed or the diff clearly adds a significan
 
 Do NOT read `agent-prompt.md` here. Resolve this skill's folder to an absolute path and spawn a subagent with:
 
-- Model: a fast, low-cost model (e.g. `haiku` on Claude Code; `inherit`/a light model elsewhere); bounded maintenance, not open-ended reasoning
+- Model: set explicitly to a fast, low-cost tier; do not inherit the session model on Claude Code (use `haiku`; a light model / `inherit` only on agents where a separate cheap tier isn't selectable); bounded maintenance, not open-ended reasoning
 - Description: "Sync: update AGENTS.md + flag stale ADRs"
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write` (`Edit` for existing docs, roadmap, and ADR `**Status**:` lines; `Write` strictly for a **net-new-area** nested AGENTS.md). Boundaries the tool grant can't express (no root creation, no ADR *content* edits (Status line only), no shallow nested docs for established areas) are rules in the agent prompt.
 - Prompt: the subagent's **first action** is to Read `<absolute skill folder>/agent-prompt.md` by path and follow it; then give the dynamic values as a labeled list ("Placeholder values: ..."):

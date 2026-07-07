@@ -6,6 +6,11 @@
 //  1. Every skill declares `allowed-tools` in frontmatter.
 //  2. No skill hardcodes a Claude-only model alias as a spawn directive
 //     (`model: "haiku|sonnet|opus|fable"`) — use role words instead.
+//     Convention: spawn instructions SET the subagent model explicitly as an
+//     action ("set the model explicitly; do not inherit the session model"),
+//     phrased in role words (a fast, low-cost tier / a strong model) with the
+//     per-tool alias only as an unquoted example — subagents otherwise inherit
+//     the (often expensive) main-session model.
 //  3. No skill names THE subagent tool in prose ("the Agent tool",
 //     "spawn an Agent", "the Task tool") — stay capability-first.
 //  4. No non-git shell glue that breaks on PowerShell in a SKILL body
@@ -35,7 +40,7 @@ const SKILL_BYTE_OVERRIDES = {};
 const SUPPORT_MD_BYTE_BUDGET = 24 * 1024;
 const SUPPORT_MD_OVERRIDES = {
   'architect/agent-prompt.md': 28 * 1024, // common ADR writer prompt; ratchet down after more common-rule trimming
-  'architect/internal/design-conversation.md': 26 * 1024, // main-thread design walk; split by stage next if it grows
+  'architect/internal/design-conversation.md': 27 * 1024, // main-thread design walk; carries the deliberate depth mandate + completeness gate (raised on purpose for question depth); split by stage if it grows further
 };
 const DESCRIPTION_CHAR_CAP = 400;
 const HOT_PATH_BUDGETS = [

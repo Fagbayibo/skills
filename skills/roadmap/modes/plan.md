@@ -12,21 +12,21 @@ Read exactly one route file before continuing to Step 2:
 
 Do not read the other plan route files unless the classification changes. After the selected route has established the roadmap/workspace context, continue with Step 2 below.
 
-### Step 2 — Ask (batched rounds, as decision panels)
+### Step 2 — Ask (generated question walk, as decision panels)
 
-Tailor to this idea; infer and skip what's stated. As many rounds as needed (up to 4 questions per round, each a panel). Cover:
+Do not follow a fixed script or a set number of rounds. Enumerate the planning dimensions THIS product needs (generate them from the idea and `AGENTS.md`), then ask them one after another as batched decision panels (up to 4 per panel), as many panels as it takes. Infer and skip anything already stated; ask everything else. The more thoroughly you ask, the better the roadmap: never cap the questions to save time, and never end while a load-bearing dimension is unasked.
 
-Round 1, product & business: MVP boundary (smallest version delivering the core value; most important); primary audience (only if unclear); monetization (free / subscription / one-time / usage-based / ads / none yet; shapes billing features); success metric (signups, activation, revenue; informs analytics features); hard constraints (deadline, budget, team size, compliance scope; shape phasing and weights).
+Cover at least these dimension groups (a checklist of what to reach, not an order to recite; add product-specific dimensions freely):
 
-Round 2, capabilities: multi-select of cross-cutting capabilities the product plausibly needs, by type (e.g. authentication, multi-tenant orgs, payments/billing, email/notifications, file/media upload, search, realtime, admin panel, public API). Confirm in scope this slice vs deferred; each selected becomes one or more features. Name capabilities, never the implementing tool.
-
-Round 3, cross-cutting & go-to-market (routinely forgotten, in the plan from day one): SEO (public/marketing pages, metadata, sitemap, structured data, social cards, SSR/SSG needs; skip for purely internal/auth-walled apps); performance (Core Web Vitals targets, caching, expected load); analytics & tracking (product analytics, error monitoring, conversion events); accessibility (WCAG target); internationalization (languages/locales, RTL); legal/compliance (cookie consent, privacy/terms, GDPR/CCPA, age gating).
+- **Product & business**: MVP boundary (smallest version delivering the core value; most important); primary audience (only if unclear); monetization (free / subscription / one-time / usage-based / ads / none yet; shapes billing features); success metric (signups, activation, revenue; informs analytics features); hard constraints (deadline, budget, team size, compliance scope; shape phasing and weights).
+- **Capabilities**: the cross-cutting capabilities the product plausibly needs, by type (e.g. authentication, multi-tenant orgs, payments/billing, email/notifications, file/media upload, search, realtime, admin panel, public API), as a multi-select. Confirm in scope this slice vs deferred; each selected becomes one or more features. Name capabilities, never the implementing tool.
+- **Cross-cutting & go-to-market** (routinely forgotten, in the plan from day one): SEO (public/marketing pages, metadata, sitemap, structured data, social cards, SSR/SSG needs; skip for purely internal/auth-walled apps); performance (Core Web Vitals targets, caching, expected load); analytics & tracking (product analytics, error monitoring, conversion events); accessibility (WCAG target); internationalization (languages/locales, RTL); legal/compliance (cookie consent, privacy/terms, GDPR/CCPA, age gating).
 
 Each "yes" becomes its own feature or folds into a relevant feature's acceptance-criteria seeds (e.g. "SEO metadata present" on each public page; cookie consent its own feature).
 
 ### Step 3 — Choose the build approach (decision panel)
 
-Decides how every feature is sliced and sequenced. No fixed procedure; reason about this product (goal, Round 1 constraints, production build vs throwaway), then present a panel of the named approaches, each stated by its guiding principle (not steps), recommending exactly one:
+Decides how every feature is sliced and sequenced. No fixed procedure; reason about this product (goal, the product & business constraints from Step 2, production build vs throwaway), then present a panel of the named approaches, each stated by its guiding principle (not steps), recommending exactly one:
 
 - **Tracer Bullet**: vertical slices; each feature built end-to-end through every layer, working.
 - **Skateboard**: MVP-first; ship the thinnest usable whole first, then grow it.
@@ -87,7 +87,7 @@ No references (or no answer): no `## References` section, no `(basis: …)` cita
 Sources only (or the agent has no web tools): wherever the roadmap recommends something the engineer didn't dictate (phasing choice, order rationale, a suggested capability, a `Needs ADR` flag, a weight call), append a short `(basis: …)`: a project source (`your AGENTS.md`, an ADR, the existing stack) or a named practice (`vertical slices ship real value early`, `foundations before features`, `data model is the costliest thing to redo`); inline you have no web tools, so name the source or practice, never a URL. Add a `## References` section naming *Project sources* (verifiable) and *Practices & standards* (named); no Links group, no subagent. Done.
 
 Sources plus web verified links: as Sources only, then spawn a sourcing subagent (capability-first) so links are fetched and confirmed, never fabricated:
-- `model`: fast/cheap (e.g. `haiku` on Claude Code; a light model elsewhere) · `description: "Roadmap: source & reference the recommendations"`
+- `model`: set explicitly to a fast, low-cost tier; do not inherit the session model (Claude Code: `haiku`; a light model elsewhere) · `description: "Roadmap: source & reference the recommendations"`
 - Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
 - `prompt`: the roadmap file path(s) and its recommendations. Job: confirm each load-bearing `(basis: …)` is sound; where a canonical source is worth linking (an official doc, a named standard/practice), web search and fetch to confirm it exists and says what's claimed; complete `## References` with a *Links* group (web verified only, else "none verified"). Never invent a URL. Keep it lean.
 - No web tools or subagents: degrade to the Sources only behavior.

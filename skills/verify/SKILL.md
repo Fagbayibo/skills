@@ -47,7 +47,7 @@ Any Agent Skills client on macOS, Linux, or Windows. Run/launch snippets are ref
 ### Step 0a — Refactor mode: before/after diff (spawn a subagent)
 
 Only in refactor mode. It drives the app twice and holds two output sets, so run it in a subagent to keep the main context clean:
-- `model`: a strong model (e.g. `sonnet` on Claude Code) · `description: "Verify: before/after diff — <scope>"` · Tools: `Read`, `Bash`, `Grep`, `Glob` (+ browser/HTTP driving)
+- `model`: set explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`) · `description: "Verify: before/after diff — <scope>"` · Tools: `Read`, `Bash`, `Grep`, `Glob` (+ browser/HTTP driving)
 - Its job:
   1. Identify the affected surfaces from the diff (endpoints, queries, jobs, pages). Pick representative ones per changed area, favoring output that is most observable and most likely to reveal a behavior shift.
   2. Capture BEFORE (pre-change state). Prefer a throwaway git worktree at the pre-change ref (the base branch, or the commit before the refactor): `git worktree add <tmp> <ref>`, start the app in that worktree, hit each surface, save the raw outputs, `git worktree remove <tmp>`. This keeps the working tree and untracked files intact. Only if worktrees aren't available, fall back to `git stash --include-untracked` (plain `git stash` leaves new files behind and contaminates the "before"), restore with `git stash pop` after.
