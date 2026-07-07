@@ -89,8 +89,8 @@ Monorepo resolution: find each scoped file's nearest enclosing `package.json` (w
 #### 2. Load preferences
 
 Read `test-preferences.json` at the project root (file tool; "not found" = no prefs).
-- Found: load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`; skip to Step 5.
-- `NO_PREFS`: continue to Step 4.
+- Found (the common write path): load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`; skip to Step 5.
+- `NO_PREFS` (first run): read `modes/setup.md` and do its Step 4 (stack detection and framework questions), then return here for Step 5 (installation check), then do its Step 6 (save preferences), then continue at Step 7. Do not read `modes/setup.md` on a write run.
 
 ---
 
@@ -108,59 +108,6 @@ Ask — "No uncommitted source changes found. What should I test?"  (header: "No
 - Last commit: scope = `git diff --name-only --diff-filter=ACMR HEAD~1 HEAD`, re-run Step 1b.
 - Specific files: classify the named files, continue.
 - Nothing: stop cleanly.
-
----
-
-#### 4. Stack detection and first-run questions (only when `NO_PREFS`)
-
-With file tools (not shell utilities), determine:
-- Package manager by lockfile: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn, `bun.lockb` → bun, `package-lock.json` → npm.
-- Language and framework: `package.json` for `next`/`vite`/`nuxt`/`svelte`/`react`; `pyproject.toml` (pytest/unittest) → Python; `go.mod` → Go; `Cargo.toml` → Rust.
-- Installed test tools: `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` in `package.json`. A different runner already in use (`bun test`, `node:test`, `ava`, `deno test`, etc.): detect and use it instead of installing a new one.
-
-**Q0 — No test setup at all? Don't assume they want one.** No test tool installed (whole repo, or this package in a monorepo): first check for a deliberate no-test-runner convention.
-- Stated in the nearest `AGENTS.md` or governing ADR (e.g. "no test runner — typecheck + `/verify` is the gate"): respect it, don't push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite. Ran the typecheck gate; use `/verify` to confirm behavior."
-- Not stated: ask (don't default to installing): "This has no test setup. How do you want to gate changes here?" → `Set up a test framework` (→ Q1, install with confirmation) · `No test runner, typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
-- Per package in a monorepo: a package with no tests by design gates on typecheck/`/verify` even if a sibling has a full suite; apply per resolved package root.
-
-Skip Q1 unless the engineer chose "set up a framework".
-
-**Q1 — Framework for unit/integration** (first run, engineer opted to set up tests)
-
-Filter by detected language. List an already-installed tool first with `(already installed)` appended and treat it as recommended.
-
-| Language | Options (max 4) |
-|---|---|
-| JS / TS | Vitest (recommended), Jest, [+ already-installed first] |
-| Python | pytest (recommended), unittest |
-| Go | `testing` + testify (recommended), `testing` stdlib only |
-| Rust | `cargo test` (built-in) — no question needed, skip |
-
-Unlisted language: ask with whatever tools you detect; the picker's automatic Other covers free text, so add no own Other option.
-
-```
-Ask — "Which framework for unit & integration tests?"  (header: "Framework")
-- options: [filtered list]
-```
-
-**Q2 — E2E tool** (ask only if `E2E_RELEVANT = yes`)
-
-```
-Ask — "Pages/flows changed. Add end-to-end tests too?"  (header: "E2E")
-- "Playwright (recommended)": "Real-browser flow tests for the changed pages"
-- "Cypress": "Real-browser flow tests with the Cypress runner"
-- "No E2E (unit/component only)": "Skip browser tests; cover pages at the component level"
-```
-
-**Q3 — Component testing addon** (JS/TS only, when any **component** or **page/flow** file is in scope and React/Vue/Svelte is detected)
-
-```
-Ask — "Add component testing support?"  (header: "Components")
-- "Yes, Testing Library (recommended)": "Installs @testing-library/<framework> + user-event for render+interact tests"
-- "No, logic tests only": "Plain module/function tests, no DOM rendering"
-```
-
-Skip Q3 entirely if scope is logic/api/cli only.
 
 ---
 
@@ -191,38 +138,6 @@ go get github.com/stretchr/testify                           # Go
 ```
 
 "No": record `INSTALL=deferred`; the subagent writes complete tests, the run command is reported as "run after installing".
-
----
-
-#### 6. Save preferences (first run only)
-
-Write `test-preferences.json` at the project root:
-
-```json
-{
-  "tool": "<unit framework>",
-  "additionalTools": ["@testing-library/react"],
-  "e2eTool": "<playwright|cypress|none>",
-  "testDir": "<conventional dir for the tool>",
-  "filePattern": "<*.test.ts>",
-  "packageManager": "<npm|pnpm|yarn|bun>"
-}
-```
-
-Conventional directories and patterns:
-
-| Tool | `testDir` | `filePattern` |
-|---|---|---|
-| Vitest | co-located (next to source) | `*.test.ts` / `*.test.tsx` |
-| Jest | co-located or `__tests__/` | `*.test.ts` |
-| Playwright | `e2e/` | `*.spec.ts` |
-| Cypress | `cypress/e2e/` | `*.cy.ts` |
-| pytest | `tests/` mirroring source | `test_*.py` |
-| Go testing | same package as source | `*_test.go` |
-| Rust | `#[cfg(test)]` in-file / `tests/` | n/a |
-
-Then tell the engineer:
-> "Preferences saved to `test-preferences.json`. Future `/test` runs load these and skip straight to writing."
 
 ---
 
@@ -313,5 +228,6 @@ Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete afte
 
 ## Reference files (in this skill's folder; referenced by relative path)
 
+- `modes/setup.md`: first-run-only steps (stack detection, framework questions, save preferences); read on the main thread only when `NO_PREFS`
 - `agent-prompt.md`: the subagent's operating template, read by the subagent via the absolute path passed in the spawn prompt
 - `writing-guide.md`: strategy, tool rules, iteration loop, report format; read the same way (inline its text only as the no-file-access fallback)

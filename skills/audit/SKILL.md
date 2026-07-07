@@ -41,7 +41,7 @@ The `AGENTS.md` files hold the content: create root if missing (Phase 1, 2) and 
 ## Portability (any OS, any agent)
 
 - Commands: `git` is the only required CLI, same on every OS. Other shell snippets (file counts, `find`, `[ -f ]`) are POSIX reference, not literal scripts; use your agent's cross-platform file tools (search/glob, read, write) to list, count, and check existence.
-- Bundled files: `agent-prompt.md` and the pattern presets (`patterns/*.md`) live in this skill's folder. Resolve that folder to an absolute path (you already resolve these relative paths, so you know the folder) and pass absolute file paths in the spawn prompt: the `agent-prompt.md` path plus the paths of the SELECTED pattern preset files only. Do NOT read their contents into the main context. The spawn prompt tells the subagent: your first action is to Read those files by path. Pass every dynamic value the template needs (PHASE, AREA, ADDITIONAL_STANDARDS, MONOREPO_OR_NO, INSTALLED_SKILLS, DECLINED_TOOLS, and so on) as a labeled list in the spawn prompt: "Placeholder values: PHASE=..., ...". Small dynamic values stay inline; only the bundled static files move to path passing. Where a template slot wants the contents of a repo file the subagent can read itself (like root AGENTS.md), pass that repo file's path instead. Fallback: if the client's subagents cannot read files, read and inline the contents (the old behavior).
+- Bundled files: `agent-prompt.md`, the phase mode files (`modes/*.md`), and the pattern presets (`patterns/*.md`) live in this skill's folder. Resolve that folder to an absolute path (you already resolve these relative paths, so you know the folder) and pass absolute file paths in the spawn prompt: the `agent-prompt.md` path plus the paths of the SELECTED pattern preset files only. Do NOT read their contents into the main context. The spawn prompt tells the subagent: your first action is to Read those files by path. Pass every dynamic value the template needs (PHASE, AREA, ADDITIONAL_STANDARDS, MONOREPO_OR_NO, INSTALLED_SKILLS, DECLINED_TOOLS, and so on) as a labeled list in the spawn prompt: "Placeholder values: PHASE=..., ...". Small dynamic values stay inline; only the bundled static files move to path passing. Where a template slot wants the contents of a repo file the subagent can read itself (like root AGENTS.md), pass that repo file's path instead. Fallback: if the client's subagents cannot read files, read and inline the contents (the old behavior).
 - No subagent or interactive-question support? Do the subagent's work inline yourself (use a cheaper model where the step calls for one), and ask any multiple-choice question as plain text with the same options.
 
 ## Execution
@@ -73,6 +73,17 @@ Monorepo (`MONOREPO=yes`): root plus a light stub per workspace, deepen on deman
 
 Legacy migration (any phase): on `ROOT_LEGACY`, before proceeding ask permission: "I found a `CLAUDE.md` with project context but no `AGENTS.md`. I'll move its content into a new `AGENTS.md` (so all tools read it) and replace `CLAUDE.md` with a pointer. Proceed?" On yes: the subagent copies the content verbatim into `AGENTS.md`, then replaces `CLAUDE.md` with the pointer; `AGENTS.md` now exists, so continue as Phase 4 (gap-fill). On no: leave both untouched and continue without migrating. Same for any nested `<area>/CLAUDE.md`.
 
+### Route to the selected phase
+
+Phase 0 (ambiguous) is handled inline below. For Phases 1–4, read only the matching mode file, then follow it:
+
+- Phase 1 (greenfield setup) → `modes/greenfield.md`
+- Phase 2 (whole-repo scan) → `modes/whole-repo.md`
+- Phase 3 (area scan) → `modes/area.md`
+- Phase 4 (gap-fill) → `modes/gapfill.md`
+
+Do not read the other mode files. The greenfield and whole-repo modes additionally read `modes/tool-skills.md` for the Agent Skills / MCP sweep (skip it for area and gap-fill runs).
+
 ### Phase 0 — Classify (only when pre-flight is ambiguous)
 
 Don't guess. Ask once via your agent's interactive option picker (`AskUserQuestion` on Claude Code), or plain text with the same options:
@@ -80,87 +91,13 @@ Don't guess. Ask once via your agent's interactive option picker (`AskUserQuesti
 - header: "Project state"
 - options: 1. `New project`, "I'll ask for your coding standards and seed the context." → Phase 1 (read the manifest/scaffold for the stack; still ask standards). 2. `Existing codebase`, "I'll scan what's here and document it." → Phase 2.
 
-### Phase 1 — Greenfield setup
-
-Trigger: pre-flight classified clearly greenfield, or Phase 0 → `New project`.
-
-Step 1, ask coding patterns AND tooling. Main model asks, as decision panels (single-select unless marked; one suggested pick each; the picker adds Other automatically), up to 4 per round, as many rounds as it takes. Be thorough, not minimal; this is the one place conventions and tooling get set. First read the real scaffolded project (manifest, existing config, tools the scaffold installed), then tailor every question: skip one the stack already settles, list an already installed tool first as the suggested pick, phrase options for the actual language and framework. Answers are captured into `AGENTS.md`. `/audit` records the choices, installs nothing; installing (packages, config files, pre-commit hooks, CI) is the `/develop tooling` sub-task that follows, but ask the tooling questions here where the choice is made and recorded.
-
-Architecture & code conventions:
-- Architecture style: present all four preset options without reading their files into main context: Clean Architecture (`patterns/clean-architecture.md`), Functional (`patterns/functional.md`), Domain Driven Design (`patterns/domain-driven.md`), and SOLID OOP (`patterns/solid-oop.md`). The chosen preset is passed as a path in Step 2, and the subagent reads only that file.
-- Type strictness (typed languages only; skip if untyped): `strict` (no `any`, exhaustive types) · `gradual` (strict for new code) · `loose`.
-- Module & folder structure: `folder-by-feature` (colocate by feature) · `by-layer` (controllers/services/repos) · match what the scaffold already set.
-- Additional code standards (multi-select): documented public APIs · a consistent error-handling pattern · validate env vars at startup · named exports only (no default exports) · consistent naming conventions · accessibility baseline on UI (WCAG AA) · conventional commit messages.
-
-Tooling (asked here, installed by `/develop tooling`):
-- Linting & formatting (adaptive): the standard linter + formatter for this stack (suggested; list an already-installed one first) · a specific alternative · minimal for now.
-- Pre-commit enforcement: lint + format + typecheck on every commit (suggested) · format only · none.
-- Testing gate (captured as the convention, the runner is set up by `/test`): unit + integration with a framework (suggested) · typecheck + manual `/verify` only · tests-first (TDD).
-- Continuous integration: a basic CI check on push (lint, typecheck, test) (suggested) · not yet · already configured.
-
-Adapt the list: drop what doesn't apply (no CI question for a throwaway prototype, no type-strictness for an untyped language); add any stack-specific convention worth pinning.
-
-Step 2, resolve SELECTED_PATTERNS: a named pattern → the absolute path of the matching `patterns/*.md` file (path only, do not inline its contents). "Other" (free text) → the engineer's exact typed text, passed inline (no file).
-
-Step 3, run the Tool-skills sweep (below), then spawn a subagent. description: "Audit: greenfield setup — create root AGENTS.md + CLAUDE.md pointer"; tools: `Read`, `Bash`, `Write`. Placeholder values: `PHASE=greenfield`, `SELECTED_PATTERNS=<pattern file path, or the Other free text>`, `ADDITIONAL_STANDARDS=<all the other Step 1 selections: code standards, type strictness, folder structure, AND the tooling choices (lint/format, pre-commit, testing gate, CI)>`, `MONOREPO_OR_NO` (`yes — apps: web, api, …` if detected), plus the sweep's `INSTALLED_SKILLS` / `DECLINED_TOOLS` so the subagent writes the `Agent skills:` line. Tell it to capture the tooling choices clearly (a short `## Tooling` note or explicit Rules lines) so `/develop tooling` installs exactly what was chosen. Per `agent-prompt.md` it writes root `AGENTS.md` + `CLAUDE.md` pointer, seeds `## Build approach` from the roadmap header (else `<TBD — set by /roadmap>`), and adds per-workspace nested docs if `MONOREPO=yes`.
-
-### Tool-skills & MCP sweep (offer matching Agent Skills and MCP servers — greenfield after scaffold, and whole-repo)
-
-Run on the main thread once the real stack is known (greenfield: from the scaffolded manifests read in Step 1; brownfield: from the repo scan). `/architect` offers when a tool is chosen; this covers whatever is already installed.
-- Build a `TOOL_DISCOVERY_SET` first: language/runtime, framework, router, styling/UI kit, database, ORM/query layer, auth/session, payments, email/notifications, storage/uploads, search, queue/background jobs, AI provider/vector DB, browser/runtime testing, observability, hosting/deploy. Include package names and common aliases from manifests. Do not stop after the first technology.
-- For each item not already covered by an installed skill / connected MCP (`npx skills list`, your connector list) or recorded as declined in `AGENTS.md`: detect Agent Skills with `npx skills find <tool-or-package>`; if weak, retry aliases from package/org names; collect every credible candidate and confirm with `npx skills add <owner>/<repo> --list` when practical. Detect MCP servers from the connector list first, else search `"<tool>" "MCP server"`. Never hardcode a list of which tools have skills or servers.
-- Keep discovery capped and cacheable: no per-tool subagents; use the main thread or one web-capable helper only when many web searches are unavoidable. Max 5 web searches and 8 fetched pages total, official registry/docs first. Reuse `docs/.agent-cache/tool-discovery/<slug>.md` if under 30 days old, after filtering installed/declined items.
-- Batch-offer Agent Skills as one multi-select panel: "Install relevant Agent Skills for this stack?" with every found skill grouped by technology, plus skip/decline. Then show MCPs separately as optional recommendations: "Optional MCP servers that could help this stack" with every found server grouped by technology, plus skip/decline. Never auto-install or auto-connect.
-- Install each selected skill: `npx skills add <owner>/<repo> -y`. Connecting an MCP is a user config step (their MCP/connector settings, e.g. `claude mcp add …`); you can't do it for them, so point them there. Once connected the tools are used automatically.
-- Pass `INSTALLED_SKILLS` / `MCP_SERVERS` / `DECLINED_TOOLS`; the subagent records in `AGENTS.md` an `Agent skills:` line (`installed: …`, `declined: …`) and an `MCP servers:` line (`connected: …`, `declined: …`); the declines stop a later run from re-offering. Project-wide tech at root; area-specific ones in the nested area doc.
-- No search/install/connect capability? Skip the offer; note in the report which tools might have a skill or MCP worth a manual look.
-
-### Phase 2 — Whole-repo scan (root + judged nested)
-
-Trigger: pre-flight classified clearly established, or Phase 0 → `Existing codebase`. Run the Tool-skills sweep above once the scan has identified the stack, before/with writing `AGENTS.md`.
-
-Spawn a subagent. description: "Audit: whole-repo scan — root + nested AGENTS.md"; tools: `Read`, `Bash`, `Write`, `Edit` (`Edit` to add nested pointers into the root it just wrote). Placeholder values: `PHASE=whole-repo`, root AGENTS.md noted as MISSING, `MONOREPO_OR_NO`.
-
-### Phase 3 — Area scan
-
-Trigger: a path or area name was given (e.g. `/audit src/auth`).
-
-Pre-flight additionally:
-1. Check the area path exists. If not: stop immediately, tell the engineer "Path `<area>` not found. Check the path and try again.", and do not spawn a subagent.
-2. Root `AGENTS.md` (the canonical file): missing, with no legacy CLAUDE.md to migrate → run Phase 2 fully first (spawn the whole-repo subagent, wait for root AGENTS.md + CLAUDE.md pointer), then continue with Phase 3. Only a legacy root `CLAUDE.md` → run the legacy migration first. Exists → proceed directly.
-3. Check if `<area>/AGENTS.md` exists; note present or missing.
-
-Spawn a subagent. description: "Audit: area scan — <area>"; tools: `Read`, `Bash`, `Write`, `Edit`. Placeholder values: `PHASE=area`, `AREA=<path>`, root AGENTS.md path, area AGENTS.md path or MISSING. The subagent adds the nested pointer line to root `AGENTS.md` via the Edit tool; it does not re-create root.
-
-After the run, parse the report's `Root gaps flagged` section:
-- `ROOT_GAPS: none` → relay the full report, done.
-- Gaps exist → ask (picker as above): Question: "I found things in `<area>` not reflected in root AGENTS.md. What should I do?" Option 1: `Add them now`, description: "I'll apply the additions immediately". Option 2: `Show me the diff`, description: "Print exactly what would change; I'll apply it manually". Option 3: `Skip for now`, description: "Leave root AGENTS.md as-is".
-- On `Add them now`: locate the `ROOT_GAPS:` block and extract each line starting with `- ` (each holds the exact markdown to insert and the target section, `— target section: ## <section>`). Apply one Edit call per gap into root `AGENTS.md`. Do not paraphrase.
-- On `Show me the diff`: print each addition as a fenced markdown block with the target section labelled. Do not write.
-- On `Skip for now`: do nothing.
-
-Relay the full report after the choice is applied.
-
-### Phase 4 — Gap-fill (root AGENTS.md already exists)
-
-Trigger: no area argument, codebase exists, AND root AGENTS.md already exists (including right after a legacy `CLAUDE.md` migration). Audit the whole codebase against what's written and fill the holes, conservatively.
-
-Pre-flight additionally: note root `AGENTS.md`'s path, and list all nested `AGENTS.md` paths (excluding `node_modules` and `.git`) to pass inline.
-
-Spawn a subagent. description: "Audit: gap-fill — codebase vs existing docs"; tools: `Read`, `Bash`, `Write`, `Edit`. Placeholder values: `PHASE=gap-fill`, root AGENTS.md path, nested AGENTS.md paths list.
-
-After the run, handle proposals before applying:
-- Nested docs the subagent created for clearly undocumented areas → already written; list them in the relay.
-- `ROOT_GAPS` and `PROPOSED_ADDITIONS` to existing files → ask (`Add them now` / `Show me the diff` / `Skip for now`) exactly as in Phase 3; apply with `Edit` (verbatim, no paraphrase) on `Add them now`.
-- `CONTRADICTIONS` (docs the code disproves) → surface to the engineer, do not auto-fix (these touch possibly curated lines). Relay each as "`<doc>` says *X*, but the code/ADR shows *Y*" and let them decide (correct it, or update the code). Never silently overwrite.
-
 ### After all phases
 
 If the subagent errored or wrote no `AGENTS.md` when it should have (the file is missing/empty), report the failure and offer to re-run; don't relay success it didn't produce. Otherwise relay the subagent's report: what was discovered (2–4 bullets), what was written (file paths), what was proposed or skipped (if existing files were found).
 
 ## Pattern presets
 
-See `patterns/` for the four coding style presets used in Phase 1.
+See `patterns/` for the four coding style presets used in Phase 1 (greenfield mode).
 
 ## Subagent prompt template
 

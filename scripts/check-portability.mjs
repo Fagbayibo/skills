@@ -73,6 +73,29 @@ const HOT_PATH_BUDGETS = [
     required: ['develop/ui-guide.md', 'develop/ui/implementation.md'],
     oneOf: ['develop/ui/mcp.md', 'develop/ui/image.md', 'develop/ui/existing.md', 'develop/ui/generate.md'],
   },
+  {
+    // Worst-case main-thread read: router + the tool-skills sweep (greenfield/
+    // whole-repo only) + the largest single phase mode file.
+    name: 'audit phase path',
+    budget: 22 * 1024,
+    required: ['audit/SKILL.md', 'audit/modes/tool-skills.md'],
+    oneOf: ['audit/modes/greenfield.md', 'audit/modes/whole-repo.md', 'audit/modes/area.md', 'audit/modes/gapfill.md'],
+  },
+  {
+    // First-run setup path reads the router spine plus modes/setup.md; the
+    // common write path reads the router alone (SKILL.md budget covers it).
+    name: 'test setup path',
+    budget: 24 * 1024,
+    required: ['test/SKILL.md', 'test/modes/setup.md'],
+  },
+  {
+    // Build path: gate router + post-gate build flow + the larger track guide.
+    // The gate-only path (route to /architect) reads SKILL.md alone.
+    name: 'develop build path',
+    budget: 44 * 1024,
+    required: ['develop/SKILL.md', 'develop/flow/build.md'],
+    oneOf: ['develop/ui-guide.md', 'develop/logical-guide.md'],
+  },
 ];
 
 function walk(dir) {
