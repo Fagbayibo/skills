@@ -191,5 +191,6 @@ If the task is to update or supersede an existing ADR:
 - Research subagent prompt: `agent-prompt.md` (passed to the subagent as an absolute path)
 - Research subagent mode instructions: `agent-modes/*.md` (only the matching mode file is passed)
 - Main-thread design conversation: `internal/design-conversation.md` (read only for create/supersede)
+- Tool skill & MCP discovery/offer: `internal/tool-discovery.md` (read only when the stack walk settles a new tool; runs discovery in the background)
 - Main-thread completion flow: `internal/after-subagent.md` (read only after the subagent finishes)
 - The staged design conversation is generated per feature (see *Staged design conversation*, stages a–f), not stored; there are no canned question lists. If a topic is too vague to generate from, narrow it first (scope validation, or one clarifying question), never fall back to generic MCQs

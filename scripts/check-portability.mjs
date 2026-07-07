@@ -40,7 +40,7 @@ const SKILL_BYTE_OVERRIDES = {};
 const SUPPORT_MD_BYTE_BUDGET = 24 * 1024;
 const SUPPORT_MD_OVERRIDES = {
   'architect/agent-prompt.md': 28 * 1024, // common ADR writer prompt; ratchet down after more common-rule trimming
-  'architect/internal/design-conversation.md': 27 * 1024, // main-thread design walk; carries the deliberate depth mandate + completeness gate (raised on purpose for question depth); split by stage if it grows further
+  'architect/internal/design-conversation.md': 25 * 1024, // main-thread design walk; tool discovery split out to internal/tool-discovery.md; split by stage if it grows further
 };
 const DESCRIPTION_CHAR_CAP = 400;
 const HOT_PATH_BUDGETS = [
