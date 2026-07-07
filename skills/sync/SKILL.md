@@ -68,8 +68,9 @@ De-duplicate, then **filter to source files** to sync *from*:
 - **Drop documentation and config** (`AGENTS.md` at any level, `docs/**`, `*.md`, `test-preferences.json`, lock files, generated output); /sync reads these as targets/context, never as a change source.
 - **Drop test files** (`*.test.*`, `*.spec.*`, `__tests__/`, etc.); tests aren't durable area conventions.
 - **Keep the `D` (deleted) entries** in a separate list; they drive orphan cleanup (Step 3) though they aren't synced *from*.
+- **Keep dependency manifest changes in a separate list** for tool discovery, even if they are config rather than source: `package.json`, `pyproject.toml`, `requirements*.txt`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `pubspec.yaml`, `mix.exs`, `*.csproj`, and equivalent package manifests. Lock files are signals only; do not pass lockfile contents.
 
-**If no source files remain** (only docs/tests/config changed), stop, nothing to sync. Do not spawn.
+**If no source files and no dependency manifest changes remain** (only docs/tests/lock/generated files changed), stop, nothing to sync. Do not spawn.
 
 ### 2. Locate the context files and ADRs (paths only — do NOT read them here)
 
@@ -80,6 +81,19 @@ Using your agent's file-search/glob tools:
 - Find the roadmap file(s) whose workspace/features the diff actually touches (in a monorepo, a changed file's workspace `apps/<x>/…` selects `docs/roadmap/<x>/`); never read or pass all of `docs/roadmap/`.
 
 The subagent reads these itself; the main model passes **paths** plus the changed-file list and diff command. One inline exception: root AGENTS.md contents, short and useful to anchor on. For each changed file, note its nearest enclosing directory with a `AGENTS.md` (root or nested); that's the context file most likely to need an update.
+
+### 2.5 Discover Agent Skills and optional MCPs for newly added tools
+
+Run only when dependency manifests changed or the diff clearly adds a significant external tool. Skip ordinary utility libraries unless they define a durable workflow or integration.
+
+- Identify newly added significant packages/tools from the manifest diff, not the full lockfile: framework, router, styling/UI kit, database, ORM/query layer, auth/session, payments, email/notifications, storage/uploads, search, queue/background jobs, AI provider/vector DB, browser/runtime testing, observability, hosting/deploy. Include package names and common aliases from manifests. Do not stop after the first technology.
+- Filter out anything already covered by installed skills, connected MCPs, or `AGENTS.md` declined entries.
+- For each remaining item, run `npx skills find <tool-or-package>`; if weak, retry aliases from package/org names. Collect every credible Agent Skill candidate and confirm with `npx skills add <owner>/<repo> --list` when practical. If the CLI is interactive/unavailable, search `"<tool>" "agent skill"` and confirm before offering.
+- MCP search is optional: connector list first, else `"<tool>" "MCP server"` per item. MCP is recommended upside, not required.
+- Keep discovery capped and cacheable: max 5 web searches and 8 fetched pages total, official registry/docs first. Reuse `docs/.agent-cache/tool-discovery/<slug>.md` when under 30 days old, after filtering installed/declined items.
+- Offer all Agent Skill matches in one multi-select panel, grouped by technology: "Install relevant Agent Skills for newly added tools?" plus skip/decline. Then offer MCPs separately: "Optional MCP servers that could help these tools" plus skip/decline. Never auto-install or auto-connect.
+- Install selected skills with `npx skills add <owner>/<repo> -y`. For MCPs, point to the user's connector/MCP settings; once connected the tools are used automatically.
+- Pass the result to the subagent as `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, and `DECLINED_TOOLS_OR_NONE` so it records durable lines in the right `AGENTS.md` file. If nothing was found or no capability exists, pass `none`.
 
 ### 3. Spawn the subagent
 
@@ -95,6 +109,7 @@ Do NOT read `agent-prompt.md` here. Resolve this skill's folder to an absolute p
   4. `ADR_PATHS` (all ADR paths, for Status-line reconciliation and staleness flagging)
   5. `FILE_TO_CONTEXT_MAP` (changed file → nearest context file)
   6. `ROADMAP_PATH_OR_NONE` (relevant workspace roadmap path(s), not all of `docs/roadmap/`; also the source of each linked feature's status for ADR Status-line reconciliation)
+  7. `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, `DECLINED_TOOLS_OR_NONE` from Step 2.5
 
 Fallback: if the client's subagents cannot read files, read `agent-prompt.md`, fill it, and pass the filled template as the prompt instead.
 

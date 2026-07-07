@@ -1,4 +1,4 @@
-# UI Path: no image and no design.md
+# UI Source: generated
 
 ## Path B — No image, no design.md
 

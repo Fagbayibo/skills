@@ -48,6 +48,12 @@ ADR_PATHS
 
 ROADMAP_PATH_OR_NONE
 
+## Tool discovery result from the main model
+
+- **Installed Agent Skills**: INSTALLED_SKILLS_OR_NONE
+- **MCP servers selected or recommended**: MCP_SERVERS_OR_NONE
+- **Declined or skipped tools**: DECLINED_TOOLS_OR_NONE
+
 ---
 
 ## What to do
@@ -64,6 +70,15 @@ Make the edit only if it is:
 **Stack consistency:** if root has `## Stack` and an architecture ADR (one with `## Proposed stack`) exists, check they agree. Root missing the decided stack (e.g. greenfield root seeded before the ADR): add it surgically. Contradiction: do not rewrite curated stack lines; flag under `CONFLICTS`, noting which ADR.
 
 **Build approach consistency:** root's `## Build approach` mirrors the roadmap header's build-approach line (its source of truth); never invent an approach. If they diverge (different approach, or root lacks the line the roadmap sets), make a single surgical edit to that one root line (as for a changed stack) and record it under `AGENTS_UPDATED`. If root's version is elaborated curated prose, or you can't tell which side is authoritative, do not overwrite; flag the divergence under `CONFLICTS`, naming the roadmap file.
+
+**Agent Skill and MCP records:** if `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, or `DECLINED_TOOLS_OR_NONE` is not `none`, record it surgically in the most specific relevant AGENTS.md:
+- Project-wide tools (framework, ORM, styling, core DB, hosting, test runner) belong in root AGENTS.md.
+- Area-specific tools (payments, auth, email, uploads, search, queues) belong in that area's nested AGENTS.md when one exists; otherwise add a short root note and flag the area under `CONTEXT_GAPS`.
+- Use or update compact lines, do not create a new section unless needed:
+  - `Agent skills: installed: <skill> (<owner/repo>); declined: <tool>`
+  - `MCP servers: connected/recommended: <server or tool>; declined: <tool>`
+- Idempotent: if the same installed, recommended, connected, or declined item is already recorded, do not add it again.
+- Record selected MCPs as recommended unless the main model explicitly says connected.
 
 Rules you must not break:
 - **Idempotent, check before you add.** Re-read the target doc now (a teammate or another session may have edited it). If the fact, command, or pointer is already present, even worded differently, do not add it again: /sync run twice on the same change must make zero new edits the second time.

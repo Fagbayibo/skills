@@ -4,24 +4,13 @@
 
 Detect (skip `node_modules/` and `.git/`): source files (any `.ts`, `.tsx`, `.js`, `.py`, `.go`, `.rs`; presence ⇒ brownfield, none ⇒ greenfield); root `AGENTS.md`; existing roadmap under `docs/roadmap/` (`roadmap.md`, or `index.md` + epic files; monorepo: `docs/roadmap/<workspace>/`), noting the shape.
 
-Greenfield: decompose the whole MVP from scratch, foundations-first (Step 3).
+Read exactly one route file before continuing to Step 2:
 
-Brownfield: read root `AGENTS.md` (and any existing roadmap) to plan the next slice on top:
-1. Enroll already-built features for context, from `AGENTS.md` (nested-area docs map to existing areas) + a light code scan, each with a `Code area` pointer. Large repo: offload the scan to a read-only subagent (fast/cheap model with `Read`/`Grep`/`Glob`) returning a compact map, don't read the tree inline. Assess completeness honestly from the code, don't stamp everything done: complete and shipped → `existing` (distinct from `done`); partially built → `in-progress` (so `/develop` can resume). Never mark a half-built feature `existing`.
-2. Plan the next slice as `planned` rows; don't re-plan `existing` features. No root `AGENTS.md`: note in the report that `/audit` should run first for real context.
+- `modes/plan-monorepo.md` when workspace markers or multiple app/package manifests show a monorepo.
+- `modes/plan-brownfield.md` when source files or a manifest show an existing codebase or an existing roadmap is being extended.
+- `modes/plan-greenfield.md` when there is no source code and no manifest yet.
 
-Re-run (roadmap exists): read the union, don't duplicate or fragment:
-- Read the whole roadmap (single file, or `index.md` + every epic file); all features at any status (`planned`, `in-progress`, `done`, `existing`, `dropped`) are the dedup baseline.
-- Never re-add a feature present at any status; request overlaps an existing `planned` row → extend it (sharpen intent/seeds).
-- Reconcile drift: shipped work or ADRs no row covers get enrolled (completed as `existing`/`done`, unfinished as `in-progress`); note as "drift enrolled".
-- Report: counts already there / new / drift, files written. Full reconcile after shipping → prefer replan mode.
-
-Monorepo (workspaces config: `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, `workspaces` in root `package.json`; or multiple manifests under `apps/*` / `packages/*`): plan per workspace, never mix apps:
-- Each workspace: `docs/roadmap/<workspace>/` (`roadmap.md`, or `index.md` + epics if large). Repo-wide planning (monorepo tooling, cross-cutting infra, e.g. a shared design system in `packages/ui`): `docs/roadmap/_root/`.
-- Top-level `docs/roadmap/index.md` maps the monorepo: one line per workspace (and `_root`) linking its roadmap with a status rollup (features done / total); create or update whenever a workspace roadmap is added or its rollup changes.
-- `/roadmap web <idea>` plans the `web` app; bare `/roadmap` on a monorepo asks which workspace(s) (or "repo-wide") as a panel. Read that workspace's nested `AGENTS.md` for its stack/conventions; apps differ, don't assume one.
-- Each feature's `Code area` points into its workspace (`apps/web/...`). Foundations are per-workspace, except genuinely shared ones (monorepo tooling, a shared UI package), which live in `_root` and the apps depend on.
-- Feature spanning workspaces: plan in `_root` (tag intent by workspace) or split into coordinated per-workspace features; never bury cross-app work in one app's roadmap.
+Do not read the other plan route files unless the classification changes. After the selected route has established the roadmap/workspace context, continue with Step 2 below.
 
 ### Step 2 — Ask (batched rounds, as decision panels)
 

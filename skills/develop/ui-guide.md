@@ -4,11 +4,12 @@ UI build track for `/develop`, read after the ADR gate (`SKILL.md` Step 0) class
 
 ## What this track does
 
-Entry points, checked in order:
+Design source routes, checked in order:
 
-1. Existing `design.md`: implement strictly to it as a professional frontend engineer.
+1. MCP source (Figma or another design MCP): pull real design data, create `design.md`, implement.
 2. Image provided: extract tokens, replicate pixel-perfectly.
-3. Neither: guide template selection or custom style generation, create `design.md`, implement.
+3. Existing `design.md` or current UI: implement to it, or extract `design.md` from shipped UI.
+4. No source: guide template selection or custom style generation, create `design.md`, implement.
 
 All paths: component-or-screen → stack detection → styling library → dark mode → token sync → font → five phases.
 
@@ -40,8 +41,8 @@ Not found → **Step 0.1 (brownfield check)**.
 ## Step 0.0 — Follow the design source the ADR recorded (don't assume)
 
 The design source is the engineer's choice, recorded in the ADR by `/architect` (Figma frames, screenshot, existing `design.md`, or described direction). Follow the record; never default to Figma just because an MCP is connected.
-- ADR says Figma → pull the real design via the Figma MCP (tokens, spacing, components, the named frames) into `./design.md` (real values, not invented), show a short summary, confirm, build to it. No MCP connected: say so, ask to connect it or pick another source.
-- ADR says screenshot / existing UI / described direction → the matching step below.
+- ADR says Figma or another design MCP → route to `ui/mcp.md`.
+- ADR says screenshot / existing UI / described direction → route to the matching source file below.
 - No ADR record (direct UI task, no source given) → ask *"How should I get the design for this?"* with options **From Figma (its MCP)** · **From a screenshot / images** · **From the existing `design.md` / current UI** · **No design, suggest a direction** (the picker adds Other), then proceed by their pick.
 
 ## Step 0.1 — Brownfield check (no design.md, but is there existing UI?)
@@ -129,18 +130,19 @@ Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, 
 
 ## Step 1 — Load the selected UI path
 
-Based on the checks above, read exactly one path file:
+Based on the checks above, read exactly one source file:
 
-- `ui/path-design-md.md` when an existing `design.md` governs this build.
-- `ui/path-image.md` when a screenshot or image is the visual source.
-- `ui/path-no-image.md` when there is no screenshot and no `design.md`.
+- `ui/mcp.md` when Figma or another design MCP is the source.
+- `ui/image.md` when a screenshot or image is the source.
+- `ui/existing.md` when an existing `design.md` or current UI is the source.
+- `ui/generate.md` when there is no source and the engineer wants a template or suggested direction.
 
-After the selected path has resolved tokens, assets, and design direction, read `ui/implementation.md` and follow it through the implementation phases and report. Do not read the other path files unless the source changes.
+After the selected source has resolved tokens, assets, and design direction, read `ui/implementation.md` and follow it through the implementation phases and report. Do not read the other source files unless the source changes.
 
 ## Reference files
 
 - Accessibility checklist: `checklist.md`
 - Design templates: `templates/`
 - Project design system: `./design.md`
-- UI source paths: `ui/path-design-md.md`, `ui/path-image.md`, `ui/path-no-image.md`
+- UI source routes: `ui/mcp.md`, `ui/image.md`, `ui/existing.md`, `ui/generate.md`
 - UI implementation phases and report: `ui/implementation.md`

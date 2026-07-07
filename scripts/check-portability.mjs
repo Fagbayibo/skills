@@ -59,6 +59,7 @@ const HOT_PATH_BUDGETS = [
     name: 'roadmap plan path',
     budget: 40 * 1024,
     required: ['roadmap/SKILL.md', 'roadmap/modes/plan.md', 'roadmap/roadmap-template.md'],
+    oneOf: ['roadmap/modes/plan-greenfield.md', 'roadmap/modes/plan-brownfield.md', 'roadmap/modes/plan-monorepo.md'],
   },
   {
     name: 'roadmap replan/add path',
@@ -70,7 +71,7 @@ const HOT_PATH_BUDGETS = [
     name: 'develop UI path',
     budget: 42 * 1024,
     required: ['develop/ui-guide.md', 'develop/ui/implementation.md'],
-    oneOf: ['develop/ui/path-design-md.md', 'develop/ui/path-image.md', 'develop/ui/path-no-image.md'],
+    oneOf: ['develop/ui/mcp.md', 'develop/ui/image.md', 'develop/ui/existing.md', 'develop/ui/generate.md'],
   },
 ];
 

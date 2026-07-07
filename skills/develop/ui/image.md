@@ -1,4 +1,4 @@
-# UI Path: image or screenshot
+# UI Source: image
 
 ## Step 1 — Image vs no image
 
