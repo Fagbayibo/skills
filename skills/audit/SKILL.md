@@ -1,7 +1,7 @@
 ---
 name: audit
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Bootstrap a project's AI context: the AGENTS.md files every later skill reads. Run /audit on a greenfield project, on an existing codebase with missing docs, or on one area (/audit src/auth). Writes tool agnostic AGENTS.md plus thin CLAUDE.md pointers, adding only what is missing; never overwrites curated content."
+description: "Run /audit on a greenfield project, an existing codebase with missing docs, or one area (/audit src/auth) to bootstrap the project's AI context — the AGENTS.md files every later skill reads. Writes tool-agnostic AGENTS.md plus thin CLAUDE.md pointers, adding only what is missing; never overwrites curated content."
 ---
 
 ## Output style (plain words, no dashes)

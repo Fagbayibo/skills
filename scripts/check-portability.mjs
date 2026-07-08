@@ -32,6 +32,7 @@ import { join } from 'node:path';
 
 const SKILLS_DIR = new URL('../skills/', import.meta.url).pathname;
 const violations = [];
+const sizes = []; // { rel, words, bytes } per .md file, for the word-count report
 
 // Rule 5 budgets. Default is the ceiling for a lean phase skill; overrides
 // are grandfathered exceptions — ratchet them DOWN as files shrink, never up.
@@ -40,7 +41,7 @@ const SKILL_BYTE_OVERRIDES = {};
 const SUPPORT_MD_BYTE_BUDGET = 24 * 1024;
 const SUPPORT_MD_OVERRIDES = {
   'architect/agent-prompt.md': 28 * 1024, // common ADR writer prompt; ratchet down after more common-rule trimming
-  'architect/internal/design-conversation.md': 25 * 1024, // main-thread design walk; tool discovery split out to internal/tool-discovery.md; split by stage if it grows further
+  'architect/internal/design-conversation.md': 25344, // main-thread design walk; ratcheted down from 25*1024 after per-stage framing dedup; tool discovery split to internal/tool-discovery.md; split by stage if it grows further
 };
 const DESCRIPTION_CHAR_CAP = 400;
 const HOT_PATH_BUDGETS = [
@@ -123,6 +124,11 @@ function check(path) {
   const text = readFileSync(path, 'utf8');
   const isSkillMd = rel.endsWith('/SKILL.md');
   const isTemplate = rel.includes('/templates/');
+
+  // Word-count report data (rule 5 companion): track every .md so a size
+  // regression on a hot file is visible at a glance, not just on budget breach.
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  sizes.push({ rel, words, bytes: Buffer.byteLength(text, 'utf8'), isTemplate });
 
   // Rule 1 — allowed-tools on every SKILL.md
   if (isSkillMd && !/^allowed-tools:/m.test(frontmatter(text))) {
@@ -228,4 +234,18 @@ if (filtered.length) {
   console.error('Portability check FAILED:\n' + filtered.map(v => '  - ' + v).join('\n'));
   process.exit(1);
 }
-console.log('Portability check passed — all skills follow the cross-tool conventions.');
+
+// Word-count report — the heaviest instruction files (templates excluded; they
+// are reference data), so a creeping size regression is visible before it breaks
+// a budget. Loading cost tracks words as much as bytes.
+const report = sizes
+  .filter(s => !s.isTemplate)
+  .sort((a, b) => b.bytes - a.bytes)
+  .slice(0, 15);
+const pad = Math.max(...report.map(s => s.rel.length));
+console.log('\nHeaviest instruction files (words · bytes):');
+for (const s of report) {
+  console.log(`  ${s.rel.padEnd(pad)}  ${String(s.words).padStart(5)} w · ${String(s.bytes).padStart(6)} b`);
+}
+
+console.log('\nPortability check passed — all skills follow the cross-tool conventions.');

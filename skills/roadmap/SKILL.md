@@ -1,7 +1,7 @@
 ---
 name: roadmap
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Turn a product idea into a living, coarse roadmap in docs/roadmap/, and keep it current as you ship. Run /roadmap to plan a new product, plan the next slice, or enroll one named feature; run it with no argument to reconcile after shipping and queue what is next. It seeds WHAT to build; /architect designs, /develop builds."
+description: "Run /roadmap to turn a product idea into a living, coarse roadmap in docs/roadmap/ and keep it current — plan a new product, plan the next slice, enroll one named feature, or run with no argument to reconcile after shipping and queue what is next. Seeds WHAT to build; /architect designs, /develop builds."
 ---
 
 ## Output style (plain words, no dashes)

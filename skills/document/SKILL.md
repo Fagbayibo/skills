@@ -1,7 +1,7 @@
 ---
 name: document
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Write the human facing prose about a change: a PR description, changelog entry, release notes, or incident postmortem. Run /document pr | changelog | release-note | postmortem (or let it ask) and it drafts from the real commits and diff, writing to the right place. It does not write code, tests, or ADRs."
+description: "Run /document pr | changelog | release-note | postmortem (or let it ask) to write the human-facing prose about a change. Drafts from the real commits and diff, writing to the right place. Does not write code, tests, or ADRs."
 ---
 
 ## Output style (plain words, no dashes)

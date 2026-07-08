@@ -1,7 +1,7 @@
 ---
 name: status
 allowed-tools: Bash, Read, Grep, Glob
-description: "Use this skill to orient across a paused session or a team: where things stand and what is safe to pick up. Run /status when resuming (where was I, what is left), joining a shared repo, or checking for collisions before starting. Reads git state, the roadmap, and ADRs. Read only."
+description: "Run /status to orient across a paused session or a team — where things stand and what is safe to pick up — when resuming (where was I, what is left), joining a shared repo, or checking for collisions before starting. Reads git state, the roadmap, and ADRs. Read-only."
 ---
 
 ## Output style (plain words, no dashes)

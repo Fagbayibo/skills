@@ -1,7 +1,7 @@
 ---
 name: review
 allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
-description: "A rigorous, senior level code review before merge, run on a different Claude model than wrote the code. Run /review after implementing a feature or fix, before opening a PR, or whenever a change warrants a fresh-model review. Severity ranked findings on correctness, security, performance, maintainability, and tests, written to docs/reviews/. It does not modify your code."
+description: "Run /review for a rigorous, senior-level code review before merge, on a different Claude model than wrote the code — after implementing a feature or fix, before opening a PR, or whenever a change warrants a fresh-model look. Severity-ranked findings on correctness, security, performance, maintainability, and tests, written to docs/reviews/. Does not modify your code."
 ---
 
 ## Output style (plain words, no dashes)

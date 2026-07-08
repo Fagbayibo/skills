@@ -1,7 +1,7 @@
 ---
 name: harden
 allowed-tools: Bash, Read, Grep, Glob, Write, Task
-description: "Stress test a completed, tested change against production failure modes: edge cases, concurrency, scale, and security. Run /harden after /test or /review, or as a last step before merge when a change warrants a stress pass (risky, high-blast-radius, or flagged on the roadmap). It writes a prioritized, verifiable hardening checklist to docs/hardening/. It does not rewrite your code."
+description: "Run /harden to stress-test a completed, tested change against production failure modes — edge cases, concurrency, scale, security — after /test or /review, or before merge when a change is risky, high-blast-radius, or flagged on the roadmap. Writes a prioritized, verifiable hardening checklist to docs/hardening/. Does not rewrite your code."
 ---
 
 ## Output style (plain words, no dashes)

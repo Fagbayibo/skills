@@ -1,7 +1,7 @@
 ---
 name: develop
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion, WebSearch, WebFetch
-description: "Build a feature, UI or backend, from an approved design. Run /develop to implement a page, component, API, service, or data slice. If something load bearing is undecided and no ADR records it, it stops and routes you to /architect. Otherwise it reads the ADR plus AGENTS.md and builds, advancing the roadmap."
+description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no ADR records it, it stops and routes you to /architect; otherwise it reads the ADR plus AGENTS.md, builds, and advances the roadmap."
 ---
 
 ## Output style (plain words, no dashes)

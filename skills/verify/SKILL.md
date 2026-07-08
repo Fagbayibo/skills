@@ -1,7 +1,7 @@
 ---
 name: verify
 allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
-description: "Use this skill to confirm a change actually works by running the real app and watching behavior, not just tests. Run /verify after /develop and before /review, or when a UI, API, CLI, job, or no-test-runner refactor needs runtime proof. It launches the app, exercises the changed flow, checks observable output, and diffs before/after output for refactors. It does not write code."
+description: "Run /verify to confirm a change actually works by running the real app and watching behavior, not just tests — after /develop and before /review, or when a UI, API, CLI, job, or no-test-runner refactor needs runtime proof. Launches the app, exercises the changed flow, checks observable output, and diffs before/after for refactors. Does not write code."
 ---
 
 ## Output style (plain words, no dashes)

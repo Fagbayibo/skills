@@ -1,7 +1,7 @@
 ---
 name: architect
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Make and document an architectural or technical decision before writing code. Run /architect when choosing between approaches, designing a feature or page, picking a tech stack, or when /develop says a decision is owed. Acts as a Staff level engineer: asks deep questions, recommends an answer, and writes a complete build spec ADR to docs/adr/. Owns all ADR files."
+description: "Run /architect when choosing between approaches, designing a feature or page, picking a tech stack, or when /develop says a decision is owed — anytime a load-bearing technical decision is unmade. Asks deep questions, recommends an answer, and writes a build-spec ADR to docs/adr/. Owns all ADR files."
 ---
 
 ## Output style (plain words, no dashes)

@@ -52,7 +52,7 @@ Mechanics (every question, no exceptions):
 - **Offer the real options; exactly one is marked `(recommended)`** with a one-line why (you make the call, they override). List every choice that genuinely applies, not a token two. Where the picker caps the count (Claude Code's `AskUserQuestion` allows four), present the strongest and let the custom slot carry the rest, or split across rounds; never drop real options to fit.
 - **The last choice is always a free-text custom input.** Claude Code's picker appends that "Other" slot automatically (don't add your own); in a plain-text fallback, add it explicitly as the final option. This holds for design questions and confirm panels alike (the data model, accept the ADR, References consent, an overlapping ADR): one recommended option plus the custom slot.
 - **Grill down to the smallest load-bearing decision.** Work out every decision this specific project needs, from the big architectural calls to the smallest tool and setup choices, and ask each as its own question with a recommended pick and current, real options you generate at runtime. No choice is too small to route through the engineer; never silently decide one for them.
-- Capability-first: use your agent's picker (`AskUserQuestion` on Claude Code); with no picker, the same options as plain text, custom option last. Batch related questions up to 4 per call, run as many rounds as a stage needs, fold prior answers forward so it reads as one continuous interview.
+- Capability-first, per the picker/custom-slot mechanics above. Batch related questions up to 4 per call, run as many rounds as a stage needs, fold prior answers forward so it reads as one continuous interview.
 
 Still infer the framing, but ASK the design inputs. Within each stage, sort every dimension INFER / ASK / RECOMMEND (see *Asks vs acts*): INFER silently from the prompt/codebase/`AGENTS.md`; ASK the engineer the design inputs (data model, stack, provider, methods, rules) one phase at a time with a suggested pick; RECOMMEND the small internal implementation details they don't want to weigh in on.
 
@@ -103,11 +103,11 @@ Then walk the stages in order as one continuous, step-by-step interview. Ask eac
 
   **Tool skills & MCP servers.** When this stack walk settles one or more NEW tools not already installed or declined, run the mandatory Agent Skill + MCP offer: read `internal/tool-discovery.md` and follow it. It runs the discovery in the background (a read-only, fast, low-cost subagent) so the searches overlap with the rest of this interview, then offers the found skills and MCP servers on the main thread. Skip it entirely when no new tool is chosen (an ENHANCEMENT reusing the existing stack). Do not read `internal/tool-discovery.md` when no new tool is picked.
 
-**Stage (d) — API / interface surface (walk each endpoint).** Ask one endpoint at a time, not an upfront full table: first which surfaces the feature needs, then per endpoint its method, inputs, outputs, auth requirement, and key errors, suggesting a shape they can take or change. Assemble as you go.
+**Stage (d) — API / interface surface (walk each endpoint).** First which surfaces the feature needs, then per endpoint its method, inputs, outputs, auth requirement, and key errors.
 
-**Stage (e) — Security & authorization (walk each rule).** Ask who may do what rule by rule (ownership, roles, multi-tenant/org scoping) and name any compliance scope this feature triggers (payments/PII/health), suggesting an answer per question. Assemble the authz model from the answers; no upfront full model.
+**Stage (e) — Security & authorization (walk each rule).** Who may do what, rule by rule (ownership, roles, multi-tenant/org scoping), plus any compliance scope this feature triggers (payments/PII/health).
 
-**Stage (f) — Edge cases & failure modes (walk each case).** Ask the handling one failure at a time (concurrency, retries, timeouts, partial failure, empty/error/loading states), suggesting a sensible default they can change. Assemble from the answers.
+**Stage (f) — Edge cases & failure modes (walk each case).** The handling one failure at a time (concurrency, retries, timeouts, partial failure, empty/error/loading states).
 
 **(UI-page features**, topic IS a page/screen: insert a page-design stage between (a) and (d) that walks page composition/sections, design-system direction, component inventory, and asset strategy (the UI-design checklist bullet) one question at a time, suggesting a pick each. No upfront full layout to accept or reject.**)**
 
