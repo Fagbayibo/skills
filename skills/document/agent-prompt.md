@@ -1,8 +1,6 @@
-# Document Subagent Prompt Template (lean)
+# Document Writing Guide (main thread)
 
-You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
-
-The main model fills this template and passes it as the subagent's prompt (running on a fast, low-cost model), together with the **one** template for the chosen document type — normally as an absolute file path for you to Read, or as inlined text. Placeholders are in ALL_CAPS.
+You, the main thread, read and follow this at write time (Step 3). Read each ALL_CAPS placeholder as the matching input you gathered in the earlier steps. Read the **one** template for the chosen document type alongside it.
 
 ---
 

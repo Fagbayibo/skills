@@ -12,7 +12,7 @@ Write everything this skill produces (files, reports, every message shown to the
 
 Role: a senior test engineer writing the suite the code deserves, no more, no less. Test what a caller relies on and what would actually break someone, not lines for a coverage number. Pick a strategy per file by reading what the thing is. Refuse tests that lock in scaffolding the slice was never meant to make real.
 
-Target: the code changed in this branch but not yet committed. Each changed file is classified (pure logic, component, API route, page/flow) and tested with the right strategy; tests verify real behavior and catch regressions, not coverage farming. A subagent reads the changed files and writes the tests; with a governing ADR, tests trace to its acceptance criteria (Steps 7 and 8).
+Target: the code changed in this branch but not yet committed. Each changed file is classified (pure logic, component, API route, page/flow) and tested with the right strategy; tests verify real behavior and catch regressions, not coverage farming. The main thread writes the tests itself (a read-only `scout` may do the heavy file reading for a large set); with a governing ADR, tests trace to its acceptance criteria (Steps 7 and 8).
 
 Does not write application code. Does not update `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
@@ -34,14 +34,14 @@ Does not write application code. Does not update `AGENTS.md`/`CLAUDE.md` context
 
 Any Agent Skills client on macOS, Linux, or Windows:
 - `git` is the only required CLI, identical everywhere; run the `git` lines as shown. Other shell snippets are POSIX reference, not literal scripts: do not assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `xargs`, `mkdir -p`, or `node -e` exist. Use your agent's cross-platform file tools (read, search/glob, write) and apply branching logic yourself, not via shell `if`/variables/redirects.
-- Bundled files: referenced relative to this skill's folder. The main agent resolves the folder to an absolute path and passes bundled file paths in the subagent prompt; the subagent reads them by path. Fallback: if the client's subagents cannot read files, read and inline the contents instead.
-- No subagent or interactive-question support? Write the tests inline yourself, and ask any multiple-choice question as plain text with the same options.
+- Bundled files: referenced relative to this skill's folder. The main thread resolves the folder to an absolute path and reads the bundled files itself at write time (Step 8): `agent-prompt.md` and `writing-guide.md`.
+- No interactive-question support? Ask any multiple-choice question as plain text with the same options.
 
 In the Ask blocks below, each option is `"label": "description"`; render them through your agent's picker (`AskUserQuestion` on Claude Code) or as plain text.
 
 ## Execution
 
-### Pre-flight (main model)
+### Pre-flight (main thread)
 
 #### 1. Determine scope from git (do this first — if empty, no point asking anything)
 
@@ -61,7 +61,7 @@ The remainder is the scope. Empty: go to Step 3. Otherwise continue.
 
 #### 1b. Classify each scoped file
 
-Classify from path and filename alone, never read contents in the main thread; if genuinely ambiguous, tag `logic` and the subagent re-tags on read. Record each file's class for the subagent prompt.
+Classify from path and filename alone, cheaply; if genuinely ambiguous, tag `logic` and re-tag when you read the file at write time. Record each file's class for the write step.
 
 | Signals in path / filename | Class | Test strategy |
 |---|---|---|
@@ -73,16 +73,16 @@ Classify from path and filename alone, never read contents in the main thread; i
 
 `E2E_RELEVANT = yes` if any file is **page/flow**; otherwise `no`.
 
-Large diff guard: more than 15 source files, don't dump all into one subagent. Prioritise by class (logic and api/server first, most risk, cheapest to test well) and ask:
+Large diff guard: more than 15 source files, don't try to write them all in one pass. Prioritise by class (logic and api/server first, most risk, cheapest to test well) and ask:
 
 ```
 Ask — "<N> changed files is a lot for one pass. How should I focus?"  (header: "Scope size")
 - "Logic & API first (recommended)": "Test the <count> logic/api files now; I'll note the rest as not-yet-covered"
-- "Test everything in batches": "Cover all <N> files across multiple subagent passes, slower but complete"
+- "Test everything in batches": "Cover all <N> files across multiple passes, slower but complete"
 - "Let me narrow it": "I'll tell you which files or directory matter most"
 ```
 
-Monorepo resolution: find each scoped file's nearest enclosing `package.json` (walk up). Different roots: group by root (own framework, package manager, test dir; install and spawn per group). One shared root (common case): single project. Record each file's `packageRoot` for the subagent.
+Monorepo resolution: find each scoped file's nearest enclosing `package.json` (walk up). Different roots: group by root (own framework, package manager, test dir; install and write per group). One shared root (common case): single project. Record each file's `packageRoot` for the write step.
 
 ---
 
@@ -137,19 +137,19 @@ pip install pytest pytest-mock                                # Python
 go get github.com/stretchr/testify                           # Go
 ```
 
-"No": record `INSTALL=deferred`; the subagent writes complete tests, the run command is reported as "run after installing".
+"No": record `INSTALL=deferred`; write complete tests anyway, the run command is reported as "run after installing".
 
 ---
 
 #### 7. Gather lightweight pointers (do NOT read heavy files here)
 
-Paths and cheap signals only; the subagent does the heavy reading. Do not read ADRs or `design.md` in full here. Never read source files here; the subagent reads each scoped file.
+Paths and cheap signals only; the heavy reading happens at write time (by you, or a `scout` if offloaded). Do not read ADRs or `design.md` in full here. Don't read source files here; they're read at write time.
 
 With file tools:
 - List the 3 most-recently-modified ADR paths under `docs/adr/` (paths only).
 - Identify the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/roadmap/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
-- Note whether `design.md` exists at the project root; its path goes to the subagent only when a **component** or **page/flow** file is in scope, else `none`.
-- Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) to inline as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the roadmap header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates the subagent's judgment (Step 8, instruction a).
+- Note whether `design.md` exists at the project root; use its path only when a **component** or **page/flow** file is in scope, else `none`.
+- Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the roadmap header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates your judgment when writing (Step 8, rule a).
 - Read `package.json`, note `scripts.test`. `RUN_COMMAND` = `<pkgmgr> test` when a `test` script exists (`<pkgmgr> run test` for npm); a raw invocation (e.g. `pnpm exec vitest run`) only when none does.
 
 ---
@@ -162,25 +162,23 @@ Ask — "Tests will be written for <N> changed files. Run the suite after writin
 - "Skip, just write them": "Write the tests and give me manual run-and-verify instructions instead"
 ```
 
-Set `RUN_AFTER = yes | no` and pass it to the subagent.
+Set `RUN_AFTER = yes | no` and apply it at write time.
 
-#### 8. Spawn subagent
+#### 8. Write the suite (main thread)
 
-Resolve this skill's folder to an absolute path (you already resolve these relative paths, so you know the folder) and pass the absolute paths of `agent-prompt.md` and `writing-guide.md` in the spawn prompt. Do NOT read their contents into the main context. Fallback: if the client's subagents cannot read files, read and inline the contents instead.
+The main thread writes the tests itself. Do not spawn a writer. Resolve this skill's folder to an absolute path (you already resolve these relative paths, so you know the folder) and Read `agent-prompt.md` and `writing-guide.md` now (only now, at write time): `agent-prompt.md` is your operating template, `writing-guide.md` is the strategy, tool rules, iteration loop, and report format you follow. Reading the changed files under test is the one expensive part; for a large or unfamiliar set, offload just the reading to a read-only `scout` subagent on the cheapest model (Claude Code: `haiku`, not inheriting the session model) that returns a compact map, then write from it.
 
-Spawn with `model` set explicitly to a strong model (do not inherit the session model; Claude Code: `sonnet`, reserving `opus` for an unusually complex suite; spawn as the `writer` subagent type, which pins the model); `description: "Test: <tool> suite for <N> changed files"`; tools `Read`, `Bash`, `Write`, `Edit`. The prompt contains:
+The inputs to apply (the labeled values you gathered):
+1. unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context plus the build approach line; the 3 recent ADR paths or `none` (read only if relevant to what you're testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing ADR path, and the `verify.md` path (each `none` if absent).
+2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`.
 
-1. The two absolute paths, with this instruction: your first action is to Read both files by path; `agent-prompt.md` is your operating template, `writing-guide.md` is the strategy, tool rules, iteration loop, and report format you must follow.
-2. The dynamic values as a labeled list ("Placeholder values: ..."): unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context inline plus the build approach line; the 3 recent ADR paths or `none` (read only if relevant to what it's testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing ADR path, and the `verify.md` path (each `none` if absent).
-3. Two instructions: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`. (Subagents without file access: inline the relevant ADR / acceptance criteria / `verify.md` text instead.)
-
-Monorepo (multiple package roots from Step 1b): one subagent per root in parallel with `run_in_background: true`, each scoped to its root's files, tool, and package manager; isolated contexts keep each lean. Collect all reports before relaying. Single root (common case): one foreground subagent.
+Monorepo (multiple package roots from Step 1b): write each root's suite in turn, scoped to its root's files, tool, and package manager (offload each root's file reading to its own `scout` if large). Single root (common case): just write it.
 
 ---
 
-### After subagent completes
+### After writing the suite
 
-Subagent errored or produced no report: say so and offer to re-run; never report a passing or failing suite it didn't actually produce. Otherwise relay the format matching `RUN_AFTER`.
+If the write failed or produced no report: say so and re-do it; never report a passing or failing suite you didn't actually produce. Otherwise relay the format matching `RUN_AFTER`.
 
 Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the roadmap and ADR hold everything, a fresh session keeps the next build cheap.
 
@@ -229,5 +227,5 @@ Omit the harden line entirely when `HARDEN_FLAG=no`. This skill is complete afte
 ## Reference files (in this skill's folder; referenced by relative path)
 
 - `modes/setup.md`: first-run-only steps (stack detection, framework questions, save preferences); read on the main thread only when `NO_PREFS`
-- `agent-prompt.md`: the subagent's operating template, read by the subagent via the absolute path passed in the spawn prompt
-- `writing-guide.md`: strategy, tool rules, iteration loop, report format; read the same way (inline its text only as the no-file-access fallback)
+- `agent-prompt.md`: the operating template the main thread reads at write time (Step 8)
+- `writing-guide.md`: strategy, tool rules, iteration loop, report format; the main thread reads it at write time too

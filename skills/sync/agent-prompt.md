@@ -1,6 +1,6 @@
-# Sync Subagent Prompt Template
+# Sync Maintenance Guide (main thread)
 
-The main model passes this file's absolute path in the spawn prompt (fallback: fills and inlines it). Placeholders are in ALL_CAPS. You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+You, the main thread, read and follow this at write time (Step 3). Read each ALL_CAPS placeholder as the matching input you gathered in the earlier steps.
 
 ---
 
@@ -74,11 +74,10 @@ Make the edit only if it is:
 **Agent Skill and MCP records:** if `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, or `DECLINED_TOOLS_OR_NONE` is not `none`, record it surgically in the most specific relevant AGENTS.md:
 - Project-wide tools (framework, ORM, styling, core DB, hosting, test runner) belong in root AGENTS.md.
 - Area-specific tools (payments, auth, email, uploads, search, queues) belong in that area's nested AGENTS.md when one exists; otherwise add a short root note and flag the area under `CONTEXT_GAPS`.
-- Use or update compact lines, do not create a new section unless needed:
-  - `Agent skills: installed: <skill> (<owner/repo>); declined: <tool>`
-  - `MCP servers: connected/recommended: <server or tool>; declined: <tool>`
-- Idempotent: if the same installed, recommended, connected, or declined item is already recorded, do not add it again.
-- Record selected MCPs as recommended unless the main model explicitly says connected.
+- An installed skill goes in the `## Agent skills` section as its own bullet so only needed skills load: `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, using the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`, never a hardcoded Claude-only path, since every tool reads this file) and keeping the registry source `<owner>/<repo>` as the tool-agnostic identity. Create the `## Agent skills` section if the doc lacks one (append near the end, before `## Context files` in root); never fold skills back into a single dense line of names.
+- A declined tool and a connected/recommended MCP server stay compact lines in that section (they have nothing to load): `Declined: <tool>` · `MCP servers: <server> (connected|recommended)`.
+- Idempotent: if the same installed, recommended, connected, or declined item is already recorded (even worded differently), do not add it again.
+- Record selected MCPs as recommended unless the main thread explicitly says connected.
 
 Rules you must not break:
 - **Idempotent, check before you add.** Re-read the target doc now (a teammate or another session may have edited it). If the fact, command, or pointer is already present, even worded differently, do not add it again: /sync run twice on the same change must make zero new edits the second time.

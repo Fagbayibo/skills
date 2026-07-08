@@ -29,7 +29,7 @@ Gates, then acts: no upfront question rounds like `/architect`. Read the decisio
 
 ## Portability (any OS, any agent)
 
-Any Agent Skills client, macOS/Linux/Windows. Detection snippets are POSIX reference; use your agent's own cross-platform file tools. Builds inline by default; a very large single build or multi-file rollout may fan out to subagents (Step 3), and a doc-check may use a read-only web subagent (Step 2.6), degrading to build-from-knowledge without web capability. Bundled guides (`ui-guide.md`, `logical-guide.md`, `checklist.md`, `templates/`) and the post-gate build flow (`flow/build.md`) are paths relative to this skill's folder; the main agent reads them. No interactive-question picker → ask the prompts as plain text with the same options.
+Any Agent Skills client, macOS/Linux/Windows. Detection snippets are POSIX reference; use your agent's own cross-platform file tools. Builds inline on the main thread (Step 3); the only subagents are a read-only `scout` that explores code (Step 2.5) and a read-only `researcher` for a doc-check (Step 2.6, degrading to build-from-knowledge without web capability), both on the cheapest model. Bundled guides (`ui-guide.md`, `logical-guide.md`, `checklist.md`, `templates/`) and the post-gate build flow (`flow/build.md`) are paths relative to this skill's folder; the main thread reads them. No interactive-question picker → ask the prompts as plain text with the same options.
 
 ## Execution
 

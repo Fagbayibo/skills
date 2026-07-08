@@ -88,10 +88,11 @@ No references (or no answer): no `## References` section, no `(basis: …)` cita
 
 Sources only (or the agent has no web tools): wherever the roadmap recommends something the engineer didn't dictate (phasing choice, order rationale, a suggested capability, a `Needs ADR` flag, a weight call), append a short `(basis: …)`: a project source (`your AGENTS.md`, an ADR, the existing stack) or a named practice (`vertical slices ship real value early`, `foundations before features`, `data model is the costliest thing to redo`); inline you have no web tools, so name the source or practice, never a URL. Add a `## References` section naming *Project sources* (verifiable) and *Practices & standards* (named); no Links group, no subagent. Done.
 
-Sources plus web verified links: as Sources only, then spawn a sourcing subagent (capability-first) so links are fetched and confirmed, never fabricated:
-- `model`: set explicitly to a fast, low-cost tier; do not inherit the session model (Claude Code: spawn as the `researcher` subagent type, which pins `haiku` and carries the web tools; a light model elsewhere) · `description: "Roadmap: source & reference the recommendations"`
-- Tools: `Read`, `Edit`, `WebSearch`, `WebFetch`
-- `prompt`: the roadmap file path(s) and its recommendations. Job: confirm each load-bearing `(basis: …)` is sound; where a canonical source is worth linking (an official doc, a named standard/practice), web search and fetch to confirm it exists and says what's claimed; complete `## References` with a *Links* group (web verified only, else "none verified"). Never invent a URL. Keep it lean.
+Sources plus web verified links: as Sources only, then verify the links with a read-only web subagent (it only fetches; you do the writing), so links are confirmed, never fabricated:
+- Spawn a read-only `researcher` subagent (capability-first). `model`: the cheapest tier; do not inherit the session model (Claude Code: the `researcher` type pins `haiku` and carries the web tools; a light model elsewhere) · `description: "Roadmap: verify reference links"`
+- Tools: `Read`, `WebSearch`, `WebFetch` (no `Edit`; it does not write)
+- `prompt`: the roadmap recommendations and the candidate sources. Job: confirm each load-bearing `(basis: …)` is sound; where a canonical source is worth linking (an official doc, a named standard/practice), web search and fetch to confirm it exists and says what's claimed; return only the compact list of verified links (title + URL), or "none verified". Never invent a URL. Keep it lean.
+- Then YOU (main thread) write the `## References` *Links* group from that verified list (web verified only, else "none verified"); the fetch happens once here, and nothing re-fetches these links afterward. They are for a human to follow.
 - No web tools or subagents: degrade to the Sources only behavior.
 
 ### Step 7 — Report and hand off

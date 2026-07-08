@@ -1,11 +1,10 @@
-# Audit Subagent Prompt Template
+# Audit Writing Guide (main thread)
 
-Main model fills this and passes it as the subagent prompt. Placeholders in ALL_CAPS.
-You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+You, the main thread, read and follow this when you write the `AGENTS.md` files. It is written as a brief with ALL_CAPS placeholders; read each placeholder as the matching input you gathered in pre-flight and the question rounds (the list in each phase mode file). You do the writing yourself; the only subagent this skill uses is a read-only `scout` that reads a large codebase and returns a compact map, on the cheapest model.
 
 ---
 
-You are running /audit in **PHASE** mode. Your tools are Read, Bash, Write, and Edit. Use them freely.
+You are running /audit in **PHASE** mode. Use your Read, Bash, Write, and Edit tools freely.
 
 ## Canonical context file: AGENTS.md (+ a CLAUDE.md pointer)
 
@@ -89,7 +88,7 @@ ADDITIONAL_STANDARDS_OR_NONE
 
 ### GREENFIELD phase
 
-New project, no source files. Create a root AGENTS.md encoding the engineer's chosen standards.
+New project, possibly just scaffolded from its chosen stack (there may be a manifest and scaffold source, but no real feature code yet, and usually an architecture ADR that decided the stack). Create a root AGENTS.md encoding the engineer's chosen standards.
 
 **Step 1 — Minimal discovery**
 
@@ -99,7 +98,7 @@ With your file tools, list the top couple of project levels (excluding `.git`); 
 
 Use the template below. `## Stack`: ADR, else findings, else `<to be filled>`. `## Build approach`: roadmap header, else `<TBD, set by /roadmap>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
 
-If `INSTALLED_SKILLS_OR_NONE` / `DECLINED_TOOLS_OR_NONE` is provided, add an `Agent skills:` line (`installed: <skill …>`, `declined: <tool …>`); if `MCP_SERVERS_OR_NONE`, an `MCP servers:` line (`connected: <server …>`, `declined: <tool …>`). Place under `## Context files` (or `## Rules` if that section is absent). Always record the declines; they stop a later `/audit` or `/architect` from re-offering. Project-wide tech at root; area-specific at that area's nested doc.
+If `INSTALLED_SKILLS_OR_NONE` is provided, write a `## Agent skills` section (template above): ONE bullet per installed skill, `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, so a later skill loads only the ones a task needs, never a single dense line of names. Detect the project's real skills directory (`.claude/skills/` on Claude Code, `.agents/skills/` on other agents, or a plain `skills/`) and use it in the link; never hardcode a Claude-only path, since every tool reads this file. Keep the registry source `<owner>/<repo>` on each bullet as the tool-agnostic identity a different agent resolves in its own dir. If `DECLINED_TOOLS_OR_NONE` is provided, add a compact `Declined: <tool>, <tool>` line in that section (a decline has nothing to load, so it needs no location; it stops a later `/audit` or `/architect` re-offering). If `MCP_SERVERS_OR_NONE`, add a compact `MCP servers: <server> (connected|recommended)` line (a connected service has no local file to open). Project-wide tech at root; area-specific at that area's nested doc, using the same `## Agent skills` section.
 
 Monorepo: keep root to monorepo-wide concerns (workspace tooling `pnpm`/`turbo`/`nx`, shared standards, a `## Context files` section pointing at each workspace's nested doc); per-app stack does not go in root.
 
@@ -163,7 +162,7 @@ ROOT_GAPS:
 - <exact markdown line to add>, target section: `## <section>`, reason: <one line>
 ```
 
-If no gaps: `ROOT_GAPS: none`. Include the exact text to insert so the main model can apply it with Edit without paraphrasing.
+If no gaps: `ROOT_GAPS: none`. Keep the exact text to insert so you can apply it with Edit without paraphrasing.
 
 **Step 3 — Nested AGENTS.md**
 
@@ -191,10 +190,10 @@ With your file tools, list the project tree a few levels deep, skipping vendored
 
 **Step 3 — Find four kinds of finding**
 
-- (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the roadmap header but absent from root) that's true but not recorded. Return each as a `ROOT_GAPS` line (exact markdown + target section); do NOT edit root yourself, the main model applies these with permission.
+- (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the roadmap header but absent from root) that's true but not recorded. Collect each as a `ROOT_GAPS` line (exact markdown + target section) and apply it only with the engineer's permission (the gap-handling step in `modes/gapfill.md`), never silently, since a root line may be curated.
 - (b) Undocumented areas: a major area with distinct conventions/gotchas and no nested AGENTS.md. Create the nested doc (nested template + sibling CLAUDE.md pointer) and add its root pointer line via Edit (safe to do directly: creating, not overwriting).
 - (c) Stale/incomplete nested docs: an existing nested AGENTS.md missing something now true of its area. Return as `PROPOSED_ADDITIONS`; do NOT edit it yourself.
-- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture ADR; `## Build approach` differs from the roadmap header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Return each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR/roadmap actually shows; the main model surfaces these to the human.
+- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture ADR; `## Build approach` differs from the roadmap header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Collect each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR/roadmap actually shows; surface these to the human, don't auto-fix.
 
 Be conservative: flag only durable findings you're confident about; when unsure, leave it. Do not flag implementation detail, TODOs, or anything that churns.
 
@@ -251,6 +250,24 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
   For whole-repo: extract what you observe in the code.
   Keep this to 5 to 10 bullet points max.>
 
+## Agent skills
+
+<Installed Agent Skills that carry this project's tool conventions. ONE bullet per skill so a
+  later skill (/architect, /develop) opens only the ones a task needs, never a single dense line
+  of names, and omit the whole section if none installed. Each bullet: the skill name, its
+  registry source `<owner>/<repo>` (the stable, tool-agnostic identity), a one-line note on what
+  it governs, and a link to where it lives IN THIS PROJECT. The skills directory is agent-specific:
+  detect the real one this project uses (`.claude/skills/` for Claude Code, `.agents/skills/` for
+  other agents, or a plain `skills/`) and use that, never hardcode a Claude-only path, since every
+  tool reads this file and resolves the source in its own skills dir. Only project-wide skills go
+  here; an area-specific skill goes in that area's nested AGENTS.md.>
+- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <one line: what it governs>
+
+<Then, only if present, a compact line each (a declined tool has nothing to load, and an MCP
+  server is a connected service with no local file, so both stay lines, not bullets):
+  `Declined: <tool>, <tool>` (offered before, not wanted; keep so a later /audit or /architect
+  does not re-offer) · `MCP servers: <server> (connected), <server> (recommended)`>
+
 ## Context files
 
 <!-- Nested AGENTS.md files are listed here as they are created -->
@@ -285,6 +302,13 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
 ## Gotchas
 
 <Non-obvious invariants that would trip a developer, omit section if none>
+
+## Agent skills
+
+<Area-specific installed skills, same bullet format as root (name, registry source, note, and a
+  link to the detected project skills dir, never a hardcoded `.claude/` path), omit section if none:
+  - [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it governs for this area>
+  A declined tool or MCP server stays a compact `Declined:` / `MCP servers:` line, as in root.>
 
 ## Related ADRs
 
@@ -340,8 +364,8 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 
 ## Rules you must not break
 
-- Text output: output ONLY the report block at the end. No running commentary or intermediate messages like "I found X" while exploring; all findings go in the report. File writes via tool calls (Write, Edit) are expected and correct — this rule applies to text output only.
-- ROOT_GAPS must appear in the report under `Root gaps flagged` — never mid-stream. Include the exact markdown text to insert so the main model can apply it without paraphrasing.
+- Write the `AGENTS.md` files with your file tools; don't paste their full contents back into the chat. When the phase is done, produce the report block at the end as your working summary for the relay.
+- ROOT_GAPS goes under `Root gaps flagged` in that summary. Keep the exact markdown text to insert so you apply it (with the engineer's permission) without paraphrasing.
 - Do not create a nested AGENTS.md unless the area genuinely warrants it.
 - Root AGENTS.md must stay under ~60 lines. Cut ruthlessly.
 - Never overwrite an existing AGENTS.md — propose additions only via the diff format.

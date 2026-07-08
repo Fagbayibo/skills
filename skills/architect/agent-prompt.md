@@ -1,7 +1,6 @@
-# Design Research Subagent Prompt Template
+# ADR Writing Guide (main thread)
 
-Main model fills this and passes it as the subagent prompt. Placeholders in ALL_CAPS.
-You may receive this file as a path plus a Placeholder values list; substitute each placeholder with its given value as you read.
+You, the main thread, read and follow this when you write the ADR after the design conversation. It is a brief with ALL_CAPS placeholders; read each as the matching input you gathered (the list in `SKILL.md`, *Write the ADR*). Do not spawn anyone to write, research, or critique the ADR; you do it all. The only subagents read the codebase (`scout`) or fetch the web (`researcher`), on the cheapest model.
 
 ---
 
@@ -28,7 +27,7 @@ You are a Staff Engineer and Principal Architect with 15+ years of production ex
 
 ---
 
-## Context injected by main model
+## Context (from the design conversation and pre-flight)
 
 **Mode**: MODE
 **Design topic**: DESIGN_TOPIC
@@ -53,7 +52,7 @@ ANSWER_ALL_ROUNDS
 **Operation**: OPERATION
 
 **References level** (what to cite, chosen by the engineer): REFERENCES_LEVEL
-<!-- One of: none | sources | sources+links. Gates the References section and (basis: ...) citations only; the Rationale (the reasoning itself) ALWAYS stays. none = NO ## References section and NO (basis: ...) citations anywhere. sources = ## References with named Project sources and Practices only, no Links, no web fetch. sources+links = sources plus web verified links (you were given WebSearch/WebFetch; fetch to confirm each link before writing it). See "On sourcing & citations" under "Expert rules that apply to all modes". -->
+<!-- One of: none | sources | sources+links. Gates the References section and (basis: ...) citations only; the Rationale (the reasoning itself) ALWAYS stays. none = NO ## References section and NO (basis: ...) citations anywhere. sources = ## References with named Project sources and Practices only, no Links. sources+links = sources plus the web verified links the Stage (c) landscape / tool-discovery checks already returned during the conversation; do NOT fetch or re-fetch at write time, reuse those. See "On sourcing & citations" under "Expert rules that apply to all modes". -->
 
 **Existing ADR (update/supersede only):**
 EXISTING_ADR_PATH_OR_NONE
@@ -68,7 +67,8 @@ EXISTING_ADR_CONTENTS_OR_NONE
 **Installed community skills (relevant to this design):**
 COMMUNITY_SKILLS_CONTENT_OR_NONE
 <!-- By default a POINTER LIST, not full content: one line per relevant skill (name, real project path, one-line relevance note), e.g.
-     - `<skill>` (`.claude/skills/<skill>/`) — a framework skill's rendering/component conventions relevant to the API surface
+     - `<skill>` (`<skills-dir>/<skill>/`) — a framework skill's rendering/component conventions relevant to the API surface
+     where `<skills-dir>` is the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`), never hardcoded.
      Read a skill file on demand (its path is real and readable) only if it materially shapes this decision.
      FALLBACK: on a client whose subagents cannot read files, the main agent inlines each skill's full content here instead, labelled by skill name (=== <skill> skill === … === end <skill> skill ===); then treat the inlined text as authoritative and read no external file. -->
 
@@ -95,10 +95,10 @@ Apply the knowledge these ways:
 **2. Populate the `**Implementation skills**:` field in `## Decision`.** After the chosen option sentence, fill in:
 
 ```markdown
-**Implementation skills**: `<skill>` (`.claude/skills/<skill>/`) · `<skill>` (`.claude/skills/<skill>/`)
+**Implementation skills**: `<skill>` (`<owner>/<repo>`, `<skills-dir>/<skill>/`) · `<skill>` (`<owner>/<repo>`, `<skills-dir>/<skill>/`)
 ```
 
-List every installed skill that shaped this design, including any the main agent just installed during the tool-skills offer (passed in COMMUNITY_SKILLS_CONTENT_OR_NONE as now installed and relevant). During implementation the engineer reads the ADR alongside each listed skill. Do NOT copy skill content into the ADR; the field is a pointer, not a paste.
+`<skills-dir>` is the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`), never hardcoded, since the ADR is read by whichever tool runs `/develop`; `<owner>/<repo>` is the tool-agnostic identity. List every installed skill that shaped this design, including any just installed during the tool-skills offer (in COMMUNITY_SKILLS_CONTENT_OR_NONE). Do NOT copy skill content into the ADR; the field is a pointer, not a paste.
 
 **3. Add Follow-up items for any skill not yet in AGENTS.md.** For each skill in COMMUNITY_SKILLS_NOT_IN_PROJECT_CONTEXT_OR_NONE, decide where its conventions should live. Root AGENTS.md loads on every task and always costs context; a nested AGENTS.md loads only when working in that directory. Scope rule: place conventions at the level matching their actual reach, judged by the skill's scope, not its name.
 
@@ -215,18 +215,18 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 **On sourcing & citations (gated by `REFERENCES_LEVEL` — the engineer chose the level; never fabricate):**
 - The Rationale (the reasoning itself) always stays, at every level; only the `(basis: …)` citations and the `## References` section are gated. Follow the matching rule:
   - **`none`** → write **NO `## References`** section and **NO `(basis: …)`** citations anywhere in the ADR. Keep every section as normal, just with no citation tags and no links. **Skip the rest of this block.**
-  - **`sources`** → cite bases as below using project sources and named practices only (no URLs, no web fetch); end the ADR with a `## References` section containing *Project sources* and *Practices & standards* only (omit the *Links* group entirely).
-  - **`sources+links`** → cite bases as below, plus web verified links (you were given `WebSearch`/`WebFetch`); end with the full `## References` section including a web verified *Links* group.
+  - **`sources`** → cite bases as below using project sources and named practices only (no URLs); end the ADR with a `## References` section containing *Project sources* and *Practices & standards* only (omit the *Links* group entirely).
+  - **`sources+links`** → cite bases as below, plus the web verified links the Stage (c) landscape / tool-discovery checks already returned; end with the full `## References` section including a web verified *Links* group. You write only links that check confirmed, no fetching now.
 - At `sources` or `sources+links`, for each **Decision** and each option you weigh, cite its **basis** inline in `(basis: …)`, where the recommendation comes from, so the engineer gets the why and a trail to follow. Priority order:
   1. **Project sources** (strongest, verifiable in-repo): the project's `AGENTS.md`, an existing ADR, an installed community skill, what's already in the stack. E.g. `(basis: your AGENTS.md, the repository-layer convention)`.
   2. **Named practices / standards**, the principle itself: `(basis: idempotency keys for money operations)`, `(basis: strangler pattern for live migrations)`.
-  3. **A real URL only when `REFERENCES_LEVEL` is `sources+links`.** For a canonical source worth linking (official docs, a standard/RFC), search, fetch the page to confirm it exists and says what you claim, then include the URL. At the `sources` level add no links, cite the practice by name. If you can't verify a link, cite by name with no link.
-- **Never invent or guess a URL.** A fabricated link is worse than none; an unverified link must not appear.
+  3. **A real URL only at `sources+links`, and only one the Stage (c) check already confirmed.** For a canonical source (official docs, a standard/RFC), use the URL that check verified during the conversation; do not fetch at write time. At `sources`, no links, cite the practice by name. A link never verified in that check → cite by name, no URL.
+- **Never invent, guess, or fetch a URL at write time.** A fabricated or unverified link must not appear; and the links are human-facing, so no later AI step (design-review, /develop, /audit) re-fetches them.
 - When the level includes a `## References` section, every entry must trace to a `(basis: …)` in the body: *Project sources* (verifiable), *Practices & standards* (named), and (only at `sources+links`) *Links* (web verified only, else "none verified").
 - Keep it lean: cite the load-bearing decisions, not every sentence. Web-verify only the few links genuinely worth including; don't search for the sake of it.
 
 **Output rule:**
-- Text output: ONLY the report block below. No running commentary. File writes via tool calls are expected and correct.
+- Keep the ADR itself in the file (write it with your file tools). Don't paste the whole ADR back into the chat. When the write is done, produce the short report block below as your own working summary; `after-subagent.md` uses its Decision and Key tradeoff lines to drive the confirmation panel.
 
 ---
 

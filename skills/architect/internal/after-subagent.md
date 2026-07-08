@@ -1,10 +1,12 @@
-# Architect Main Flow: after subagent
+# Architect Main Flow: after the ADR is written
 
-### After subagent completes
+### After the ADR is written
 
-**First — did it run at all?** If the ADR file is missing or empty, report the failure and offer to re-run; never fabricate an ADR summary. Only if the file exists, continue:
+You wrote the ADR yourself on the main thread. Now check it, review it, and confirm it with the engineer, all on the main thread; never spawn anyone to critique or cross-check it, and never re-fetch any of its links (they were fetched once during the design conversation and are now human-facing).
 
-**Self-check before presenting**: Read the written ADR. For a directory ADR read both `index.md` and its `rationale.md` (the decision-record sections live in `rationale.md`; the single-file shape has everything in the one file). Verify all required sections exist across the file(s):
+**First — did the write land?** If the ADR file is missing or empty, something went wrong in the write; report it and re-write, never fabricate an ADR summary. Only if the file exists, continue:
+
+**Self-check before presenting**: Re-read the ADR you just wrote. For a directory ADR read both `index.md` and its `rationale.md` (the decision-record sections live in `rationale.md`; the single-file shape has everything in the one file). Verify all required sections exist across the file(s):
 - All modes: `## Summary` (the plain-words human quick read, no dashes, in `index.md`/the file), `## Requirements` (IDed acceptance criteria, the confirmed spine), `## Decision`, `## Consequences` (build spec, in `index.md`/the file); and `## Context`, `## Options considered` (unless "Documenting a made decision"), `## Rationale` (decision record, in `rationale.md` for a directory ADR, inline otherwise). A directory `index.md` also carries the one-line `## Rationale` pointer to `rationale.md`.
 - Data-backed modes: `## Build plan`: ordered tasks, each tagged with the AC(s) it satisfies, migration first; every AC traces to at least one task
 - Feature mode: `## Feature design` with the confirmed data model and Critical test scenarios (mapped to ACs) populated
@@ -13,11 +15,11 @@
 - Enhancement mode (non-trivial migration): `## Migration plan` with Strategy, Phases, Rollback, and Risks
 - Cross-cutting mode: `## Standard definition` with Canonical pattern, Replaces, Enforcement, Rollout, and Exceptions
 
-If a required section is missing or a field is blank/placeholder, add this line directly after the ADR path in the presentation: `⚠️ Incomplete: [section name] was not completed by the subagent, e.g. "⚠️ Incomplete: ## Feature design > Security model was left as a placeholder. Request it in your feedback."`
+If a required section is missing or a field is blank/placeholder, add this line directly after the ADR path in the presentation: `⚠️ Incomplete: [section name] came out blank, e.g. "⚠️ Incomplete: ## Feature design > Security model was left as a placeholder. Request it in your feedback."`
 
-**Design-review gate (full-weight features — optional for lean/medium, capability-first).** Before presenting a full-tier / high-risk / compliance-touching / foundational ARCHITECTURE ADR, run a fresh-model critique: spawn a subagent with its model set explicitly to a strong and, where possible, different model (not inherited from the session) with the drafted ADR to stress-test the design (does it hold up? is there a materially simpler option? what failure mode is missed?). Surface its findings alongside the ADR (a short "Design review" note), and fix clear issues by targeted Edit before or during confirmation. Skip for trivial/lean-tier decisions, and skip where the agent has no subagent capability (note that it was skipped).
+**Design-review pass (full-weight features — optional for lean/medium).** Before presenting a full-tier / high-risk / compliance-touching / foundational ARCHITECTURE ADR, stress-test your own draft on the main thread: read it back with fresh eyes and challenge it (does the design hold up? is there a materially simpler option? what failure mode is missed?). Reason from the ADR text and your own knowledge only; do NOT fetch or re-fetch its reference links, they were already verified during the design conversation. Note the outcome in a short "Design review" line, and fix clear issues by targeted Edit before or during confirmation. Skip for trivial/lean-tier decisions.
 
-1. Tell the engineer the ADR path, a one-line preview from the subagent's report, and (if run) the design-review note:
+1. Tell the engineer the ADR path, a one-line preview from your report, and (if run) the design-review note:
 
    ```
    Draft ADR written to `docs/adr/<NNNN-title>.md`

@@ -12,7 +12,7 @@ Write everything this skill produces (files, reports, messages to the engineer) 
 
 Closes the loop on a completed change: syncs AGENTS.md files, the roadmap, and linked ADR `**Status**:` lines to what the repo now shows, and flags what it must not edit (stale ADRs, curated prose). The Boundaries table below is the exact contract.
 
-**`agent-prompt.md`** is the single source of truth for the maintenance rules; SKILL.md covers only orchestration. Runs in a subagent (see Step 3).
+**`agent-prompt.md`** is the single source of truth for the maintenance rules; SKILL.md covers only orchestration. The main thread reads it and does the maintenance itself (see Step 3).
 
 **Canonical file:** durable context lives in the tool-agnostic **`AGENTS.md`**; **`CLAUDE.md` is only a pointer** to it. /sync edits/creates both, treating them only as targets, never as a change source.
 
@@ -48,8 +48,8 @@ Owns exactly what the Boundaries table grants and writes nothing else. As the **
 ## Portability (any OS, any agent)
 
 - **Commands**: `git` is the only required CLI and behaves the same on every OS, run the `git` lines as shown. Other shell snippets are POSIX **reference**, not literal scripts: don't assume `find`, `grep`, `sed`, `cat`, `test`/`[ ]`, `ls`, or `xargs` exist; use your agent's cross-platform file tools and apply branching logic yourself rather than shell `if`/variables/redirects.
-- **Bundled files**: referenced by paths relative to this skill's folder. Resolve the folder to an absolute path (you already resolve these relative paths) and pass absolute file paths in the subagent's prompt; do NOT read bundled file contents into the main context (fallback in Step 3).
-- **No subagent support?** Do the whole maintenance inline yourself, following the exact rules in **`agent-prompt.md`** (authoritative for both the subagent and this inline path).
+- **Bundled files**: referenced by paths relative to this skill's folder. Resolve the folder to an absolute path (you already resolve these relative paths) and read `agent-prompt.md` yourself at write time (Step 3), not during pre-flight.
+- The whole maintenance runs inline on the main thread, following the exact rules in **`agent-prompt.md`** (authoritative).
 
 ## Execution
 
@@ -62,7 +62,7 @@ Base: `main` if `git rev-parse --verify main` succeeds, else `master`. Current b
 - Current branch **is** the base, mode `uncommitted`: `git diff --name-status HEAD`.
 - Otherwise, mode `branch`: `git merge-base "$BASE" HEAD`, then `git diff --name-status <merge-base>`.
 
-Either way, add untracked files from `git ls-files --others --exclude-standard`, each prefixed with an `A` status (matching the `--name-status` format). Note the mode, base, and merge base for the subagent.
+Either way, add untracked files from `git ls-files --others --exclude-standard`, each prefixed with an `A` status (matching the `--name-status` format). Note the mode, base, and merge base for the write step.
 
 De-duplicate, then **filter to source files** to sync *from*:
 - **Drop documentation and config** (`AGENTS.md` at any level, `docs/**`, `*.md`, `test-preferences.json`, lock files, generated output); /sync reads these as targets/context, never as a change source.
@@ -80,7 +80,7 @@ Using your agent's file-search/glob tools:
 - Find all ADRs under `docs/adr/` whose names start with a digit, sorted.
 - Find the roadmap file(s) whose workspace/features the diff actually touches (in a monorepo, a changed file's workspace `apps/<x>/…` selects `docs/roadmap/<x>/`); never read or pass all of `docs/roadmap/`.
 
-The subagent reads these itself; the main model passes **paths** plus the changed-file list and diff command. One inline exception: root AGENTS.md contents, short and useful to anchor on. For each changed file, note its nearest enclosing directory with a `AGENTS.md` (root or nested); that's the context file most likely to need an update.
+Note the **paths** plus the changed-file list and diff command; read the files at write time. Read root AGENTS.md contents now (short and useful to anchor on). For each changed file, note its nearest enclosing directory with a `AGENTS.md` (root or nested); that's the context file most likely to need an update.
 
 ### 2.5 Discover Agent Skills and optional MCPs for newly added tools
 
@@ -94,29 +94,24 @@ Run only when dependency manifests changed or the diff clearly adds a significan
 - Keep discovery capped and cacheable: max 5 web searches and 8 fetched pages total, official registry/docs first. Reuse `docs/.agent-cache/tool-discovery/<slug>.md` when under 30 days old, after filtering installed/declined items.
 - Offer all Agent Skill matches in one multi-select panel, grouped by technology: "Install relevant Agent Skills for newly added tools?" plus skip/decline. Then offer MCPs separately: "Optional MCP servers that could help these tools" plus skip/decline. Never auto-install or auto-connect.
 - Install selected skills with `npx skills add <owner>/<repo> -y`. For MCPs, point to the user's connector/MCP settings; once connected the tools are used automatically.
-- Pass the result to the subagent as `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, and `DECLINED_TOOLS_OR_NONE` so it records durable lines in the right `AGENTS.md` file. If nothing was found or no capability exists, pass `none`.
+- Carry the result as `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, and `DECLINED_TOOLS_OR_NONE` and record durable lines in the right `AGENTS.md` file when you write. If nothing was found or no capability exists, treat as `none`.
 
-### 3. Spawn the subagent
+### 3. Do the maintenance (main thread)
 
-Do NOT read `agent-prompt.md` here. Resolve this skill's folder to an absolute path and spawn a subagent with:
+The main thread does the maintenance itself; it never hands the `AGENTS.md` / roadmap / ADR-status edits to a subagent. Read `agent-prompt.md` now (only now, at write time) and follow it exactly; it is authoritative for the maintenance rules. The diff reading is the one thing you may offload, and only for a large change set, to a read-only `scout` subagent on the cheapest model (Claude Code: `haiku`) that returns a compact map. Stay within the same boundaries the old tool grant expressed: `Edit` existing docs, roadmap, and ADR `**Status**:` lines; `Write` strictly for a **net-new-area** nested AGENTS.md; no root creation, no ADR *content* edits (Status line only), no shallow nested docs for established areas (these are rules in `agent-prompt.md`).
 
-- Model: set explicitly to a fast, low-cost tier; do not inherit the session model on Claude Code (use `haiku`; a light model / `inherit` only on agents where a separate cheap tier isn't selectable); bounded maintenance, not open-ended reasoning
-- Description: "Sync: update AGENTS.md + flag stale ADRs"
-- Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write` (`Edit` for existing docs, roadmap, and ADR `**Status**:` lines; `Write` strictly for a **net-new-area** nested AGENTS.md). Boundaries the tool grant can't express (no root creation, no ADR *content* edits (Status line only), no shallow nested docs for established areas) are rules in the agent prompt.
-- Prompt: the subagent's **first action** is to Read `<absolute skill folder>/agent-prompt.md` by path and follow it; then give the dynamic values as a labeled list ("Placeholder values: ..."):
+The inputs to apply:
   1. `MODE`, `BASE`, `MERGE_BASE`, `CHANGED_FILES` (name-status changed-source list), `DIFF_COMMAND` (exact `git diff` command)
   2. `DELETED_PATHS` (deleted paths, for orphan cleanup)
-  3. `ROOT_AGENTS_MD` (root AGENTS.md contents, inline), `NESTED_PATHS` (nested AGENTS.md paths)
+  3. `ROOT_AGENTS_MD` (root AGENTS.md contents), `NESTED_PATHS` (nested AGENTS.md paths)
   4. `ADR_PATHS` (all ADR paths, for Status-line reconciliation and staleness flagging)
   5. `FILE_TO_CONTEXT_MAP` (changed file → nearest context file)
   6. `ROADMAP_PATH_OR_NONE` (relevant workspace roadmap path(s), not all of `docs/roadmap/`; also the source of each linked feature's status for ADR Status-line reconciliation)
   7. `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, `DECLINED_TOOLS_OR_NONE` from Step 2.5
 
-Fallback: if the client's subagents cannot read files, read `agent-prompt.md`, fill it, and pass the filled template as the prompt instead.
-
 ### 4. Relay the result
 
-**If the subagent errored or returned no parseable summary**, report that and offer to re-run, don't fabricate a result (a genuine `NOTHING_TO_SYNC` is a valid success; a crash or empty output is not). Otherwise relay the compact summary:
+**If the maintenance failed or produced no parseable summary**, report that and re-do it, don't fabricate a result (a genuine `NOTHING_TO_SYNC` is a valid success; a crash or empty output is not). Otherwise relay the compact summary:
 
 ```
 ## /sync complete

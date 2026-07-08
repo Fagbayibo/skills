@@ -76,8 +76,8 @@ deciding? 2 to 4 paragraphs. Do not mention options here, only the problem space
 
 <One sentence stating the decision clearly.>
 
-**Implementation skills**: `<skill-name>` (`.claude/skills/<skill-name>/`) · `<skill-name>` (`.claude/skills/<skill-name>/`)
-<!-- List every installed community skill that informed this design. The engineer reads this field during implementation to know which skill conventions to apply. Omit line entirely if no community skills were used. -->
+**Implementation skills**: `<skill-name>` (`<owner>/<repo>`, `<skills-dir>/<skill-name>/`) · `<skill-name>` (`<owner>/<repo>`, `<skills-dir>/<skill-name>/`)
+<!-- Every installed community skill that informed this design; the engineer reads it during implementation. `<skills-dir>` is the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`), never hardcoded; `<owner>/<repo>` is the tool-agnostic identity. Omit the line if no community skills were used. -->
 
 ## Rationale
 
@@ -171,8 +171,9 @@ N. <Build task>, satisfies **AC-N**
      links are gated, so a `none` document reads clean.
      What this decision is grounded in. Group as below; omit empty groups. NEVER fabricate a URL,
      name the source/practice instead. The *Links* group appears only at the `sources+links` level,
-     and every link in it must have been web verified by the subagent (at `sources` there is no
-     Links group, and no web fetch happens). -->
+     and every link in it must have been web verified during the Stage (c) landscape / tool-discovery
+     check (at `sources` there is no Links group). No link is fetched at write time or re-fetched
+     later; these links are here for a human to follow. -->
 
 **Project sources** (verifiable, in this repo):
 - <e.g. `AGENTS.md`, the auth convention · ADR 0003 · an installed community skill · already on the project's BaaS>
