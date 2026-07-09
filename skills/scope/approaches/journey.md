@@ -22,7 +22,7 @@ Foundations → the primary journey built completely → the next journey built 
 ## Grade
 Production, one path deep at a time. Each shipped phase is a fully finished experience.
 
-## Worked example — async standup app
+## Worked example: async standup app
 1. Foundations: stack + scaffold, the data model the first journey needs, design system.
 2. **Phase 1 (the daily-submit journey, complete):** land / get reminded → open today's standup → fill it on the active template → submit → confirmation → edit before cutoff → see it in the feed. All states: already-submitted, missed-yesterday, empty template, network error. Fully polished before anything else.
 3. Phase 2 (the team-setup journey, complete): create a team → invite members → accept invite → set the template → manage roles, all steps and states.

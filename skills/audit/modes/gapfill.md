@@ -1,4 +1,4 @@
-# Audit Mode: gap-fill (Phase 4 — root AGENTS.md already exists)
+# Audit Mode: gap-fill (Phase 4: root AGENTS.md already exists)
 
 Trigger: no area argument, codebase exists, AND root AGENTS.md already exists (including right after a legacy `CLAUDE.md` migration). Audit the whole codebase against what's written and fill the holes, conservatively.
 

@@ -1,12 +1,14 @@
 ---
 name: scope
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Run /scope to turn a product idea into a living, coarse scope in docs/scope/ and keep it current — plan a new product, plan the next slice, enroll one named feature, or run with no argument to reconcile after shipping and queue what is next. Seeds WHAT to build; /architect designs, /develop builds."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent, AskUserQuestion
+description: "Run /scope to turn a product idea into a living, coarse scope in docs/scope/ and keep it current: plan a new product, plan the next slice, enroll one named feature, or run with no argument to reconcile after shipping and queue what is next. Seeds WHAT to build; /architect designs, /develop builds."
 ---
 
 ## Output style (plain words, no dashes)
 
-All output (scope and messages): plain simple language; keep meaningful technical terms but explain each in plain words. Zero dashes of any kind (no em dash, en dash, or hyphen as punctuation); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -47,7 +49,7 @@ Status lifecycle (`/scope` sets initial status; the pipeline advances it):
 - `done` ≠ `existing`: `done` = this pipeline built and verified it; `existing` predates the workflow; `/develop` and `/sync` never touch `existing` rows.
 - `replan` may set a de-scoped feature to `dropped`, never deletes rows; `dropped` keeps history, excluded from active counts and work; `/develop` and `/sync` skip it.
 
-Process weight (absorbs the old `/triage`): every feature carries Weight `lean` · `medium` · `full`, one column turning downstream process on or off. `lean`: trivial, low-risk, well-understood; skip the fresh-model review; often `Needs spec: no`. `medium`: moderate scope or a real decision; normal path. `full`: high risk, large scope, or compliance-sensitive; a fresh-model `/check review` warranted; almost always `Needs spec: yes`. `/scope` sets the initial weight (same signals `/architect` and `/develop` use; README Tiers are the reference); downstream skills read this column.
+Process weight: every feature carries Weight `lean` · `medium` · `full`, one column turning downstream process on or off. `lean`: trivial, low-risk, well-understood; skip the fresh-model review; often `Needs spec: no`. `medium`: moderate scope or a real decision; normal path. `full`: high risk, large scope, or compliance-sensitive; a fresh-model `/check review` warranted; almost always `Needs spec: yes`. `/scope` sets the initial weight from the risk and size of the feature, the same signals `/architect` and `/develop` read; downstream skills read this column. Weight is a per-feature judgment, not a fixed tier: there is no global playbook a feature is slotted into.
 
 Artifact base: `docs/` by default; if `docs/` is a published docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` (`.workflow/scope/…`). Always follow whichever base already exists (paths here assume `docs/`).
 
@@ -63,7 +65,7 @@ Any Agent Skills client on macOS, Linux, Windows. Detection snippets are POSIX r
 
 ## Execution
 
-### Step 0 — Infer intent & idea check
+### Step 0: Infer intent & idea check
 
 No subcommand. First check whether a scope exists under `docs/scope/` (or `.workflow/scope/` if that is the artifact base), then infer:
 - Scope exists + no argument (or a re-run described as "reconcile / what's next") → replan behavior (`modes/replan.md`).
@@ -78,7 +80,7 @@ Plan behavior, no idea given (no argument, no scope to extend): stop and ask bef
 
 Wait for the answer; use it as the product idea.
 
-### Step 1 — Load the inferred behavior
+### Step 1: Load the inferred behavior
 
 After Step 0 infers the behavior, read exactly one mode file and follow it:
 

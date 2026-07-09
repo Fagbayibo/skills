@@ -716,9 +716,11 @@ The only "imagery" in the system is hand-drawn hedgehog illustrations rendered a
 
 ## Iteration Guide
 
+This template is a SEED, not the design system. The `{colors.*}` / `{component.*}` / `{rounded.*}` names below are internal to this file. When you build, you map their VALUES onto the project's canonical CSS custom properties (see `ui/generate.md` B2) and record the character in `design.md`. Shipped code refers to the CSS custom properties (`var(--color-ink)`), never to a `{colors.*}` name, and `design.md` never restates a token value.
+
 1. Focus on ONE component at a time. Pull its YAML entry and verify every property resolves.
-2. Reference component names and tokens directly (`{colors.primary}`, `{component.button-primary-pressed}`, `{rounded.md}`) — do not paraphrase.
-3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
+2. Within this file, reference component names and tokens by their entry (`{colors.primary}`, `{component.button-primary-pressed}`, `{rounded.md}`) — do not paraphrase.
+3. After edits, check the work by hand: every token you reference resolves to a real CSS custom property, text on its background clears the WCAG AA contrast ratio (4.5:1 for body, 3:1 for large text), and no token is defined but unused.
 4. Add new variants as separate component entries (`-pressed`, `-disabled`, `-focused`) — do not bury them inside prose.
 5. Default body to `{typography.body-md}` (16px / 400 / 1.5); reach for `{typography.body-strong}` for emphasis; reserve `{typography.display-lg}` (24px / 800) strictly for marketing display moments.
 6. Keep `{colors.primary}` scarce per viewport — at most one yellow-orange pill per fold.

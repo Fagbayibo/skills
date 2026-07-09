@@ -1,8 +1,8 @@
-# /develop — UI track guide
+# /develop: UI track guide
 
 UI build track for `/develop`, read after the spec gate (`SKILL.md` Step 0) classifies a task as UI: components, pages, or full layouts with semantic HTML, design tokens, and strict accessibility. Any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). The project's `design.md` holds the art direction (character, the build mandate, composition and component rules, and pointers to where the real tokens live); the token values themselves live in the project's CSS (`globals.css` / tailwind config), never duplicated in `design.md`. Read the bar below before you build anything.
 
-## The bar — read this first, it is the definition of done
+## The bar: read this first, it is the definition of done
 
 You are a senior product designer shipping a real product, not a developer wiring a form. Every UI page must leave as a complete, professional product surface, the quality you would expect from a top product or from Claude's own chat app, never a bare minimum stub. This is not optional styling advice. It is the definition of done for a UI build, committed here, before you start, so it cannot get crowded out by the token and accessibility rules later in this guide.
 
@@ -41,29 +41,28 @@ The UI build serves the project's build approach (read in `SKILL.md` Step 2), ne
 
 Any Agent Skills client, macOS/Linux/Windows. Detection snippets (`find`, `cat | grep`, `cp`) are POSIX reference, not literal scripts: use your agent's own cross-platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are paths relative to this skill's folder, read on demand: load only the ONE chosen template (full file only after selection), never all of them, and read this guide's phases as reached, not front-loaded. The UI build runs inline (it is interactive); heavy code exploration (finding existing components/tokens to match) goes to a read-only subagent per `SKILL.md` Step 2.5. App code/CSS is inherently cross-platform. No interactive-question picker: ask the prompts as plain text with the same options.
 
-## Step 0 — Did the spec already decide the design system?
+## Step 0: Where the design comes from (one decision, made once)
 
-Check the governing spec first (`/develop` read it in Step 2). If it settled the design direction (named template, "extract from existing UI", described style, or page composition), execute it; never re-ask, `/architect` already grilled the engineer on this. Create `design.md` (art direction) plus CSS tokens from the spec's decision (e.g. "use the Raycast template" → `ui/generate.md` B2: its token values to CSS, its character to `design.md`; "extract from existing UI" → Step 0.2), then implement.
+Check the governing spec first (`/develop` read it in Step 2). The design source is the engineer's choice and `/architect` already grilled them on it, so follow what the spec recorded, never re-ask, and never default to Figma just because an MCP is connected.
 
-Only if no spec governs this UI, or it is silent on the design system, fall through to the detection below.
+Route on what the spec recorded, using the *Design source* table above:
+- Figma or another design MCP → `ui/mcp.md`.
+- A screenshot or a pasted image → `ui/image.md`.
+- An existing design system, or "extract from existing UI" → **Step 0.1**.
+- A named template or a described direction → `ui/generate.md` (its B2 puts the token values into CSS and its character into `design.md`), then implement.
 
-## Step 0.0 — Check for existing design.md
+No spec governs this UI, or the spec is silent on the design system → fall through to the detection in Steps 0.1 to 0.3. If detection settles nothing, ask *"How should I get the design for this?"* with options **From Figma (its MCP)** · **From a screenshot / images** · **From the existing `design.md` / current UI** · **No design, suggest a direction** (the picker adds Other), then proceed by their pick.
+
+## Step 0.1: Check for existing design.md
 
 File-search for `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, `.claude`. Found: validate; a real one has a `character` and a `## Build mandate` (art direction) and points at the CSS for tokens. Empty, or only a stub: treat as not found and warn the user. (An older `design.md` that still carries inline `colors:` / `typography:` value blocks is still valid; treat the CSS as authoritative for values.)
 
 Found and valid → **Design.md path**, skip Steps 1 onward.
-Not found → **Step 0.1 (brownfield check)**.
+Not found → **Step 0.2 (brownfield check)**.
 
 ---
 
-## Step 0.0 — Follow the design source the spec recorded (don't assume)
-
-The design source is the engineer's choice, recorded in the spec by `/architect` (Figma frames, screenshot, existing `design.md`, or described direction). Follow the record; never default to Figma just because an MCP is connected.
-- Spec says Figma or another design MCP → route to `ui/mcp.md`.
-- Spec says screenshot / existing UI / described direction → route to the matching source file below.
-- No spec record (direct UI task, no source given) → ask *"How should I get the design for this?"* with options **From Figma (its MCP)** · **From a screenshot / images** · **From the existing `design.md` / current UI** · **No design, suggest a direction** (the picker adds Other), then proceed by their pick.
-
-## Step 0.1 — Brownfield check (no design.md, but is there existing UI?)
+## Step 0.2: Brownfield check (no design.md, but is there existing UI?)
 
 Before generating a fresh design system, check for an existing visual language to match; a new one over an existing app clashes with what's shipped. File-search (ignoring `node_modules`) for:
 - Styling/token files: `globals.css`, `tokens.css`, `theme.*`, `tailwind.config.*`.
@@ -73,19 +72,19 @@ Found (brownfield): ask before proceeding, via your agent's interactive option p
 - **question**: "There's no `design.md`, but this project already has UI. How should I get the design system?"
 - **header**: "Design system"
 - **options**:
-  1. `Extract from existing code` — "Recommended — capture the design direction from the current tokens/components into `design.md`, pointing at the existing CSS tokens, so new UI matches what's shipped." → **Step 0.2**.
-  2. `Use a reference` — "I'll give a screenshot or a `design.md` URL, or pick a template." → **Step 1**.
-  3. `Match a specific file` — "Build to mirror an existing component/page I name; I'll point you at it." → read that file's styles, treat them as the local source of truth.
+  1. `Extract from existing code`: "Recommended, capture the design direction from the current tokens/components into `design.md`, pointing at the existing CSS tokens, so new UI matches what's shipped." → **Step 0.3**.
+  2. `Use a reference`: "I'll give a screenshot or a `design.md` URL, or pick a template." → **Step 1**.
+  3. `Match a specific file`: "Build to mirror an existing component/page I name; I'll point you at it." → read that file's styles, treat them as the local source of truth.
 
 No existing UI (greenfield) → **Step 0.5**.
 
-### Step 0.2 — Capture the design direction from existing code
+### Step 0.3: Capture the design direction from existing code
 
 The existing CSS / Tailwind config already holds the token values (the source of truth); do not copy them into `design.md`. Read the token files and 3 to 5 representative components/pages to read the *system*, then write `design.md` as art direction (per `ui/generate.md` B2's schema): `source: extracted-from-code`, the character you observe, the composition and component patterns the app already uses, the build mandate, and a pointer to the CSS token file. Inconsistent codebase: note the dominant patterns and the variance. Show a short summary, confirm before building, then implement to the direction with the CSS as the token source of truth.
 
 ---
 
-## Step 0.5 — Component or screen?
+## Step 0.5: Component or screen?
 
 Determines prop API design, routing integration, file placement.
 
@@ -98,8 +97,8 @@ Determines prop API design, routing integration, file placement.
 If ambiguous, ask (as above):
 ```
 "Is this a reusable component or a full page?"
-  - Reusable component — isolated, takes props, no routing
-  - Full page / screen — owns layout, integrates with router
+  - Reusable component: isolated, takes props, no routing
+  - Full page / screen: owns layout, integrates with router
 ```
 
 **Component rules** (apply throughout all phases): define the `interface Props` before any markup; named export from its own file; no router imports, no page-level data fetching inside the component; Storybook present (`*.stories.*`) → create a story file alongside; file naming matches the convention of existing components.
@@ -126,7 +125,7 @@ Using your file-search and read tools (ignoring `node_modules`):
 | Detected | Approach |
 |---|---|
 | `components/ui/` (shadcn) | Use shadcn primitives with `cn()` + Tailwind token classes |
-| `tailwindcss` only | Utility classes only — no `style={}` props |
+| `tailwindcss` only | Utility classes only, no `style={}` props |
 | `*.module.css` | One `.module.css` per component |
 | `styled-components` / `@emotion` | Tagged template literals referencing CSS variables |
 | Nothing | Semantic HTML + external CSS referencing CSS custom properties |
@@ -137,7 +136,7 @@ Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, 
 
 | Detected | Approach |
 |---|---|
-| `next-themes` in package.json | `.dark {}` class only — no `@media` as primary |
+| `next-themes` in package.json | `.dark {}` class only, no `@media` as primary |
 | `darkMode: 'class'` in tailwind config | `.dark {}` class only |
 | `darkMode: 'media'` in tailwind config | `@media (prefers-color-scheme: dark)` |
 | Nothing detected | Both: `@media` query + `.dark {}` fallback |
@@ -146,7 +145,7 @@ Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, 
 
 ---
 
-## Step 1 — Load the selected UI path
+## Step 1: Load the selected UI path
 
 Based on the checks above, read exactly one source file:
 

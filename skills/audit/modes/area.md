@@ -12,7 +12,7 @@ The main thread writes the area's `AGENTS.md` itself, following the AREA phase i
 After writing, handle the `Root gaps flagged` section:
 - `ROOT_GAPS: none` → relay the full report, done.
 - Gaps exist → ask (one option marked recommended, the picker adds a free-text custom slot last): Question: "I found things in `<area>` not reflected in root AGENTS.md. What should I do?" Option 1: `Add them now (recommended)`, description: "I'll apply the additions immediately". Option 2: `Show me the diff`, description: "Print exactly what would change; I'll apply it manually". Option 3: `Skip for now`, description: "Leave root AGENTS.md as-is".
-- On `Add them now`: locate the `ROOT_GAPS:` block and extract each line starting with `- ` (each holds the exact markdown to insert and the target section, `— target section: ## <section>`). Apply one Edit call per gap into root `AGENTS.md`. Do not paraphrase.
+- On `Add them now`: locate the `ROOT_GAPS:` block and extract each line starting with `- ` (each holds the exact markdown to insert and the target section, `target section: ## <section>`). Apply one Edit call per gap into root `AGENTS.md`. Do not paraphrase.
 - On `Show me the diff`: print each addition as a fenced markdown block with the target section labelled. Do not write.
 - On `Skip for now`: do nothing.
 

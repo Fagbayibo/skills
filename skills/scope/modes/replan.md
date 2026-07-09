@@ -1,6 +1,6 @@
 # Scope Mode: replan
 
-## Replan (the living rhythm — run after a feature or phase ships)
+## Replan (the living rhythm, run after a feature or phase ships)
 
 The default cadence, not rare: run each time a feature or phase lands, keeping the scope matching reality and queueing the next slice. Reconciles in place, never spawns a new file; coarse and surgical (reconcile cells, append rows, don't rewrite the file).
 

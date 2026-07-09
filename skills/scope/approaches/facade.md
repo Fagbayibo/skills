@@ -22,7 +22,7 @@ Foundations (enough to render UI: design system, component library, routing) →
 ## Grade
 Prototype first, wired later. State openly that phase 1 is not production-complete; it is a validated shell.
 
-## Worked example — async standup app
+## Worked example: async standup app
 1. Foundations (UI only): design system, component library, routing, mock-data fixtures.
 2. **Phase 1 (clickable prototype):** every screen on mock data and navigable, sign-in, team dashboard, submit-standup form, team feed, history, settings. Looks real, persists nothing.
 3. Phase 2: wire real authentication (Clerk) behind the existing sign-in screen.

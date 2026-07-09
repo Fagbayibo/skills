@@ -1,12 +1,14 @@
 ---
 name: test
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Run /test to write a test suite for code you just built or changed — after implementing a feature, route, or fix. Targets uncommitted changes automatically, reads test-preferences.json for your framework (asks and saves it if absent), and picks the right strategy per file: happy path, edge cases, error states, accessibility."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent, AskUserQuestion
+description: "Run /test to write a test suite for code you just built or changed, after implementing a feature, route, or fix. Targets uncommitted changes automatically, reads test-preferences.json for your framework (asks and saves it if absent), and picks the right strategy per file: happy path, edge cases, error states, accessibility."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (files, reports, every message shown to the engineer) in plain simple language; keep technical terms that carry real meaning but explain each in plain words. No dashes of any kind (em dash, en dash, or hyphen as punctuation); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -25,8 +27,8 @@ Does not write application code. Does not update `AGENTS.md`/`CLAUDE.md` context
 
 ## Artifact ownership
 
-- Test files (`*.test.ts`, `*.spec.ts`, `test_*.py`, `*_test.go`, etc.) — created by this skill
-- `test-preferences.json` at the project root — created and maintained by this skill
+- Test files (`*.test.ts`, `*.spec.ts`, `test_*.py`, `*_test.go`, etc.), created by this skill
+- `test-preferences.json` at the project root, created and maintained by this skill
 
 ---
 
@@ -43,7 +45,7 @@ In the Ask blocks below, each option is `"label": "description"`; render them th
 
 ### Pre-flight (main thread)
 
-#### 1. Determine scope from git (do this first — if empty, no point asking anything)
+#### 1. Determine scope from git (do this first, if empty, no point asking anything)
 
 Changed-but-uncommitted files (cross-platform git):
 - Tracked (staged + unstaged), excluding deletions: `git diff --name-only --diff-filter=ACMR HEAD`
@@ -68,7 +70,7 @@ Classify from path and filename alone, cheaply; if genuinely ambiguous, tag `log
 | `*.tsx`/`*.jsx`/`*.vue`/`*.svelte` not under a route/page path | **component** | Component test (render + interact + assert DOM/ARIA) |
 | `app/**/page.*`, `pages/**` (not `pages/api`), `*Screen.*`, `*View.*` | **page/flow** | E2E candidate + component test of pieces |
 | `app/**/route.*`, `pages/api/**`, `*.controller.*`, `*.handler.*`, `*.resolver.*`, `actions.*` | **api/server** | Integration test (call handler, mock at boundary) |
-| Plain `.ts`/`.js`/`.py`/`.go`/`.rs` — utils, hooks, services, domain logic | **logic** | Unit test (inputs → outputs, edge cases, errors) |
+| Plain `.ts`/`.js`/`.py`/`.go`/`.rs`, utils, hooks, services, domain logic | **logic** | Unit test (inputs → outputs, edge cases, errors) |
 | `cli.*`, `bin/**`, `*.command.*`, `cmd/**` | **cli** | Integration test invoking the command |
 
 `E2E_RELEVANT = yes` if any file is **page/flow**; otherwise `no`.
@@ -76,7 +78,7 @@ Classify from path and filename alone, cheaply; if genuinely ambiguous, tag `log
 Large diff guard: more than 15 source files, don't try to write them all in one pass. Prioritise by class (logic and api/server first, most risk, cheapest to test well) and ask:
 
 ```
-Ask — "<N> changed files is a lot for one pass. How should I focus?"  (header: "Scope size")
+Ask: "<N> changed files is a lot for one pass. How should I focus?"  (header: "Scope size")
 - "Logic & API first (recommended)": "Test the <count> logic/api files now; I'll note the rest as not-yet-covered"
 - "Test everything in batches": "Cover all <N> files across multiple passes, slower but complete"
 - "Let me narrow it": "I'll tell you which files or directory matter most"
@@ -88,9 +90,11 @@ Monorepo resolution: find each scoped file's nearest enclosing `package.json` (w
 
 #### 2. Load preferences
 
-Read `test-preferences.json` at the project root (file tool; "not found" = no prefs).
-- Found (the common write path): load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`; skip to Step 5.
-- `NO_PREFS` (first run): read `modes/setup.md` and do its Step 4 (stack detection and framework questions), then return here for Step 5 (installation check), then do its Step 6 (save preferences), then continue at Step 7. Do not read `modes/setup.md` on a write run.
+Read `test-preferences.json` at the project root (file tool; "not found" = no prefs). Branch on whether it names a `tool`, not on whether the file exists:
+- **`tool` is set** (the common write path): load `tool`, `additionalTools`, `e2eTool`, `testDir`, `filePattern`, `packageManager`; skip to Step 5.
+- **`tool` is `null` and `gate` is set** (`GATE_ONLY`): this project gates without a test runner, by an earlier deliberate choice. Do not write a suite, do not install a runner, do not re-ask, and do not read `modes/setup.md`. Run the project's typecheck/lint gate, then stop and report: "This project gates on `<gate>`, not a test suite. Ran the typecheck gate; use `/check verify` to confirm behavior."
+- **No file** (`NO_PREFS`, first run): read `modes/setup.md` and do its Step 4 (stack detection and framework questions), then return here for Step 5 (installation check), then do its Step 6 (save preferences), then continue at Step 7. Do not read `modes/setup.md` on a write run.
+- **Malformed** (a file with neither `tool` nor `gate`, or unparseable JSON): say so, then treat it as `NO_PREFS` and re-run setup, which overwrites it.
 
 ---
 
@@ -99,7 +103,7 @@ Read `test-preferences.json` at the project root (file tool; "not found" = no pr
 Empty scope: skip the framework questions, tell the engineer, offer fallbacks:
 
 ```
-Ask — "No uncommitted source changes found. What should I test?"  (header: "No changes")
+Ask: "No uncommitted source changes found. What should I test?"  (header: "No changes")
 - "The last commit": "Diff HEAD~1..HEAD and test what that commit changed"
 - "Specific files": "I'll test the files or directory you name"
 - "Nothing right now": "Stop. I'll run /test after I make changes"
@@ -121,7 +125,7 @@ Check the chosen unit tool, E2E tool (if any), and addon (if any) with file tool
 All present → Step 6. Any missing → confirm first:
 
 ```
-Ask — "<missing tools> not installed. Install now?"  (header: "Install")
+Ask: "<missing tools> not installed. Install now?"  (header: "Install")
 - "Yes, install and continue": "Run the install with the detected package manager, then write tests"
 - "No, write runnable stubs": "Skip install; write tests I can run once I install the tools myself"
 ```
@@ -157,7 +161,7 @@ With file tools:
 #### 7.5 Ask whether to run the suite (always)
 
 ```
-Ask — "Tests will be written for <N> changed files. Run the suite after writing?"  (header: "Run tests?")
+Ask: "Tests will be written for <N> changed files. Run the suite after writing?"  (header: "Run tests?")
 - "Yes, run and fix to green": "Execute the suite; I'll fix any test mistakes and flag real bugs the tests catch"
 - "Skip, just write them": "Write the tests and give me manual run-and-verify instructions instead"
 ```
@@ -170,7 +174,7 @@ The main thread writes the tests itself. Do not spawn a writer. Resolve this ski
 
 The inputs to apply (the labeled values you gathered):
 1. unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context plus the build approach line; the 3 recent spec paths or `none` (read only if relevant to what you're testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing spec path, and the `verify.md` path (each `none` if absent).
-2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the spec's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /check verify manual step`.
+2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the spec's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N, <why not automatable> → defer to /check verify manual step`.
 
 Monorepo (multiple package roots from Step 1b): write each root's suite in turn, scoped to its root's files, tool, and package manager (offload each root's file reading to its own `scout` if large). Single root (common case): just write it.
 

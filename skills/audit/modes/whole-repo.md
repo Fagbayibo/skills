@@ -1,4 +1,4 @@
-# Audit Mode: whole-repo scan (Phase 2 — root + judged nested)
+# Audit Mode: whole-repo scan (Phase 2: root + judged nested)
 
 Trigger: pre-flight classified clearly established (real feature code, real history, no in-progress workflow setup), or Phase 0 → `Existing codebase`. Run the Tool-skills sweep (`modes/tool-skills.md`, web/registry discovery in a `researcher` subagent) once the scan has identified the stack, before/with writing `AGENTS.md`.
 

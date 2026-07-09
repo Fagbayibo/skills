@@ -21,7 +21,7 @@ Claude Code loads it via the import below:
 - **Scope mode**: MODE
 - **Base / merge base**: BASE / MERGE_BASE
 - **Changed source files (with status A/M/R)**: CHANGED_FILES
-- **Deleted paths (status D — for orphan cleanup only)**: DELETED_PATHS
+- **Deleted paths (status D, for orphan cleanup only)**: DELETED_PATHS
 
 See exactly what changed with:
 
@@ -40,11 +40,11 @@ ROOT_AGENTS_MD
 - **Nested AGENTS.md paths**: NESTED_PATHS
 - **Changed file → nearest context file**: FILE_TO_CONTEXT_MAP
 
-## Specs (you may reconcile ONLY the `**Status**:` line; you may FLAG staleness — you must NOT edit any other spec content)
+## Specs (you may reconcile ONLY the `**Status**:` line; you may FLAG staleness, you must NOT edit any other spec content)
 
 SPEC_PATHS
 
-## Feature scope for the relevant workspace(s) the diff touches — NOT all of docs/scope/ (you may RECONCILE status only — never add/remove/reorder features)
+## Feature scope for the relevant workspace(s) the diff touches, NOT all of docs/scope/ (you may RECONCILE status only, never add/remove/reorder features)
 
 SCOPE_PATH_OR_NONE
 
@@ -67,14 +67,28 @@ Make the edit only if it is:
 - **Additive or corrective**: add a missing fact or fix a wrong one. Never delete curated guidance you don't fully understand.
 - **Durable**: true beyond this one change. Skip one-off notes, history, and feature summaries.
 
-**Stack consistency:** if root has `## Stack` and an architecture spec (one with `## Proposed stack`) exists, check they agree. Root missing the decided stack (e.g. greenfield root seeded before the spec): add it surgically. Contradiction: do not rewrite curated stack lines; flag under `CONFLICTS`, noting which spec.
+### The mirrored root fields
 
-**Build approach consistency:** root's `## Build approach` mirrors the scope header's build-approach line (its source of truth); never invent an approach. If they diverge (different approach, or root lacks the line the scope sets), make a single surgical edit to that one root line (as for a changed stack) and record it under `AGENTS_UPDATED`. If root's version is elaborated curated prose, or you can't tell which side is authoritative, do not overwrite; flag the divergence under `CONFLICTS`, naming the scope file.
+<!-- ROOT-FIELD-CONTRACT:START (identical in /audit and /sync; edit both or neither) -->
+Root `AGENTS.md` carries two mirrored fields. Each has exactly one source of truth outside the file, and no skill may invent a value for either:
+
+- `## Stack` mirrors the architecture spec, the one under `docs/specs/` with a `## Proposed stack` section.
+- `## Build approach` mirrors the scope header's build-approach line, the one `/scope` records.
+
+Three rules bind every skill that touches them. Never overwrite curated prose in either field. Fill a field only when it is missing or still a placeholder. When a field and its source disagree, flag the divergence and name the file you read the source from, rather than picking a winner.
+<!-- ROOT-FIELD-CONTRACT:END -->
+
+What `/sync` does with them: reconcile, one line at a time.
+
+- **Missing the value its source sets** (e.g. a greenfield root seeded before the architecture spec landed, or a root with no build-approach line while the scope header names one): add that one line surgically, and record it under `AGENTS_UPDATED`.
+- **Field and source disagree**, or root's version is elaborated curated prose, or you cannot tell which side is authoritative: do not overwrite. Flag it under `CONFLICTS`, naming the spec or scope file you compared against.
+
+`/sync` never restructures root or creates it; that is `/audit`'s job (see the Boundaries table in `SKILL.md`).
 
 **Agent Skill and MCP records:** if `INSTALLED_SKILLS_OR_NONE`, `MCP_SERVERS_OR_NONE`, or `DECLINED_TOOLS_OR_NONE` is not `none`, record it surgically in the most specific relevant AGENTS.md:
 - Project-wide tools (framework, ORM, styling, core DB, hosting, test runner) belong in root AGENTS.md.
 - Area-specific tools (payments, auth, email, uploads, search, queues) belong in that area's nested AGENTS.md when one exists; otherwise add a short root note and flag the area under `CONTEXT_GAPS`.
-- An installed skill goes in the `## Agent skills` section as its own bullet so only needed skills load: `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, using the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`, never a hardcoded Claude-only path, since every tool reads this file) and keeping the registry source `<owner>/<repo>` as the tool-agnostic identity. Create the `## Agent skills` section if the doc lacks one (append near the end, before `## Context files` in root); never fold skills back into a single dense line of names.
+- An installed skill goes in the `## Agent skills` section as its own bullet so only needed skills load: `- [<skill>](<skills-dir>/<skill>/): `<owner>/<repo>`, <what it covers>`, using the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`, never a hardcoded Claude-only path, since every tool reads this file) and keeping the registry source `<owner>/<repo>` as the tool-agnostic identity. Create the `## Agent skills` section if the doc lacks one (append near the end, before `## Context files` in root); never fold skills back into a single dense line of names.
 - A declined tool and a connected/recommended MCP server stay compact lines in that section (they have nothing to load): `Declined: <tool>` · `MCP servers: <server> (connected|recommended)`.
 - Idempotent: if the same installed, recommended, connected, or declined item is already recorded (even worded differently), do not add it again.
 - Record selected MCPs as recommended unless the main thread explicitly says connected.
@@ -86,13 +100,13 @@ Rules you must not break:
 - **Never overwrite or rewrite curated prose.** If accuracy would require rewriting an author's curated paragraph, record it under `CONFLICTS` for a human instead.
 - Keep root AGENTS.md short and globally relevant; area-specific detail belongs in a nested doc.
 
-### 2. Create a nested AGENTS.md — only for an area NET-NEW in this change
+### 2. Create a nested AGENTS.md: only for an area NET-NEW in this change
 
 You may create **one** nested `<area>/AGENTS.md` for an area the change introduced wholesale. The test is **context, not policy**:
 
 - **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES: the diff shows you the entire area. If any file in the area is `M` (modified), the area pre-existed: do NOT create. Write a focused doc: local file pointers, local commands, conventions/constraints visible in the new code, links to any governing spec. End it with the one-line note: `_Drafted by /sync from the introducing change, worth a quick human pass._` Then add exactly one pointer line to root AGENTS.md under `## Context files`:
   ```
-  - [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
+  - [<area>/AGENTS.md](<area>/AGENTS.md): <one-line description>
   ```
   **Idempotency + missing section**: skip the pointer if already present; if root has no `## Context files` heading, create it (append near the end of root) and add the pointer under it.
 
@@ -109,7 +123,7 @@ For each path in DELETED_PATHS:
 - Fix any file pointer in any AGENTS.md that targets a deleted/moved path.
 - Record removals under `ORPHANS_CLEANED`. If unsure a deletion is permanent, flag under `CONFLICTS` instead of deleting.
 
-### 4. Reconcile linked specs' Status line (edit ONLY the `**Status**:` line — never spec content)
+### 4. Reconcile linked specs' Status line (edit ONLY the `**Status**:` line, never spec content)
 
 A spec's status mirrors its feature's build lifecycle:
 - `Proposed`: not yet built (scope `planned`).
@@ -139,7 +153,7 @@ Be **strict**, noise erodes trust. Read a spec only if the changed paths plausib
 
 You are the **universal sub-task reconciler**: `/develop` ticks its own sub-tasks; `/test`, `/audit`, and `/sync` sub-tasks have no one else. For **every feature the diff touched**, re-evaluate each of its sub-tasks against repo evidence (not just what this diff added) and tick the genuinely complete ones: the diff picks *which features* to re-check, the repo state decides *which sub-tasks are done*. Look directly with Read/Bash/Grep/Glob.
 
-**Malformed scope** (no At-a-glance table or feature sections, non-standard status, broken headings, a bad hand-edit): do not edit it; note `scope malformed: <file> — needs a human or /scope re-run` under `SCOPE_RECONCILED` and skip it. Never act on a misread.
+**Malformed scope** (no At-a-glance table or feature sections, non-standard status, broken headings, a bad hand-edit): do not edit it; note `scope malformed: <file>, needs a human or /scope re-run` under `SCOPE_RECONCILED` and skip it. Never act on a misread.
 
 > Step 1's source-file filtering (dropping `*.test.*`, `docs/**`) governs what you sync AGENTS.md from; it does not limit reconciliation. Here you may and should inspect test files, AGENTS.md, and config to judge completion.
 
@@ -154,14 +168,14 @@ Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly pr
 
 Then update the feature's **status**, in the At-a-glance table AND beside its heading: `in-progress` while any box (`Build it` + its milestones, `Verify it`, `Test it`) is unticked; `done` **only when `Design`, `Build` (+ milestones), `Verify`, and `Test` are all ticked**.
 
-- **Strictly status only.** Never add, remove, rename, or reorder features or checkboxes (that's /scope's). Skip `existing` and `dropped` features entirely. Never invent a feature for code that has no section; if shipped code clearly matches no feature, note "unmapped: <area> — run /scope to enroll this off-plan work" under `SCOPE_RECONCILED`.
+- **Strictly status only.** Never add, remove, rename, or reorder features or checkboxes (that's /scope's). Skip `existing` and `dropped` features entirely. Never invent a feature for code that has no section; if shipped code clearly matches no feature, note "unmapped: <area>, run /scope to enroll this off-plan work" under `SCOPE_RECONCILED`.
 - **Attribution across features and workspaces.** Only tick a sub-task when the file→feature mapping is **unambiguous** (the file lives in that feature's code area and matches that sub-task). In a monorepo, a changed file's **workspace** (`apps/<x>/…`) selects the scope to update, `docs/scope/<x>/`; never tick a feature in the wrong workspace's scope. If an area maps to more than one feature, do not guess; note `ambiguous: <area> → <featureA> / <featureB>` under `SCOPE_RECONCILED`.
 - **Idempotent**: a box already `[x]` stays `[x]`; re-running changes nothing.
 - **Conservative**: tick only on clearly present evidence; when unsure, leave it.
 
 ### 7. Report
 
-Output exactly this block — verbatim, no extra prose. Omit any section that's empty.
+Output exactly this block, verbatim, no extra prose. Omit any section that's empty.
 
 ```
 SCOPE: <N> changed files

@@ -25,19 +25,33 @@ Hard rules:
 - Migration (when told `MIGRATE=yes`): copy the legacy `CLAUDE.md` content verbatim into a new `AGENTS.md`, then replace `CLAUDE.md` with the pointer above. Never discard curated content.
 - A `CLAUDE.md` pointer that already points to AGENTS.md stays untouched.
 
-## Stack reconciliation (every phase that writes or audits root)
+## Stamp what you write, so curated content is knowable
 
-Root's `## Stack` mirrors the architecture decision. Before finalizing root in any phase, check `docs/specs/` for an architecture spec (one with a `## Proposed stack` section).
-- Creating root (greenfield, whole-repo): populate `## Stack` from that spec if it exists (the source of truth, even on greenfield with no code); else derive from the code/manifest, else `<to be filled>`.
-- Auditing existing root (gap-fill): `## Stack` missing or placeholder → ROOT_GAPS; contradicts the spec → CONTRADICTIONS. Never silently overwrite curated stack text.
+Every `AGENTS.md` this skill creates ends with the drafted-by line in the templates below. It exists so a later run (this skill or `/sync`) can tell what a tool wrote from what a human wrote, instead of guessing.
+
+- **Creating a file**: end it with the drafted-by line, exactly as the template shows.
+- **Gap-filling a file that still carries the line**: the untouched parts are yours to correct; add or fix facts surgically, and leave the line in place.
+- **Gap-filling a file with no drafted-by line**: a human has taken it over. Add missing facts only, never rewrite an existing line, and route anything that would change existing prose to CONTRADICTIONS.
+
+The stamp records provenance, not permission. It never licenses overwriting a line someone edited, and the "never overwrite curated prose" rule in the contract below holds either way.
+
+## The mirrored root fields
+
+<!-- ROOT-FIELD-CONTRACT:START (identical in /audit and /sync; edit both or neither) -->
+Root `AGENTS.md` carries two mirrored fields. Each has exactly one source of truth outside the file, and no skill may invent a value for either:
+
+- `## Stack` mirrors the architecture spec, the one under `docs/specs/` with a `## Proposed stack` section.
+- `## Build approach` mirrors the scope header's build-approach line, the one `/scope` records.
+
+Three rules bind every skill that touches them. Never overwrite curated prose in either field. Fill a field only when it is missing or still a placeholder. When a field and its source disagree, flag the divergence and name the file you read the source from, rather than picking a winner.
+<!-- ROOT-FIELD-CONTRACT:END -->
+
+What `/audit` does with them (every phase that writes or audits root):
+
+- **Creating root** (greenfield, whole-repo): populate `## Stack` from the architecture spec if it exists (the source of truth, even on greenfield with no code); else derive from the code/manifest, else `<to be filled>`. Seed `## Build approach` from the scope header if one exists, a short line: name + one-line principle; if no scope, or none set, write `<TBD, set by /scope>` rather than guessing.
+- **Auditing existing root** (gap-fill): either field missing or placeholder → ROOT_GAPS; either field contradicting its source → CONTRADICTIONS.
 
 This keeps the `/architect → /audit` handoff order-independent: root absorbs the decided stack whenever audit runs.
-
-## Build approach (every phase that writes or audits root)
-
-Root's `## Build approach` is a project-wide convention, the default build strategy every skill reads, exactly like `## Stack`. Capture it as a convention, never invent or prescribe one; the source of truth is the scope header (the build-approach line `/scope` records).
-- Creating root (greenfield, whole-repo): seed from the scope header if one exists, a short line: name + one-line principle. If no scope, or none set, write `<TBD, set by /scope>` rather than guessing.
-- Auditing existing root (gap-fill): missing while the scope header names one → ROOT_GAPS; the two name different approaches → CONTRADICTIONS. Never silently overwrite a curated line.
 
 ## Phase
 
@@ -52,7 +66,7 @@ SCOPE_OR_AREA
 ## Monorepo
 
 MONOREPO_OR_NO
-<!-- "no", or "yes — apps: web, api, …". If yes: each app/package is its own area — give each
+<!-- "no", or "yes, apps: web, api, …". If yes: each app/package is its own area, give each
      a nested AGENTS.md with its own stack/commands/conventions; root AGENTS.md keeps
      monorepo-wide concerns (workspace tooling, shared conventions) only. -->
 
@@ -90,23 +104,23 @@ ADDITIONAL_STANDARDS_OR_NONE
 
 New project, possibly just scaffolded from its chosen stack (there may be a manifest and scaffold source, but no real feature code yet, and usually an architecture spec that decided the stack). Create a root AGENTS.md encoding the engineer's chosen standards.
 
-**Step 1 — Minimal discovery**
+**Step 1: Minimal discovery**
 
 With your file tools, list the top couple of project levels (excluding `.git`); read the manifest if present (note language, package manager). Check `docs/specs/` for numbered specs (`NNNN-*.md`); if an architecture spec exists (`## Proposed stack` section), read it: the stack is already decided via `/architect`, use it for `## Stack`, no placeholders, never contradict it. Check `docs/scope/` (or `.workflow/scope/`): if the scope header records a build approach (name + one-line principle), capture it verbatim as the `## Build approach` seed; else `<TBD, set by /scope>`.
 
-**Step 2 — Create root AGENTS.md**
+**Step 2: Create root AGENTS.md**
 
 Use the template below. `## Stack`: spec, else findings, else `<to be filled>`. `## Build approach`: scope header, else `<TBD, set by /scope>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
 
-If `INSTALLED_SKILLS_OR_NONE` is provided, write a `## Agent skills` section (template above): ONE bullet per installed skill, `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, so a later skill loads only the ones a task needs, never a single dense line of names. Detect the project's real skills directory (`.claude/skills/` on Claude Code, `.agents/skills/` on other agents, or a plain `skills/`) and use it in the link; never hardcode a Claude-only path, since every tool reads this file. Keep the registry source `<owner>/<repo>` on each bullet as the tool-agnostic identity a different agent resolves in its own dir. If `DECLINED_TOOLS_OR_NONE` is provided, add a compact `Declined: <tool>, <tool>` line in that section (a decline has nothing to load, so it needs no location; it stops a later `/audit` or `/architect` re-offering). If `MCP_SERVERS_OR_NONE`, add a compact `MCP servers: <server> (connected|recommended)` line (a connected service has no local file to open). Project-wide tech at root; area-specific at that area's nested doc, using the same `## Agent skills` section.
+If `INSTALLED_SKILLS_OR_NONE` is provided, write a `## Agent skills` section (template above): ONE bullet per installed skill, `- [<skill>](<skills-dir>/<skill>/): `<owner>/<repo>`, <what it covers>`, so a later skill loads only the ones a task needs, never a single dense line of names. Detect the project's real skills directory (`.claude/skills/` on Claude Code, `.agents/skills/` on other agents, or a plain `skills/`) and use it in the link; never hardcode a Claude-only path, since every tool reads this file. Keep the registry source `<owner>/<repo>` on each bullet as the tool-agnostic identity a different agent resolves in its own dir. If `DECLINED_TOOLS_OR_NONE` is provided, add a compact `Declined: <tool>, <tool>` line in that section (a decline has nothing to load, so it needs no location; it stops a later `/audit` or `/architect` re-offering). If `MCP_SERVERS_OR_NONE`, add a compact `MCP servers: <server> (connected|recommended)` line (a connected service has no local file to open). Project-wide tech at root; area-specific at that area's nested doc, using the same `## Agent skills` section.
 
 Monorepo: keep root to monorepo-wide concerns (workspace tooling `pnpm`/`turbo`/`nx`, shared standards, a `## Context files` section pointing at each workspace's nested doc); per-app stack does not go in root.
 
-**Step 2b — Per-workspace nested AGENTS.md (monorepo only)**
+**Step 2b: Per-workspace nested AGENTS.md (monorepo only)**
 
 If `MONOREPO_OR_NO` is `yes`: for each listed workspace (`apps/*`, `packages/*`), read its manifest. Even with no features built, the scaffold declares the workspace's stack and commands; capture them so `/architect` and `/develop` read them from the workspace's own doc (they won't look in root). Write `<workspace>/AGENTS.md` with the nested template (`## Stack` from its manifest, `## Commands` from its scripts, scoped, e.g. `pnpm --filter <name> dev`, root `## Rules` inherited by reference), plus the sibling `<workspace>/CLAUDE.md` pointer and a pointer line under root's `## Context files`. Skip an empty placeholder workspace with no manifest.
 
-**Step 3 — Report** (format at the bottom); list every per-workspace doc created.
+**Step 3: Report** (format at the bottom); list every per-workspace doc created.
 
 ---
 
@@ -114,32 +128,32 @@ If `MONOREPO_OR_NO` is `yes`: for each listed workspace (`apps/*`, `packages/*`)
 
 A codebase exists but no AGENTS.md. Explore enough to write an accurate root AGENTS.md.
 
-**Step 1 — Discover**
+**Step 1: Discover**
 
 With your file tools, list the project tree a few levels deep, skipping vendored/generated dirs (`.git`, `node_modules`, `.next`, `dist`, `build`). Read whichever exist:
-- `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` — stack and deps
-- `.github/workflows/` — CI and deploy patterns
+- `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod`: stack and deps
+- `.github/workflows/`: CI and deploy patterns
 - Main entry point (`src/index.*`, `main.*`, `app.*`, `server.*`)
 - Test config (`jest.config.*`, `pytest.ini`, `vitest.config.*`)
-- All existing `AGENTS.md` (excluding `.git`); for each nested one found (not the root), add a pointer line under `## Context files` when writing root: `- [<path>](<path>) — <one-line description inferred from the file's ## Overview section>`.
+- All existing `AGENTS.md` (excluding `.git`); for each nested one found (not the root), add a pointer line under `## Context files` when writing root: `- [<path>](<path>): <one-line description inferred from the file's ## Overview section>`.
 
-**Step 2 — Extract durable knowledge**
+**Step 2: Extract durable knowledge**
 
 Stack, runtime, framework; daily commands (install, dev, build, test); conventions visible in the code (naming, file structure, patterns); what would trip up a new developer in week one. Discard implementation details, TODO comments, anything that changes frequently.
 
-**Step 3 — Create root AGENTS.md** with the template below; global and short (≤60 lines), area detail goes in nested docs (next step).
+**Step 3: Create root AGENTS.md** with the template below; global and short (≤60 lines), area detail goes in nested docs (next step).
 
-**Step 4 — Create nested AGENTS.md**
+**Step 4: Create nested AGENTS.md**
 
 Monorepo (`MONOREPO_OR_NO` = yes): don't judge or deep-scan. Every workspace (`apps/*`, `packages/*`) gets a light stub `AGENTS.md` at its root (`## Stack` + `## Commands` from its manifest, scoped, e.g. `pnpm -F <name> …`, plus a one-line overview), the sibling `CLAUDE.md` pointer, and a root `## Context files` pointer. No code scan; deep conventions come later via `/audit <workspace>`. A doc buried below a workspace root (e.g. `packages/ui/src/mdx/`) with no root doc: follow the relocation rule the main agent surfaced (move up, or root-doc + linked nested). Skip the judgment step below.
 
 Single repo: identify the major areas/modules (e.g. `src/auth`, `src/payments`, `src/api`, `src/jobs`); judge each. Warrants a nested doc: distinct conventions, non-obvious rules, local commands, external integrations, or gotchas a developer must know before touching it. Does not: a simple module with no surprises, or root already covers it (skip; never one per folder). For each warranted area: write `<area>/AGENTS.md` with the nested template, its sibling `<area>/CLAUDE.md` pointer, and one pointer line in root's `## Context files` via Edit:
 ```
-- [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
+- [<area>/AGENTS.md](<area>/AGENTS.md): <one-line description>
 ```
 Global facts in root; area knowledge co-located with the area's code (it auto-loads when that code is edited).
 
-**Step 5 — Report** (format at the bottom); list every nested doc created.
+**Step 5: Report** (format at the bottom); list every nested doc created.
 
 ---
 
@@ -147,11 +161,11 @@ Global facts in root; area knowledge co-located with the area's code (it auto-lo
 
 Root AGENTS.md exists. Job: (1) check whether root AGENTS.md has what this area needs, (2) create or update the nested AGENTS.md.
 
-**Step 1 — Explore the area**
+**Step 1: Explore the area**
 
 With your file tools, list all files under `SCOPE_OR_AREA`. Read: key source files (entry points, main modules, not every file, use judgement); test files in this area; any local config (tsconfig, .env.example, etc.); the existing root and area AGENTS.md (provided above; Read them if given as paths).
 
-**Step 2 — Gap-check root AGENTS.md**
+**Step 2: Gap-check root AGENTS.md**
 
 Flag a gap only if it is: a command engineers working in this area need but root doesn't mention; a stack element, runtime, or major dependency relevant to this area but absent from root; a hard project-wide rule the area makes visible (e.g. "all DB calls go through the repository layer"). Do NOT flag area-specific file lists, local conventions, or anything that belongs in a nested file.
 
@@ -164,7 +178,7 @@ ROOT_GAPS:
 
 If no gaps: `ROOT_GAPS: none`. Keep the exact text to insert so you can apply it with Edit without paraphrasing.
 
-**Step 3 — Nested AGENTS.md**
+**Step 3: Nested AGENTS.md**
 
 Warrant (own patterns, non-obvious rules, local commands, or constraints a developer needs to know first) vs not (a simple CRUD module with no surprises, or already well-covered by root AGENTS.md).
 
@@ -172,7 +186,7 @@ Warrant (own patterns, non-obvious rules, local commands, or constraints a devel
 - Missing + not warranted → note why in the report and skip.
 - Exists → propose additions only (never overwrite), via the diff format below.
 
-**Step 4 — Report** (format at the bottom).
+**Step 4: Report** (format at the bottom).
 
 ---
 
@@ -180,15 +194,15 @@ Warrant (own patterns, non-obvious rules, local commands, or constraints a devel
 
 Root AGENTS.md already exists; the codebase is partially documented. Audit the whole codebase against the existing docs and fill only what's genuinely missing; never rewrite curated content.
 
-**Step 1 — Read what's documented**
+**Step 1: Read what's documented**
 
 Read the existing root AGENTS.md (provided above; Read it if given as a path) and every nested AGENTS.md (paths provided above).
 
-**Step 2 — Scan the codebase**
+**Step 2: Scan the codebase**
 
 With your file tools, list the project tree a few levels deep, skipping vendored/generated dirs (`.git`, `node_modules`, `.next`, `dist`, `build`). Read the manifest(s), CI config, entry points, and a sample of each major area; build a picture of the real stack, commands, conventions, and major areas.
 
-**Step 3 — Find four kinds of finding**
+**Step 3: Find four kinds of finding**
 
 - (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the scope header but absent from root) that's true but not recorded. Collect each as a `ROOT_GAPS` line (exact markdown + target section) and apply it only with the engineer's permission (the gap-handling step in `modes/gapfill.md`), never silently, since a root line may be curated.
 - (b) Undocumented areas: a major area with distinct conventions/gotchas and no nested AGENTS.md. Create the nested doc (nested template + sibling CLAUDE.md pointer) and add its root pointer line via Edit (safe to do directly: creating, not overwriting).
@@ -197,7 +211,7 @@ With your file tools, list the project tree a few levels deep, skipping vendored
 
 Be conservative: flag only durable findings you're confident about; when unsure, leave it. Do not flag implementation detail, TODOs, or anything that churns.
 
-**Step 4 — Report** (format at the bottom). Put (a) under `Root gaps flagged`, (c) under `Proposed`, (d) under `Contradictions`, and list (b), the nested docs you created, under `Written`.
+**Step 4: Report** (format at the bottom). Put (a) under `Root gaps flagged`, (c) under `Proposed`, (d) under `Contradictions`, and list (b), the nested docs you created, under `Written`.
 
 ---
 
@@ -261,7 +275,7 @@ Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
   other agents, or a plain `skills/`) and use that, never hardcode a Claude-only path, since every
   tool reads this file and resolves the source in its own skills dir. Only project-wide skills go
   here; an area-specific skill goes in that area's nested AGENTS.md.>
-- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <one line: what it governs>
+- [<skill>](<skills-dir>/<skill>/): `<owner>/<repo>`, <one line: what it governs>
 
 <Then, only if present, a compact line each (a declined tool has nothing to load, and an MCP
   server is a connected service with no local file, so both stay lines, not bullets):
@@ -271,6 +285,8 @@ Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
 ## Context files
 
 <!-- Nested AGENTS.md files are listed here as they are created -->
+
+_Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._
 
 === ROOT AGENTS.md TEMPLATE END ===
 
@@ -307,12 +323,14 @@ Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
 
 <Area-specific installed skills, same bullet format as root (name, registry source, note, and a
   link to the detected project skills dir, never a hardcoded `.claude/` path), omit section if none:
-  - [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it governs for this area>
+  - [<skill>](<skills-dir>/<skill>/): `<owner>/<repo>`, <what it governs for this area>
   A declined tool or MCP server stays a compact `Declined:` / `MCP servers:` line, as in root.>
 
 ## Related specs
 
 <Links once specs exist, omit section if none yet>
+
+_Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._
 ```
 
 ---
@@ -368,7 +386,7 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 - ROOT_GAPS goes under `Root gaps flagged` in that summary. Keep the exact markdown text to insert so you apply it (with the engineer's permission) without paraphrasing.
 - Do not create a nested AGENTS.md unless the area genuinely warrants it.
 - Root AGENTS.md must stay under ~60 lines. Cut ruthlessly.
-- Never overwrite an existing AGENTS.md — propose additions only via the diff format.
+- Never overwrite an existing AGENTS.md, propose additions only via the diff format.
 - Do not create specs. Do not write plans. Stay in your lane.
-- Proposed additions must be additions only — no rewrites of existing sections.
+- Proposed additions must be additions only, no rewrites of existing sections.
 - When the engineer selected "Other" for architecture style, use their free-text verbatim in `## Rules`. Do not interpret or paraphrase it.

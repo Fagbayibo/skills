@@ -8,29 +8,29 @@ The main thread reads this file in full at write time (Step 8), just before it w
 
 **You must not modify application source files.** /test writes tests; it never changes the code under test to make a test pass.
 
-### Existing tests — extend, never duplicate or clobber
+### Existing tests: extend, never duplicate or clobber
 
 Before writing a new test file, look for one that already covers the source file (same base name with the test pattern, co-located or under TEST_DIR). If it exists:
-- **Extend it** with `Edit` — add the missing cases, keep the engineer's existing tests intact.
+- **Extend it** with `Edit`, add the missing cases, keep the engineer's existing tests intact.
 - Never create a second parallel test file for the same source, and never overwrite hand-written tests.
-- If existing tests look wrong or contradict the current code, do not silently rewrite them — note them under `NOT_COVERED` as "existing tests may be stale" so the engineer decides.
+- If existing tests look wrong or contradict the current code, do not silently rewrite them, note them under `NOT_COVERED` as "existing tests may be stale" so the engineer decides.
 
-### Config files — minimal and additive only
+### Config files: minimal and additive only
 
 You generally write only test files. The one exception: if the chosen runner **cannot execute without a config that does not yet exist**, create the minimal one needed:
 - Vitest + Testing Library with no `vitest.config.*`: create one with `environment: 'jsdom'` and a setup file importing `@testing-library/jest-dom`.
 - Playwright with no `playwright.config.*`: create a minimal config (test dir, base webServer if obvious).
-- **Never edit an existing config** — if one is present, respect it and adapt the tests to it. List any conflict under `NOT_COVERED`.
+- **Never edit an existing config**, if one is present, respect it and adapt the tests to it. List any conflict under `NOT_COVERED`.
 
-### Security-sensitive code — add security cases by default
+### Security-sensitive code: add security cases by default
 
 If any file in scope handles authentication, authorization, sessions, payments, or PII (signals: `auth`, `login`, `session`, `token`, `password`, `permission`, `role`, `payment`, `charge`, `webhook`, `checkout`), add cases for: unauthorized/forbidden access, missing/expired/tampered credentials, and that secrets or sensitive fields are not leaked in responses or logs. Note any security risk you cannot cover with a test in `NOT_COVERED`.
 
-If `INSTALL_STATE = deferred`, still write complete, correct tests — they simply won't run until the engineer installs.
+If `INSTALL_STATE = deferred`, still write complete, correct tests, they simply won't run until the engineer installs.
 
 ### Reading context efficiently
 
-- Read each scoped source file — that is your primary input.
+- Read each scoped source file, that is your primary input.
 - Read a spec path you were given **only if** it plainly governs a file you're testing; skip the rest. Don't read all three reflexively.
 - Read the `design.md` path **only** when writing component/page accessibility cases.
 
@@ -50,11 +50,11 @@ If `INSTALL_STATE = deferred`, still write complete, correct tests — they simp
 
 ## Coverage priorities (in order)
 
-1. **Happy path** — the normal, expected use
-2. **Edge cases** — empty, null/undefined, zero, boundary, max length, unicode
-3. **Error states** — invalid input, dependency failure, network error, unauthorized, not found
-4. **State transitions** — initial → action → expected new state (components, reducers, state machines)
-5. **Accessibility** (component/page scope) — keyboard reachable, ARIA present, accessible names correct
+1. **Happy path**: the normal, expected use
+2. **Edge cases**: empty, null/undefined, zero, boundary, max length, unicode
+3. **Error states**: invalid input, dependency failure, network error, unauthorized, not found
+4. **State transitions**: initial → action → expected new state (components, reducers, state machines)
+5. **Accessibility** (component/page scope): keyboard reachable, ARIA present, accessible names correct
 
 A good suite for a changed feature has more than the happy path. If you only wrote happy-path tests, you are not done.
 
@@ -84,9 +84,9 @@ A good suite for a changed feature has more than the happy path. If you only wro
 
 ### Testing Library (when ADDITIONAL_TOOLS includes it)
 - Query priority: `getByRole` → `getByLabelText` → `getByText` → `getByTestId` (last resort)
-- `userEvent.setup()` before interactions — never `fireEvent`
+- `userEvent.setup()` before interactions, never `fireEvent`
 - Async render: `await findByRole(...)`, not `waitFor(() => getByRole(...))`
-- Assert what the user perceives: text, role, disabled/expanded — not `className` or React state
+- Assert what the user perceives: text, role, disabled/expanded, not `className` or React state
 
 ### Playwright (E2E)
 - Each test self-contained: setup in `test.beforeEach`, teardown in `test.afterEach`
@@ -97,7 +97,7 @@ A good suite for a changed feature has more than the happy path. If you only wro
 
 ### Cypress (E2E)
 - `cy.findByRole()` (with @testing-library/cypress) or `cy.get()` with data attributes
-- Assert with `.should(...)`; let Cypress retry — no fixed `cy.wait(ms)`
+- Assert with `.should(...)`; let Cypress retry, no fixed `cy.wait(ms)`
 - Stub network with `cy.intercept()` at the boundary
 
 ### pytest
@@ -125,7 +125,7 @@ A good suite for a changed feature has more than the happy path. If you only wro
 - Modal/dialog traps focus while open and returns focus to the trigger on close
 - `aria-expanded` toggles correctly on disclosure triggers
 - Icon-only buttons expose screen-reader text
-- Do not test colour contrast here (visual — defer to design review)
+- Do not test colour contrast here (visual, defer to design review)
 
 ---
 
@@ -141,10 +141,10 @@ Follow TEST_DIR and FILE_PATTERN exactly, and match any existing test convention
 
 ## Running and iterating (only when RUN_AFTER = yes)
 
-Run from `PACKAGE_ROOT`. Keep your own context small — test output is verbose, so:
+Run from `PACKAGE_ROOT`. Keep your own context small, test output is verbose, so:
 
 - **First run**: use the terse reporter for your tool (`--reporter=dot` for Vitest/Jest, `--reporter=line` for Playwright, `-q` for pytest, `-q` for `go test`). You want pass/fail counts and the failing names, not full passing output.
-- **On each retry, re-run only the file(s) that failed** — never the whole suite. E.g. `<RUN_COMMAND> path/to/failing.test.ts`. This keeps each iteration's output small and fast.
+- **On each retry, re-run only the file(s) that failed**, never the whole suite. E.g. `<RUN_COMMAND> path/to/failing.test.ts`. This keeps each iteration's output small and fast.
 
 Then iterate:
 
@@ -152,7 +152,7 @@ Then iterate:
 2. **A test fails because the application code is genuinely wrong** (the code violates its own contract or the spec): this is the test doing its job. **Do not change the source to make it pass, and do not weaken the assertion.** Leave the test failing, capture it under `BUGS_FOUND`, and move on.
 3. Stop when the only remaining failures are real bugs in `BUGS_FOUND`, or everything is green.
 
-Distinguish the two honestly. Silencing a real failure by loosening the assertion defeats the purpose of the suite. Do not paste raw test output into your report — summarise to counts plus the specific failing cases.
+Distinguish the two honestly. Silencing a real failure by loosening the assertion defeats the purpose of the suite. Do not paste raw test output into your report, summarise to counts plus the specific failing cases.
 
 If `RUN_AFTER = no`: do not run anything. Write the tests, then produce `MANUAL_INSTRUCTIONS` so the engineer can run and verify themselves.
 
@@ -160,7 +160,7 @@ If `RUN_AFTER = no`: do not run anything. Write the tests, then produce `MANUAL_
 
 ## Report
 
-After finishing, output the block matching `RUN_AFTER` verbatim — no extra prose around it.
+After finishing, output the block matching `RUN_AFTER` verbatim, no extra prose around it.
 
 **When RUN_AFTER = yes:**
 

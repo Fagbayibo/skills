@@ -485,9 +485,11 @@ Product UI mockups use `srcset` with desktop / mobile crops; mobile crops focus 
 
 ## Iteration Guide
 
+This template is a SEED, not the design system. The `{colors.*}` / `{component.*}` / `{rounded.*}` names below are internal to this file. When you build, you map their VALUES onto the project's canonical CSS custom properties (see `ui/generate.md` B2) and record the character in `design.md`. Shipped code refers to the CSS custom properties (`var(--color-ink)`), never to a `{colors.*}` name, and `design.md` never restates a token value.
+
 1. Focus on ONE component at a time.
-2. Reference component names and tokens directly.
-3. Run `npx @google/design.md lint DESIGN.md` after edits.
+2. Within this file, reference component names and tokens by their entry.
+3. After edits, check the work by hand: every token you reference resolves to a real CSS custom property, text on its background clears the WCAG AA contrast ratio (4.5:1 for body, 3:1 for large text), and no token is defined but unused.
 4. Default body to `{typography.body-md}`; use `{typography.code}` for any developer-facing snippet.
 5. Keep emerald scarce; one filled green button per viewport.
 6. The white-canvas commitment is non-negotiable — adding atmospheric backdrops breaks the brand.

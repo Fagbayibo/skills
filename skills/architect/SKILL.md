@@ -1,12 +1,14 @@
 ---
 name: architect
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Run /architect when choosing between approaches, designing a feature or page, picking a tech stack, or when /develop says a decision is owed — anytime a load-bearing technical decision is unmade. Asks deep questions, recommends an answer, and writes a build spec to docs/specs/. Owns all spec files."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent, AskUserQuestion
+description: "Run /architect when choosing between approaches, designing a feature or page, picking a tech stack, or when /develop says a decision is owed, anytime a load-bearing technical decision is unmade. Asks deep questions, recommends an answer, and writes a build spec to docs/specs/. Owns all spec files."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (the spec and every message to the engineer) in plain simple language, keeping technical terms that carry real meaning but explaining each in plain words. Use zero dashes of any kind in output (no em dash, no en dash, no hyphen as punctuation); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -50,11 +52,11 @@ Ask targeted questions before you write the spec (and before spawning any read/f
 - **ASK**: only what the engineer alone knows (requirements, preferences, business rules, compliance scope).
 - **RECOMMEND**: anything expertise settles (which provider/library/pattern fits). State the pick, a one-line why, and the runner-up; they may override. Never a neutral menu, never a silent decision.
 
-Project preference, walk it phase by phase, suggest, don't decide: for the **stack**, the **data model**, and the **tool/provider choice**, the engineer goes through each phase and picks (application type, framework, data storage, auth, deployment, API, and so on), with your suggested option marked at each phase and a free-text custom-input option always available. Work out which decisions this specific project actually needs and ask each one, from the big architectural calls down to the smallest tool or setup choice; no decision is too small to route through the engineer, and the more you pull out of them, the better the spec. Never bundle a complete data model, full stack, or pre-baked acceptance-criteria set into one accept-or-change panel, and never silently decide a tool, provider, or setup choice for them.
-
-Grill the engineer on the feature with feature-specific questions: data model, business rules, behavior, scale, library/provider choice, and (with UI) what each screen contains and its sections. Keep asking, in as many batched rounds as needed, until the spec is a complete build spec. The less specified, the more you ask. Framing (stack, platform, team/constraints) is inferred from `AGENTS.md` and the codebase, never asked.
+Never bundle a complete data model, full stack, or pre-baked acceptance-criteria set into one accept-or-change panel, and never silently decide a tool, provider, or setup choice for them.
 
 Recommendations align with the stack in use (on a BaaS, prefer its auth/storage over new external tools; reuse beats sprawl). Web or mobile alike: infer the platform, never assume web.
+
+That is the intent, not the procedure. How to actually run the questioning (phase by phase, batched rounds, what to grill on, what to infer from `AGENTS.md` instead of asking) lives in `internal/design-conversation.md`, which the Execution section below makes you read in full before you ask a single design question.
 
 ## Artifact ownership
 
@@ -66,8 +68,8 @@ Two independent choices, location (repo shape) and shape (decision size):
 - **Shape = decision size**, the same in any repo shape. Simple decision: one file `$SPEC_DIR/NNNN-title.md` (everything inline, written tight). A decision that is an umbrella (related sub-decisions), or heavy/foundational, or warrants a `verify.md`, uses the directory shape: `$SPEC_DIR/NNNN-title/` with `index.md` as its top file plus a `rationale.md` beside it (and child specs `NNNN-<child>.md` for an umbrella). Never double the name (`NNNN-title/NNNN-title.md`); the directory carries the number, the top file is `index.md`. Default to a single file; use the directory shape when there are child decisions, or the spec is heavy enough that keeping the reasoning out of every build read pays off, or a `verify.md` is warranted.
 
   A directory spec always has exactly two core files (plus optional `verify.md` and child specs):
-  - **`index.md`** — the build spec `/develop` reads: `## Summary`, `## Requirements`, `## Decision`, the design/spec section, `## Build plan`, `## Consequences`, `## Follow-up`, and a one-line `## Rationale` pointer to `rationale.md`. For an umbrella it also opens with a `## Structure` manifest listing and linking every child spec (one line each: what it is plus which decision it supports), and holds any cross-child contract.
-  - **`rationale.md`** — the decision record `/develop` skips: `## Context`, `## Options considered`, `## Rationale`, the `## References` section, and any bulky evidence (inventories, audits) under its own subheading. There is no `research/` folder; all evidence lives here.
+  - **`index.md`**: the build spec `/develop` reads: `## Summary`, `## Requirements`, `## Decision`, the design/spec section, `## Build plan`, `## Consequences`, `## Follow-up`, and a one-line `## Rationale` pointer to `rationale.md`. For an umbrella it also opens with a `## Structure` manifest listing and linking every child spec (one line each: what it is plus which decision it supports), and holds any cross-child contract.
+  - **`rationale.md`**: the decision record `/develop` skips: `## Context`, `## Options considered`, `## Rationale`, the `## References` section, and any bulky evidence (inventories, audits) under its own subheading. There is no `research/` folder; all evidence lives here.
   - Child specs (umbrella only) are flat `NNNN-<child>.md` files, each self-sufficient to build from with a short inline rationale (not its own `rationale.md`); promote a child to its own directory only when it grows heavy. Cross-child contracts live in the umbrella `index.md`.
 - **One narrow exception into the scope:** after the spec is confirmed, update the matching feature to the built-ready shape (exact edits in *After the spec is written*, step 3). Never dump the atomic task list into the scope. No matching feature: offer to enroll one (see the derive-tasks step).
 
@@ -83,7 +85,7 @@ Two independent choices, location (repo shape) and shape (decision size):
 
 ## Execution
 
-### Step 0 — Topic check (before pre-flight)
+### Step 0: Topic check (before pre-flight)
 
 If no design topic was provided (`/architect` with no argument or an empty description), stop and ask before doing anything else:
 
@@ -143,7 +145,7 @@ Then write the spec, applying:
 - **From `agent-prompt.md`**: adopt the persona ("Who you are / How you think / What you do NOT do") and follow the common instructions, Step 0, Step 0b, `## Expert rules that apply to all modes`, and `## Report format`. At `## Instructions by mode`, follow the one mode file above as the only mode-specific block; ignore the other mode files. `agent-prompt.md` is written as a subagent brief with ALL_CAPS placeholders; read those placeholders as the inputs you already gathered in the conversation (listed below), and apply the rules to yourself.
 - **From `spec-template.md`**: use only the part between `=== SPEC TEMPLATE START ===` and `=== SPEC TEMPLATE END ===` (the spec section structure + field guidance: Summary, Context, Options considered, Decision, Rationale, the mode-specific design section, Consequences, Follow-up, References, etc.). The trailing reference/meta sections (`## Filename conventions`, the `## Status values` table, the umbrella-structure / child-status notes, `## Writing rules`) are your own guidance: you resolved the filename, shape, and initial `**Status**:` in pre-flight; write the `**Status**:` line per the "On the initial `**Status**:` line" rule in `## Expert rules that apply to all modes`. Do not edit `spec-template.md`.
 
-**References and links — reuse the Stage (c) `REFERENCES_LEVEL`.** Write the References section and `(basis: ...)` citations only at the chosen level: `none` = no `## References` section and no citations anywhere (Rationale stays); `sources` = named Project sources and Practices only, no links; `sources+links` = sources plus the web verified links the Stage (c) landscape / tool-discovery checks already returned. Do NOT fetch or re-fetch anything now; those checks ran once during the conversation and the links they confirmed are what you write. If a link you want was never verified in that check, cite the source by name with no URL rather than fetching at write time. The written links are for a human to follow, not for later AI reads. Only if Stage (c) never ran (e.g. the documentation path), present the References consent panel now (same panel, recommended pick `No references, keep it clean`) and set `REFERENCES_LEVEL` to `none` or `sources` (no write-time fetch is available, so `sources+links` is not offered here).
+**References and links: reuse the Stage (c) `REFERENCES_LEVEL`.** Write the References section and `(basis: ...)` citations only at the chosen level: `none` = no `## References` section and no citations anywhere (Rationale stays); `sources` = named Project sources and Practices only, no links; `sources+links` = sources plus the web verified links the Stage (c) landscape / tool-discovery checks already returned. Do NOT fetch or re-fetch anything now; those checks ran once during the conversation and the links they confirmed are what you write. If a link you want was never verified in that check, cite the source by name with no URL rather than fetching at write time. The written links are for a human to follow, not for later AI reads. Only if Stage (c) never ran (e.g. the documentation path), present the References consent panel now (same panel, recommended pick `No references, keep it clean`) and set `REFERENCES_LEVEL` to `none` or `sources` (no write-time fetch is available, so `sources+links` is not offered here).
 
 The inferred MODE (from Framing) is already one of `FEATURE` / `ARCHITECTURE` / `ENHANCEMENT` / `CROSS-CUTTING`.
 
@@ -151,7 +153,7 @@ The inputs to apply (you already have them from the design conversation and pre-
 1. Design topic (from the user's original message)
 2. The inferred framing: MODE, platform (web/mobile/API), stack & conventions (from `AGENTS.md`), and any constraints/compliance inferred or confirmed
 2a. The feature's build approach (pre-flight precedence: scope-row `Approach` override, else the project default from `AGENTS.md`/scope header, else the noted default) → `BUILD_APPROACH`; order and slice `## Build plan` by what the approach implies for this feature
-3. All staged-conversation answers, stage by stage: the confirmed acceptance criteria (already IDed AC-1…, to seed `## Requirements`), the confirmed data model (entities/fields/relationships, to seed `## Build plan` task 1), the confirmed stack/tool picks, API surface, authz model, and edge cases. On the documentation path (staged conversation skipped) treat it as `"Staged design skipped — documenting an already-made decision"`, not an error
+3. All staged-conversation answers, stage by stage: the confirmed acceptance criteria (already IDed AC-1…, to seed `## Requirements`), the confirmed data model (entities/fields/relationships, to seed `## Build plan` task 1), the confirmed stack/tool picks, API surface, authz model, and edge cases. On the documentation path (staged conversation skipped) treat it as `"Staged design skipped, documenting an already-made decision"`, not an error
 3a. The RECOMMEND items → `RECOMMEND_ITEMS_OR_NONE`: the specific decisions you must make and justify (tool/provider aligned to the stack, session model, etc.); make each call, don't echo it back as an open question. If none, treat as `"none"`
 3b. The References level → `REFERENCES_LEVEL` (`none` | `sources` | `sources+links`, per the rule above). If Stage (c) never ran and you have not asked, default to `none`
 4. Context-file contents: `AGENTS.md` (root + the feature area's nested), or `CLAUDE.md` as fallback, or "MISSING"
@@ -188,4 +190,4 @@ If the task is to update or supersede an existing spec:
 - Main-thread design conversation: `internal/design-conversation.md` (read only for create/supersede)
 - Tool skill & MCP discovery/offer: `internal/tool-discovery.md` (read only when the stack walk settles a new tool; the web/registry fetch runs in a `researcher` subagent)
 - Main-thread completion flow: `internal/after-subagent.md` (read only after the spec is written)
-- The staged design conversation is generated per feature (see *Staged design conversation*, stages a–f), not stored; there are no canned question lists. If a topic is too vague to generate from, narrow it first (scope validation, or one clarifying question), never fall back to generic MCQs
+- The staged design conversation is generated per feature (see *Staged design conversation*, stages a to f), not stored; there are no canned question lists. If a topic is too vague to generate from, narrow it first (scope validation, or one clarifying question), never fall back to generic MCQs

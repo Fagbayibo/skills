@@ -1,12 +1,14 @@
 ---
 name: audit
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion
-description: "Run /audit on a greenfield project, an existing codebase with missing docs, or one area (/audit src/auth) to bootstrap the project's AI context — the AGENTS.md files every later skill reads. Writes tool-agnostic AGENTS.md plus thin CLAUDE.md pointers, adding only what is missing; never overwrites curated content."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent, AskUserQuestion
+description: "Run /audit on a greenfield project, an existing codebase with missing docs, or one area (/audit src/auth) to bootstrap the project's AI context, the AGENTS.md files every later skill reads. Writes tool-agnostic AGENTS.md plus thin CLAUDE.md pointers, adding only what is missing; never overwrites curated content."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (files, reports, every message to the engineer) in plain simple language; keep technical terms that carry real meaning but explain each in plain words. Never use a dash as punctuation (no em dash, no en dash, no hyphen as punctuation); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -77,7 +79,7 @@ Legacy migration (any phase): on `ROOT_LEGACY`, before proceeding ask permission
 
 ### Route to the selected phase
 
-Phase 0 (ambiguous) is handled inline below. For Phases 1–4, read only the matching mode file, then follow it:
+Phase 0 (ambiguous) is handled inline below. For Phases 1 to 4, read only the matching mode file, then follow it:
 
 - Phase 1 (greenfield setup) → `modes/greenfield.md`
 - Phase 2 (whole-repo scan) → `modes/whole-repo.md`
@@ -86,7 +88,7 @@ Phase 0 (ambiguous) is handled inline below. For Phases 1–4, read only the mat
 
 Do not read the other mode files. The greenfield and whole-repo modes additionally read `modes/tool-skills.md` for the Agent Skills / MCP sweep (skip it for area and gap-fill runs).
 
-### Phase 0 — Classify (only when pre-flight is ambiguous)
+### Phase 0: Classify (only when pre-flight is ambiguous)
 
 Don't guess. Ask once via your agent's interactive option picker (`AskUserQuestion` on Claude Code), or plain text with the same options. Mark one option `(recommended)` by whichever signal is stronger (a scaffold-like tree with a manifest but little history leans New; real feature code and deep history leans Existing), and the picker adds a free-text custom slot last:
 - question: "I can't tell if this is a new project or an existing codebase (<state why: e.g. 'a manifest exists but I see no source in a language I recognise', or 'files look like untouched scaffolding'>). Which is it?"
@@ -95,7 +97,7 @@ Don't guess. Ask once via your agent's interactive option picker (`AskUserQuesti
 
 ### After all phases
 
-If no `AGENTS.md` was written when it should have been (the file is missing/empty), report the failure and re-do it; don't relay success it didn't produce. Otherwise relay the report: what was discovered (2–4 bullets), what was written (file paths), what was proposed or skipped (if existing files were found).
+If no `AGENTS.md` was written when it should have been (the file is missing/empty), report the failure and re-do it; don't relay success it didn't produce. Otherwise relay the report: what was discovered (2 to 4 bullets), what was written (file paths), what was proposed or skipped (if existing files were found).
 
 ## Pattern presets
 

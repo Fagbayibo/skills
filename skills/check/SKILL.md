@@ -1,19 +1,21 @@
 ---
 name: check
-allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
+allowed-tools: Bash, Read, Grep, Glob, Write, Agent, AskUserQuestion
 description: "Run /check before merge to confirm a change is sound. Two modes: `/check verify` drives the real app and proves behavior against the spec (every acceptance criterion met, every specced surface built); `/check review` runs a senior code review on a different model than wrote the code. Verify after /develop, review before a PR. Writes findings to docs/reviews/; never edits your code."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (files, reports, every message to the engineer) in plain, simple language. Keep technical terms that carry real meaning but explain each in plain words. No dashes of any kind: no em dash, no en dash, no hyphen as punctuation. Use short sentences, commas, or parentheses. Clear beats clever.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
 `/check` is the pre-merge gate. It confirms a change is sound in two different ways, run as two modes; they are separate jobs and you usually run both, verify first:
 
-- **`verify`** (runtime proof) — run the real app and watch the change behave. Proves the feature actually works and conforms to the spec (every acceptance criterion met, every specced surface built), which green tests never reveal. Read-only on code, owns no durable files. Runs on the main thread. Typically after `/develop`.
-- **`review`** (fresh-model code review) — a rigorous senior read of the diff, on a **different model than wrote the code**, because a model reviewing its own output shares its blind spots. Writes severity-ranked findings to `docs/reviews/`. Read-only on code. Typically before opening a PR.
+- **`verify`** (runtime proof): run the real app and watch the change behave. Proves the feature actually works and conforms to the spec (every acceptance criterion met, every specced surface built), which green tests never reveal. Read-only on code, owns no durable files. Runs on the main thread. Typically after `/develop`.
+- **`review`** (fresh-model code review): a rigorous senior read of the diff, on a **different model than wrote the code**, because a model reviewing its own output shares its blind spots. Writes severity-ranked findings to `docs/reviews/`. Read-only on code. Typically before opening a PR.
 
 Neither mode edits your code. `verify` points failures at `/debug` or `/develop`; `review` reports findings for the implementer to fix.
 
@@ -23,7 +25,7 @@ Read the argument and route:
 
 - Starts with `verify` (or `run`) → runtime proof. Read `modes/verify.md` and follow it fully. Pass any remaining arguments (a feature name, a scope) through.
 - Starts with `review` → code review. Read `modes/review.md` and follow it fully. Pass the review steering through unchanged (e.g. `/check review with opus`, `/check review uncommitted`).
-- No mode word, or ambiguous → ask once which one, capability-first (a picker where the agent has one, else plain text): question "Which check?", header "Check", options `verify — run the real app and prove it works (recommended right after building)` · `review — a fresh-model read of the diff before a PR`. The picker appends its own free-text option; add it explicitly in a plain-text fallback. Then read that mode's file and follow it.
+- No mode word, or ambiguous → ask once which one, capability-first (a picker where the agent has one, else plain text): question "Which check?", header "Check", options `verify: run the real app and prove it works (recommended right after building)` · `review: a fresh-model read of the diff before a PR`. The picker appends its own free-text option; add it explicitly in a plain-text fallback. Then read that mode's file and follow it.
 
 Do not mix the two in one run. If the engineer clearly wants both, do `verify` first (confirm it works), then offer `review`.
 

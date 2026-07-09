@@ -1,12 +1,14 @@
 ---
 name: sync
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task
-description: "Run /sync as the last step after a change is complete, around merge, to keep durable knowledge current. Updates root and nested AGENTS.md, reconciles the scope from repo evidence, and flags specs the change made stale. Surgical, additive edits only."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent
+description: "Run /sync as the last step after a change is complete, around merge, to keep durable knowledge current. Updates root and nested AGENTS.md, reconciles the scope from repo evidence, and flags specs the change made stale. Surgical edits only: it adds lines, and rewrites single lines it owns. Never a whole section, never curated prose."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (files, reports, messages to the engineer) in plain simple language; keep technical terms that carry real meaning but explain each in plain words. Never use dashes as punctuation (no em dash, en dash, or punctuation hyphen); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -28,7 +30,7 @@ Closes the loop on a completed change: syncs AGENTS.md files, the scope, and lin
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |
 | Reconcile a spec's `**Status**:` line to its feature's scope status (`planned`→`Proposed`, `in-progress`→`In Progress`, `done`→`Accepted`) | ✅ Status line only | /sync |
 | Edit a spec's **content** / supersede it | ❌ flags as stale | /architect |
-| Reconcile the scope — for the **relevant workspace's** scope file only (not all of `docs/scope/`) — tick **any** completed sub-task from repo **evidence** (code, tests, AGENTS.md), advance status | ✅ corrects | /sync |
+| Reconcile the scope, for the **relevant workspace's** scope file only (not all of `docs/scope/`), tick **any** completed sub-task from repo **evidence** (code, tests, AGENTS.md), advance status | ✅ corrects | /sync |
 | Add / reorder features or sub-tasks in the scope | ❌ leaves alone | /scope |
 | Overwrite or rewrite curated AGENTS.md prose | ❌ flags conflict instead | human |
 
@@ -54,7 +56,7 @@ Owns exactly what the Boundaries table grants and writes nothing else. As the **
 
 ## Execution
 
-### 1. Scope the change set (cheap — with per-file status)
+### 1. Scope the change set (cheap, with per-file status)
 
 **Freshness first (teams):** `git fetch --quiet`; if `git rev-list --count HEAD..origin/$BASE` > 0 you are behind `origin/$BASE`, warn the engineer to pull first, a teammate may have already synced these docs.
 
@@ -73,7 +75,7 @@ De-duplicate, then **filter to source files** to sync *from*:
 
 **If no source files and no dependency manifest changes remain** (only docs/tests/lock/generated files changed), stop, nothing to sync. Do not spawn.
 
-### 2. Locate the context files and specs (paths only — do NOT read them here)
+### 2. Locate the context files and specs (paths only, do NOT read them here)
 
 Using your agent's file-search/glob tools:
 - Note whether a root `AGENTS.md` exists.

@@ -1,12 +1,14 @@
 ---
 name: develop
-allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion, WebSearch, WebFetch
-description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no spec records it, it stops and routes you to /architect; otherwise it reads the spec plus AGENTS.md, builds, and advances the scope."
+allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent, AskUserQuestion
+description: "Run /develop to build a feature, UI or backend, from an approved design, a page, component, API, service, or data slice. If something load-bearing is undecided and no spec records it, it stops and routes you to /architect; otherwise it reads the spec plus AGENTS.md, builds, and advances the scope."
 ---
 
 ## Output style (plain words, no dashes)
 
-Write everything this skill produces (files, reports, every message to the engineer) in plain simple language, keeping technical terms that carry real meaning but explaining each in plain words. Never use dashes as punctuation (no em dash, en dash, or hyphen used as punctuation); use short sentences, commas, or parentheses instead.
+<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
+Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
@@ -33,7 +35,7 @@ Any Agent Skills client, macOS/Linux/Windows. Detection snippets are POSIX refer
 
 ## Execution
 
-### Pre-check — the project must already exist (except the scaffold task)
+### Pre-check: the project must already exist (except the scaffold task)
 
 Exception: if this IS the scaffold sub-task of the Stack and architecture foundation feature (prompt says `scaffold`, or the step initializes the project from the stack spec), creating the project IS the job. Read the ARCHITECTURE spec's `## Proposed stack`; run the framework's own init (`create-next-app`, `cargo new`, etc. per that stack); install base dependencies (framework, core runtime, only what the first slice needs); lay out directories; confirm a dev server or build runs. Scaffold steps derive from the stack decision (a decision spec has no build plan). Install just-in-time: NOT every library the spec names (email, monitoring, and so on); each later feature installs its own when built; only cross-cutting tooling (lint, format, type strictness) comes early, via `/audit` + the tooling task. Then proceed.
 
@@ -43,7 +45,7 @@ Otherwise `/develop` builds into an existing project. No skeleton (no `package.j
 
 A project exists (even a bare scaffold) → proceed.
 
-### Pre-check — freshness & collaboration (don't build on stale state or over a teammate)
+### Pre-check: freshness & collaboration (don't build on stale state or over a teammate)
 
 Before mutating anything (skip silently if solo, offline, or non-git): `git fetch` quietly; base = `main`, else `master`; behind count (`git rev-list --count HEAD..origin/<base>`); uncommitted work (`git status --short`).
 
@@ -53,7 +55,7 @@ Before mutating anything (skip silently if solo, offline, or non-git): `git fetc
 
 Warnings, not hard blocks, but surface them.
 
-### Step 0 — The spec gate (always first)
+### Step 0: The spec gate (always first)
 
 Is a decision owed and unrecorded? The test:
 
@@ -81,9 +83,9 @@ Decision owed and unrecorded → don't guess, don't silently stop. Ask (single-s
 - **question**: "This looks like it needs an architecture decision first: `<name the specific load-bearing choice, e.g. 'which auth provider + session model'>`. How do you want to handle it?"
 - **header**: "spec first?"
 - **options**:
-  1. `Architect it first` — "Recommended. Capture the decision in a spec before building, so the build has a spec." → **end here** with the handoff below. Do not build.
-  2. `No, not needed` — "I've judged there's no real decision here; build directly." → proceed to the build flow (`flow/build.md`).
-  3. `Skip for now` — "Build it without a spec; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs spec?` = `yes` with a `⚠ spec pending` note in the scope (`docs/scope/`).
+  1. `Architect it first`: "Recommended. Capture the decision in a spec before building, so the build has a spec." → **end here** with the handoff below. Do not build.
+  2. `No, not needed`: "I've judged there's no real decision here; build directly." → proceed to the build flow (`flow/build.md`).
+  3. `Skip for now`: "Build it without a spec; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs spec?` = `yes` with a `⚠ spec pending` note in the scope (`docs/scope/`).
 
 The tool appends "Other" as a free-text option automatically.
 

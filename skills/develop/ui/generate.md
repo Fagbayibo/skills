@@ -1,16 +1,16 @@
 # UI Source: generated
 
-## Path B — No source: establish the system, then build (design-first)
+## Path B: No source, establish the system, then build (design-first)
 
 This is case 4 from the guide: nothing was provided, so you establish the design system, then build to the bar. Design first, integrate second.
 
 **Prefer a proven design skill when one is available.** If the project has a design skill installed (Anthropic's `frontend-design` on Claude Code, Codex's frontend skill) or a design MCP connected, use it to set the visual direction; that is the same craft that makes the chat app's output good. With none available, use a curated template as the agnostic seed (below). Either way, the token values land in CSS and the art direction lands in `design.md` (B2).
 
-### B1 — Set the direction (template seed, or a proven design skill)
+### B1: Set the direction (template seed, or a proven design skill)
 
-For the picker read only the frontmatter (lines 1–30) of each of `templates/stripe.md`, `templates/posthog.md`, `templates/nike.md`, `templates/supabase.md`, `templates/raycast.md`, not the full files. Read the full selected file in B2, after the user chooses.
+For the picker read only the frontmatter (lines 1 to 30) of each of `templates/stripe.md`, `templates/posthog.md`, `templates/nike.md`, `templates/supabase.md`, `templates/raycast.md`, not the full files. Read the full selected file in B2, after the user chooses.
 
-Ask (as above) — question 1:
+Ask (as above), question 1:
 ```
 "What mood should this UI have?"
   - Dark & focused       → near-black, precise, technical (Raycast)
@@ -19,23 +19,39 @@ Ask (as above) — question 1:
   - Custom               → describe a style, brand, or paste a design.md URL
 ```
 
-Then ask (as above) — question 2 (only for Light or Bold):
+Then ask (as above), question 2 (only for Light or Bold):
 ```
   Light: Stripe vs Supabase
   Bold:  PostHog vs Nike
   Dark:  auto-select Raycast
 ```
 
-### B2 — Establish the system: token values to CSS, art direction to design.md
+### B2: Establish the system, token values to CSS, art direction to design.md
 
 Whatever set the direction (a selected template, a design skill, a described style, or a `design.md` URL), split the result so nothing is duplicated:
 
 **1. Write the token VALUES into the project's CSS** (`app/globals.css` / `src/styles/tokens.css`, plus tailwind config if used), per B3. This is the single source of truth for colors, typography, spacing, radius, shadows, and motion.
-- **Template selected** → read the full template file, take its token values into the CSS token file (B3).
+- **Template selected** → read the full template file, take its token values into the CSS token file (B3), mapping its names onto the canonical CSS tokens (table below).
 - **URL provided** → fetch, validate it has colors and typography, take its values into the CSS token file.
 - **Style description** → generate the values (aesthetic guide below) into the CSS token file.
 
-**2. Write `design.md` as ART DIRECTION only** — never a copy of the token values, those live in CSS:
+**Mapping a template's color names onto the CSS tokens.** A template names colors for its own brand (`ink`, `soft-cloud`, `hairline`, `canvas-night`), while the project's CSS uses the fixed role names in B3. Map by ROLE, not by name; the template's names never appear in your code:
+
+| CSS token (B3) | Take the template's color for that role |
+|---|---|
+| `--color-canvas` | the page background |
+| `--color-surface` | the raised or secondary surface (a card, a panel) |
+| `--color-ink` | primary text |
+| `--color-body` | secondary body text |
+| `--color-muted` | de-emphasized text (captions, placeholders) |
+| `--color-accent` | the primary action color |
+| `--color-on-accent` | text and icons sitting on the accent |
+| `--color-border` | the hairline or divider |
+| `--color-success` / `--color-error` | the semantic pair |
+
+Template colors with no matching role (extra brand accents, deep or soft variants) are optional. Carry one over only when the design actually uses it, as `--color-accent-<name>`. Never invent a new role, and never leave a `{colors.*}` reference in the code you ship: after this step the CSS custom properties are the only names anything refers to.
+
+**2. Write `design.md` as ART DIRECTION only**, never a copy of the token values, those live in CSS:
 
 ```yaml
 ---
@@ -72,7 +88,7 @@ You are a senior product designer. Every page in this system ships as a complete
 
 Fill every design.md section with real, specific direction. No placeholders, and no token value dumps (values live in CSS).
 
-### B3 — Create CSS token file
+### B3: Create CSS token file
 
 Create `app/globals.css`, `src/styles/tokens.css`, or add to an existing globals file. Define CSS custom properties for:
 - All colors (light): `--color-canvas`, `--color-surface`, `--color-ink`, `--color-body`, `--color-muted`, `--color-accent`, `--color-on-accent`, `--color-border`, `--color-success`, `--color-error`

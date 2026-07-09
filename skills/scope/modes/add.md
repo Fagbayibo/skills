@@ -1,6 +1,6 @@
 # Scope Mode: add
 
-## Add (enroll one ad-hoc feature — lightweight)
+## Add (enroll one ad-hoc feature, lightweight)
 
 Inferred when a scope exists and the argument names a single feature: `/scope <a feature>` enrolls one coarse row without re-planning, for a feature invented mid-stream. No `add` subcommand to type.
 

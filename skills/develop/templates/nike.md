@@ -600,9 +600,11 @@ All interactive elements meet WCAG AAA (44×44px minimum). Pills (`{component.bu
 
 ## Iteration Guide
 
+This template is a SEED, not the design system. The `{colors.*}` / `{component.*}` / `{rounded.*}` names below are internal to this file. When you build, you map their VALUES onto the project's canonical CSS custom properties (see `ui/generate.md` B2) and record the character in `design.md`. Shipped code refers to the CSS custom properties (`var(--color-ink)`), never to a `{colors.*}` name, and `design.md` never restates a token value.
+
 1. Focus on ONE component at a time. Pull its YAML entry from the front matter and verify every property resolves.
-2. Reference component names and tokens directly (`{colors.ink}`, `{component.button-primary-active}`, `{rounded.lg}`) — do not paraphrase color names or radii in prose.
-3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
+2. Within this file, reference component names and tokens by their entry (`{colors.ink}`, `{component.button-primary-active}`, `{rounded.lg}`) — do not paraphrase color names or radii in prose.
+3. After edits, check the work by hand: every token you reference resolves to a real CSS custom property, text on its background clears the WCAG AA contrast ratio (4.5:1 for body, 3:1 for large text), and no token is defined but unused.
 4. Add new variants as separate component entries (`-active`, `-disabled`, `-focused`) — do not bury them inside prose. Nike's pressed state (`scale(0.5) opacity 0.5`) is intentional and must be its own entry, not a hover stand-in.
 5. Default body to `{typography.body-md}`; reach for `{typography.body-strong}` for product names and primary nav links; reserve `{typography.display-campaign}` strictly for hero campaign lockups.
 6. Keep `{colors.ink}` scarce per viewport — if more than one solid-black pill or block appears in the same fold, neutralize one to `{component.button-secondary}` or `{component.button-outline-on-image}`.

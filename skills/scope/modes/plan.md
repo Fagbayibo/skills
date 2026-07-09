@@ -1,6 +1,6 @@
 # Scope Mode: plan
 
-### Step 1 — Locate the scope; greenfield / brownfield / monorepo
+### Step 1: Locate the scope; greenfield / brownfield / monorepo
 
 Detect (skip `node_modules/` and `.git/`): source files (any `.ts`, `.tsx`, `.js`, `.py`, `.go`, `.rs`; presence ⇒ brownfield, none ⇒ greenfield); root `AGENTS.md`; existing scope under `docs/scope/` (`scope.md`, or `index.md` + epic files; monorepo: `docs/scope/<workspace>/`), noting the shape.
 
@@ -12,7 +12,7 @@ Read exactly one route file before continuing to Step 2:
 
 Do not read the other plan route files unless the classification changes. After the selected route has established the scope/workspace context, continue with Step 2 below.
 
-### Step 2 — Ask (generated question walk, as decision panels)
+### Step 2: Ask (generated question walk, as decision panels)
 
 Do not follow a fixed script or a set number of rounds. Enumerate the planning dimensions THIS product needs (generate them from the idea and `AGENTS.md`), then ask them one after another as batched decision panels (up to 4 per panel), as many panels as it takes. Infer and skip anything already stated; ask everything else. The more thoroughly you ask, the better the scope: never cap the questions to save time, and never end while a load-bearing dimension is unasked.
 
@@ -24,7 +24,7 @@ Cover at least these dimension groups (a checklist of what to reach, not an orde
 
 Each "yes" becomes its own feature or folds into a relevant feature's acceptance-criteria seeds (e.g. "SEO metadata present" on each public page; cookie consent its own feature).
 
-### Step 3 — Choose the build approach (decision panel)
+### Step 3: Choose the build approach (decision panel)
 
 Decides how every feature is sliced and sequenced. No fixed procedure; reason about this product (goal, the product & business constraints from Step 2, production build vs throwaway), then present a panel of the named approaches, each stated by its guiding principle (not steps), recommending exactly one:
 
@@ -37,23 +37,23 @@ Reason out the pick, never hardcode it or its mechanics: default for a proper pr
 
 **Once the approach is chosen, read its persona file and adopt that engineer's role for decomposition** (`approaches/tracer-bullet.md`, `approaches/skateboard.md`, `approaches/facade.md`, or `approaches/journey.md`). Read only the chosen one. Each persona defines how that engineer slices, what the first slice or deliverable is, what is real vs deferred, and the sequencing, with a worked example. All slicing and sequencing in Step 4 and Step 5 follows that persona, so the four approaches produce genuinely different scopes for the same product, not the same list relabeled. A per-feature override (Step 5) reads that feature's chosen persona and applies it to that feature only.
 
-Record it (the propagation source) in the scope header: `Build approach: <name> — <one-line principle>`. A project-wide convention: `/audit` and `/sync` persist it into root `AGENTS.md`; `/architect`, `/develop`, `/check verify` read and honor it. It also sets each feature's Phase (its slice / journey), shown in the At-a-glance table and as section grouping.
+Record it (the propagation source) in the scope header: `Build approach: <name> (<one-line principle>)`. A project-wide convention: `/audit` and `/sync` persist it into root `AGENTS.md`; `/architect`, `/develop`, `/check verify` read and honor it. It also sets each feature's Phase (its slice / journey), shown in the At-a-glance table and as section grouping.
 
 Header value = project default; a single feature may override via the optional per-feature Approach (Step 5), a tag beside its heading (e.g. `· Facade`). Precedence: own tag if set, else project default; tag only when it differs (no tag = inherit).
 
-### Step 4 — Foundations-first sequencing (a principle every build approach obeys)
+### Step 4: Foundations-first sequencing (a principle every build approach obeys)
 
 No approach starts a feature slice before the ground it stands on exists (working skeleton before features): lead with explicit foundation features (stack, tooling, data model, design system, walking skeleton), never buried sub-tasks, cheaper foundation before what depends on it. Then the feature slices, ordered and phased per Step 3 (Phasing column: `Foundation`, `Skeleton`, the slice/journey e.g. `Slice 2`, or `Deferred`; Order column: integer build sequence across the whole scope).
 
 - **Greenfield (and greenfield monorepo)**: apply the full foundations-first sequencing in `modes/plan-greenfield.md` (the ordered foundation features, then how each build approach shapes the slices). That route file is your Step 4 detail.
 - **Brownfield**: the foundations already exist; do not re-plan them. Plan the next slice on top per `modes/plan-brownfield.md`, shaping it to the Step 3 approach; enroll already-built features rather than laying foundations.
 
-### Step 5 — Decompose into coarse feature sections (you reason; don't ask)
+### Step 5: Decompose into coarse feature sections (you reason; don't ask)
 
 From the answers, produce the feature list: foundations first (Step 4), then slices, then explicitly-deferred nice-to-haves. Per feature:
 
 - Keep features small: one page or one cohesive unit each (a listing, a product page, and a cart are three features, not one "storefront"); split anything spanning unrelated screens.
-- **Intent (1–2 lines)**: what it is and why it matters.
+- **Intent (1 to 2 lines)**: what it is and why it matters.
 - **Done-when line (acceptance-criteria seeds)**: one compact `Done when:` line of observable outcomes (e.g. "user can filter the list and the URL reflects it; empty and error states render"). Seeds, not a spec; `/architect` grows them into the spec's full requirements and acceptance criteria. Load-bearing outcomes only.
 - **Weight**: `lean` / `medium` / `full` (see Artifact ownership), from risk, scope, compliance sensitivity.
 - **Approach (optional per-feature override)**: defaults to inherit. Only when genuinely best built differently, run a Build-approach panel for THAT feature: `(recommended) inherit the project default` on top, plus the named approaches (Tracer Bullet · Skateboard · Facade (prototype-grade) · Journey) as overrides; same panel and no-hardcoded-tool conventions as Step 3, tag and precedence rules per Step 3.
@@ -64,7 +64,7 @@ No build-task breakdown here. A not-yet-designed feature gets exactly one checkb
 
 Analysis/inventory is not a scope row: cataloguing duplication, listing call sites, auditing current state is decision-support research living with the spec (`/architect` puts it in the spec's `rationale.md`). Never plan a row or step that writes a `.md` into `docs/scope/`.
 
-### Step 6 — Write the scope (single-file or epic-split)
+### Step 6: Write the scope (single-file or epic-split)
 
 Re-list the scope location immediately before writing (a teammate may have changed it), then write per `scope-template.md`:
 
@@ -74,7 +74,7 @@ Re-list the scope location immediately before writing (a teammate may have chang
 
 Citations are gated by Step 6b: ask that panel first (or confirm the chosen level) before adding any `(basis: …)` or `## References` content, and honor its level.
 
-### Step 6b — References consent (one panel, covers sources AND links)
+### Step 6b: References consent (one panel, covers sources AND links)
 
 Ask ONE consent question governing both the `(basis: …)` citations and any reference links (one clear ask, not two). Panel; record the outcome as the References level:
 - question: "Add a References section to the scope (where the recommendations come from, and optionally links)? The intent and reasoning stay either way. The links option runs a subagent that web searches and fetches pages to confirm official docs and standards, which costs some extra tokens."
@@ -95,6 +95,6 @@ Sources plus web verified links: as Sources only, then verify the links with a r
 - Then YOU (main thread) write the `## References` *Links* group from that verified list (web verified only, else "none verified"); the fetch happens once here, and nothing re-fetches these links afterward. They are for a human to follow.
 - No web tools or subagents: degrade to the Sources only behavior.
 
-### Step 7 — Report and hand off
+### Step 7: Report and hand off
 
 Print the completion report using the `## /scope complete` block in `scope-template.md`, filled with this run's specifics. `/scope` does not run `/architect` or `/develop` for you; it hands you the ordered, coarse, weighted list to walk feature by feature (architect the `Needs spec: yes` ones, then build).

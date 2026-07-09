@@ -39,9 +39,9 @@ Any Agent Skills client on macOS, Linux, or Windows:
 
 Do not rely on self-introspection: the model executing this skill cannot reliably name itself, and the "You are powered by…" line in the system prompt is written at session start and goes stale the moment the user switches with `/model`. Detect from durable config, then confirm.
 
-**1a — Detect the author model (best effort).** The author model is whatever is generating code in this session. Using your file tools, read `ANTHROPIC_MODEL` from the env if set, and check `.claude/settings.local.json`, `.claude/settings.json`, and the user-level `.claude/settings.json` in the home directory for a `"model"` value. Map ids to families: `claude-opus-*` → `opus`, `claude-sonnet-*` → `sonnet`, `claude-haiku-*` → `haiku`, `claude-fable-*` → `fable`. Use the system-prompt value only as a last-resort weak hint, possibly stale.
+**1a: Detect the author model (best effort).** The author model is whatever is generating code in this session. Using your file tools, read `ANTHROPIC_MODEL` from the env if set, and check `.claude/settings.local.json`, `.claude/settings.json`, and the user-level `.claude/settings.json` in the home directory for a `"model"` value. Map ids to families: `claude-opus-*` → `opus`, `claude-sonnet-*` → `sonnet`, `claude-haiku-*` → `haiku`, `claude-fable-*` → `fable`. Use the system-prompt value only as a last-resort weak hint, possibly stale.
 
-**1b — Confirm the author model (one question).** A wrong guess silently reviews code with the same model and defeats the skill, so confirm before spawning. Pre-select the detected family as the recommended option. Present via your agent's interactive option picker (`AskUserQuestion` on Claude Code), or as plain-text options with the same choices if it has none:
+**1b: Confirm the author model (one question).** A wrong guess silently reviews code with the same model and defeats the skill, so confirm before spawning. Pre-select the detected family as the recommended option. Present via your agent's interactive option picker (`AskUserQuestion` on Claude Code), or as plain-text options with the same choices if it has none:
 
 ```
 "Which model wrote this code? I'll review on a different one."
@@ -57,7 +57,7 @@ Do not rely on self-introspection: the model executing this skill cannot reliabl
 
 Skip the question only when detection was unambiguous and the user passed an explicit `with <model>` reviewer override (the override settles which model reviews). Otherwise ask.
 
-**1c — Map to the contrasting Claude reviewer.** No API keys, no external setup; a subagent spawns a different-model reviewer and that model does the review:
+**1c: Map to the contrasting Claude reviewer.** No API keys, no external setup; a subagent spawns a different-model reviewer and that model does the review:
 
 | Author model | Reviewer model to spawn |
 |---|---|
@@ -77,7 +77,7 @@ State the final choice plainly before spawning:
 
 Want a different provider (GPT, Gemini)? Don't wire up API keys; switch your active model in your AI tool (`/model` for a different Claude, or open the change in your other assistant) and run the review there. The skill recommends this in its closing note for high-stakes changes; it never sends your code anywhere itself.
 
-### 2. Scope the change set (cheap — names only, let the subagent read the diff)
+### 2. Scope the change set (cheap, names only, let the subagent read the diff)
 
 Keep the main context lean: gather file names and the base ref only. The subagent runs the actual `git diff` and reads files. Choose a mode (apply the branching logic yourself, not via shell `if`/variables):
 - Base branch `BASE`: `git rev-parse --verify main`; on success use `main`, otherwise `master`.
@@ -94,13 +94,13 @@ If the change set is empty: stop and tell the engineer there's nothing to review
 ### 3. Gather lightweight pointers (do NOT read heavy files here)
 
 Paths and cheap signals only; the subagent reads on demand. Using your file tools: list the 3 most-recent spec files under `docs/specs/` (paths only), and resolve the test signal, one of three states, not a yes/no:
-- `TESTS = configured`: `test-preferences.json` names a framework (a runner is set up). Judge test adequacy normally.
-- `TESTS = none-by-design`: `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, or the nearest `AGENTS.md`/governing spec states a "no test runner" convention. Deliberate: the gate is typecheck + `/check verify`, not a suite.
-- `TESTS = none-yet`: no runner and no stated convention. A genuine gap.
+- `TESTS = configured`: `test-preferences.json` sets `"tool"` to a framework (a runner is set up). Judge test adequacy normally.
+- `TESTS = none-by-design`: `test-preferences.json` has `"tool": null` and a `"gate"` (e.g. `"typecheck+verify"`), or the nearest `AGENTS.md`/governing spec states a "no test runner" convention. Deliberate: the gate is typecheck + `/check verify`, not a suite.
+- `TESTS = none-yet`: no `test-preferences.json` at all, and no stated convention. A genuine gap.
 
 Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical, or `CLAUDE.md` as fallback; short), the 3 recent spec paths, the base ref / merge-base, and the diff scope. The subagent reads specs only if they govern the changed code, runs `git diff` itself, and reads the changed files and their tests.
 
-### 4. Spawn the review subagent — on the contrasting Claude model
+### 4. Spawn the review subagent: on the contrasting Claude model
 
 Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the absolute paths of two bundled files in the spawn prompt: `review-agent-prompt.md` (the spawn template) and `review-guide.md` (the rubric). Do not read their contents into the main context; the subagent's first action is to `Read` `review-agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Then spawn:
 
