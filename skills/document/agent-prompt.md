@@ -1,6 +1,6 @@
-# Document Subagent Prompt Template (lean)
+# Document Writing Guide (main thread)
 
-The main model fills this template and passes it as the subagent's prompt (running on a fast, low-cost model), together with the **one** template for the chosen document type. Placeholders are in ALL_CAPS.
+You, the main thread, read and follow this at write time (Step 3). Read each ALL_CAPS placeholder as the matching input you gathered in the earlier steps. Read the **one** template for the chosen document type alongside it.
 
 ---
 
@@ -13,6 +13,7 @@ TYPE  (one of: pr, changelog, release-note, postmortem)
 ## Structure to follow (the template for this type)
 
 TEMPLATE_CONTENT
+<!-- The main model supplies the chosen template here: an absolute path for you to Read, or its pasted full contents. -->
 
 ## Source material
 

@@ -1,13 +1,15 @@
-# Test Subagent Prompt Template
+# Test Writing Template (main thread)
 
-The main model fills this template and passes it as the subagent's prompt. The detailed rules, strategies, iteration loop, and report format live in `writing-guide.md`; the main model **inlines that file's full text** into `WRITING_GUIDE` below before spawning, so the subagent never has to resolve a skill path (portable across any agent/OS). Placeholders are in ALL_CAPS.
+You, the main thread, read and follow this at write time (Step 8). Read each ALL_CAPS placeholder as the matching input you gathered in pre-flight and the question rounds.
+
+Read `writing-guide.md` alongside this: the detailed rules, strategies, iteration loop, and report format live there; read it in full before writing.
 
 ---
 
 ## Writing guide (your rulebook — follow it exactly)
 
 WRITING_GUIDE
-<!-- The main model pastes the full contents of writing-guide.md here. -->
+<!-- Read writing-guide.md from this skill's folder in full before writing. -->
 
 ---
 
@@ -53,7 +55,7 @@ PROJECT_CONTEXT
 ## How to proceed
 
 1. **Follow the Writing guide above** — it's your rulebook: strategy per file class, coverage priorities, expert rules, tool-specific rules, accessibility cases, file placement, the run/iterate loop, and the exact report format you must output.
-2. Read each source file in scope. Read ADR/design pointers only when they bear on what you're testing (their contents may be inlined below if your client gives subagents no file access).
+2. Read each source file in scope (or work from the `scout` map if you offloaded the reading). Read ADR/design pointers only when they bear on what you're testing.
 3. For each file, check for an existing test file and **extend it** rather than duplicate (per the guide).
 4. Write or extend the tests using the strategy for each file's class.
 5. If `RUN_AFTER = yes`, run and iterate per the guide (terse reporter; re-run only failing files). Never modify application source to make a test pass.

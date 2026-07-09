@@ -1,8 +1,7 @@
 ---
 name: debug
-compatibility: Built for Claude Code — uses a subagent and iterative tool use. Installs on any Agent Skills client but is tuned for Claude Code.
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task
-description: "Use this skill to find and fix the root cause of a bug — something failing, broken, throwing, or behaving wrong. Run /debug when a test fails for a non-obvious reason, when /verify finds a failure, or when behavior is unexpected. It runs a disciplined loop — reproduce, localize, hypothesize, test, fix at the root, verify — one hypothesis at a time until the cause is proven, then makes the minimal fix and hands a regression test to /test. It fixes the cause, not the symptom; no features or extra refactors."
+description: "Run /debug to find and fix the root cause of a bug — something failing, broken, throwing, or behaving wrong — when a test fails for a non-obvious reason, /check verify finds a failure, or behavior is unexpected. Runs a reproduce, localize, hypothesize, test, fix, verify loop, makes the minimal fix, and hands a regression test to /test. No features, no extra refactors."
 ---
 
 ## Output style (plain words, no dashes)
@@ -79,7 +78,7 @@ Make the **minimal, targeted** change that addresses the proven cause. Don't fix
 ### Optional — run it in a subagent
 
 For a non-trivial hunt, spawn an investigation subagent so the iterative tool use doesn't fill the main context:
-- `model`: a strong model (e.g. `sonnet` on Claude Code)
+- `model`: set explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`)
 - `description: "Debug: <symptom>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write`
 - `prompt`: this loop + the captured symptom + reproduction + the relevant `AGENTS.md` (inlined). Require it to report the root cause with evidence, not just "fixed it."

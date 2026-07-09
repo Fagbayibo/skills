@@ -1,6 +1,6 @@
-# Test Writing Guide (read by the test subagent)
+# Test Writing Guide (read by the main thread at write time)
 
-The test subagent reads this file in full before writing. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Keeping it here — rather than in the spawn prompt — means this detail never passes through the main model's context.
+The main thread reads this file in full at write time (Step 8), just before it writes the tests. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Reading it only at write time keeps this detail out of context through the earlier pre-flight and question steps.
 
 ---
 
@@ -24,7 +24,7 @@ You generally write only test files. The one exception: if the chosen runner **c
 
 ### Security-sensitive code — add security cases by default
 
-If any file in scope handles authentication, authorization, sessions, payments, or PII (signals: `auth`, `login`, `session`, `token`, `password`, `permission`, `role`, `payment`, `charge`, `webhook`, `checkout`), add cases for: unauthorized/forbidden access, missing/expired/tampered credentials, and that secrets or sensitive fields are not leaked in responses or logs. Flag these in `HARDEN_NOTE`.
+If any file in scope handles authentication, authorization, sessions, payments, or PII (signals: `auth`, `login`, `session`, `token`, `password`, `permission`, `role`, `payment`, `charge`, `webhook`, `checkout`), add cases for: unauthorized/forbidden access, missing/expired/tampered credentials, and that secrets or sensitive fields are not leaked in responses or logs. Note any security risk you cannot cover with a test in `NOT_COVERED`.
 
 If `INSTALL_STATE = deferred`, still write complete, correct tests — they simply won't run until the engineer installs.
 
@@ -176,9 +176,6 @@ BUGS_FOUND:
 
 NOT_COVERED:
 - <scenario left out, one line each, with reason>
-
-HARDEN_FLAG: yes|no
-HARDEN_NOTE: <if yes: one sentence on the security or scale risk; omit if no>
 ```
 
 **When RUN_AFTER = no:**
@@ -196,7 +193,4 @@ MANUAL_INSTRUCTIONS:
 
 NOT_COVERED:
 - <scenario left out, one line each, with reason>
-
-HARDEN_FLAG: yes|no
-HARDEN_NOTE: <if yes: one sentence on the security or scale risk; omit if no>
 ```
