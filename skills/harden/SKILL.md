@@ -1,7 +1,7 @@
 ---
 name: harden
 allowed-tools: Bash, Read, Grep, Glob, Write, Task
-description: "Run /harden to stress-test a completed, tested change against production failure modes — edge cases, concurrency, scale, security — after /test or /review, or before merge when a change is risky, high-blast-radius, or flagged on the roadmap. Writes a prioritized, verifiable hardening checklist to docs/hardening/. Does not rewrite your code."
+description: "Run /harden to stress-test a completed, tested change against production failure modes — edge cases, concurrency, scale, security — after /test or /check review, or before merge when a change is risky, high-blast-radius, or flagged on the roadmap. Writes a prioritized, verifiable hardening checklist to docs/hardening/. Does not rewrite your code."
 ---
 
 ## Output style (plain words, no dashes)
@@ -18,7 +18,7 @@ Takes working, tested code and asks the question tests rarely do: **how does thi
 - **Read-mostly** — it diagnoses and recommends; it writes only the checklist (not application code). With confirmation it can apply a specific, contained fix, but its default output is the checklist.
 - Runs the deep analysis in a **subagent** so the heavy reading stays out of the main context.
 
-Owns the hardening checklist (`docs/hardening/`). Does not write tests (/test), reviews (/review), code, ADRs, or the `AGENTS.md`/`CLAUDE.md` context files.
+Owns the hardening checklist (`docs/hardening/`). Does not write tests (/test), reviews (/check review), code, ADRs, or the `AGENTS.md`/`CLAUDE.md` context files.
 
 ## Asks vs acts
 
@@ -43,7 +43,7 @@ Written for any Agent Skills client on macOS, Linux, or Windows:
 
 ### 1. Scope the change set (cheap — names only)
 
-Same scoping as /review: the change under hardening is what differs from the base branch plus uncommitted work. Gather **names and the base ref only**; the subagent reads the diff and files.
+Same scoping as /check review: the change under hardening is what differs from the base branch plus uncommitted work. Gather **names and the base ref only**; the subagent reads the diff and files.
 
 Pick the base branch: use `main` if `git rev-parse --verify main` succeeds, otherwise `master`. Read the current branch with `git rev-parse --abbrev-ref HEAD`.
 
@@ -60,7 +60,7 @@ Paths and cheap signals only. Using your file tools: list the 3 most-recent ADR 
 
 Test signal — three states, not a yes/no:
 - `TESTS = configured` — `test-preferences.json` names a framework. "Add a test for this" is valid advice.
-- `TESTS = none-by-design` — `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, **or** `AGENTS.md`/an ADR states a "no test runner" convention. Don't say "add a test" or "no test harness" as a weakness — the gate is typecheck + `/verify`; frame the "verify with" as that gate.
+- `TESTS = none-by-design` — `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, **or** `AGENTS.md`/an ADR states a "no test runner" convention. Don't say "add a test" or "no test harness" as a weakness — the gate is typecheck + `/check verify`; frame the "verify with" as that gate.
 - `TESTS = none-yet` — no runner and no stated convention.
 
 Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical — or `CLAUDE.md` as fallback; short), the recent ADR **paths**, the latest review **path**, the diff scope, and the test signal.
@@ -77,7 +77,7 @@ Resolve this skill's folder to an absolute path (you, the main agent, already re
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, changed-file list + the exact `git diff` command
   3. Project-context contents (inline) — `AGENTS.md`, or `CLAUDE.md` fallback
   4. Recent ADR paths + latest review path (read if relevant; inline their text if your client gives subagents no file access)
-  5. The **test signal** (`configured` / `none-by-design` / `none-yet`) — on `none-by-design`, "verify with" is the typecheck + `/verify` gate, never "add a test harness"
+  5. The **test signal** (`configured` / `none-by-design` / `none-yet`) — on `none-by-design`, "verify with" is the typecheck + `/check verify` gate, never "add a test harness"
   6. Output path: `docs/hardening/<date>-<branch>.md`
 
 ### 4. Relay the result

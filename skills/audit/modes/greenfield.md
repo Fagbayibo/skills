@@ -13,7 +13,7 @@ Architecture & code conventions:
 Tooling (asked here, installed by `/develop tooling`):
 - Linting & formatting (adaptive): the standard linter + formatter for this stack (suggested; list an already-installed one first) · a specific alternative · minimal for now.
 - Pre-commit enforcement: lint + format + typecheck on every commit (suggested) · format only · none.
-- Testing gate (captured as the convention, the runner is set up by `/test`): unit + integration with a framework (suggested) · typecheck + manual `/verify` only · tests-first (TDD).
+- Testing gate (captured as the convention, the runner is set up by `/test`): unit + integration with a framework (suggested) · typecheck + manual `/check verify` only · tests-first (TDD).
 - Continuous integration: a basic CI check on push (lint, typecheck, test) (suggested) · not yet · already configured.
 
 Adapt the list: drop what doesn't apply (no CI question for a throwaway prototype, no type-strictness for an untyped language); add any stack-specific convention worth pinning.

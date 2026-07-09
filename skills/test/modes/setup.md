@@ -10,9 +10,9 @@ With file tools (not shell utilities), determine:
 - Installed test tools: `vitest`/`jest`/`@playwright/test`/`cypress`/`@testing-library/*` in `package.json`. A different runner already in use (`bun test`, `node:test`, `ava`, `deno test`, etc.): detect and use it instead of installing a new one.
 
 **Q0 — No test setup at all? Don't assume they want one.** No test tool installed (whole repo, or this package in a monorepo): first check for a deliberate no-test-runner convention.
-- Stated in the nearest `AGENTS.md` or governing ADR (e.g. "no test runner — typecheck + `/verify` is the gate"): respect it, don't push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, point to `/verify` for behavior. Report: "This project gates on typecheck + `/verify`, not a test suite. Ran the typecheck gate; use `/verify` to confirm behavior."
-- Not stated: ask (don't default to installing): "This has no test setup. How do you want to gate changes here?" → `Set up a test framework` (→ Q1, install with confirmation) · `No test runner, typecheck + /verify` (→ save that preference, run typecheck, defer behavior to `/verify`; never install) · `Just typecheck for now`.
-- Per package in a monorepo: a package with no tests by design gates on typecheck/`/verify` even if a sibling has a full suite; apply per resolved package root.
+- Stated in the nearest `AGENTS.md` or governing ADR (e.g. "no test runner — typecheck + `/check verify` is the gate"): respect it, don't push a framework. Save a `"gate": "typecheck+verify"` preference, run the project's typecheck/lint as the gate, point to `/check verify` for behavior. Report: "This project gates on typecheck + `/check verify`, not a test suite. Ran the typecheck gate; use `/check verify` to confirm behavior."
+- Not stated: ask (don't default to installing): "This has no test setup. How do you want to gate changes here?" → `Set up a test framework` (→ Q1, install with confirmation) · `No test runner, typecheck + /check verify` (→ save that preference, run typecheck, defer behavior to `/check verify`; never install) · `Just typecheck for now`.
+- Per package in a monorepo: a package with no tests by design gates on typecheck/`/check verify` even if a sibling has a full suite; apply per resolved package root.
 
 Skip Q1 unless the engineer chose "set up a framework".
 

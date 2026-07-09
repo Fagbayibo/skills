@@ -1,17 +1,35 @@
 # /develop — UI track guide
 
-UI build track for `/develop`, read after the ADR gate (`SKILL.md` Step 0) classifies a task as UI: components, pages, or full layouts with semantic HTML, design tokens, and strict accessibility. Any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). A root `design.md` is the single source of truth. With a screenshot, replicate pixel-perfectly; without one, pick a curated template, a `design.md` URL, or a described style.
+UI build track for `/develop`, read after the ADR gate (`SKILL.md` Step 0) classifies a task as UI: components, pages, or full layouts with semantic HTML, design tokens, and strict accessibility. Any web stack (Next.js, Vite, Nuxt, Svelte, plain HTML). The project's `design.md` holds the art direction (character, the build mandate, composition and component rules, and pointers to where the real tokens live); the token values themselves live in the project's CSS (`globals.css` / tailwind config), never duplicated in `design.md`. Read the bar below before you build anything.
 
-## What this track does
+## The bar — read this first, it is the definition of done
 
-Design source routes, checked in order:
+You are a senior product designer shipping a real product, not a developer wiring a form. Every UI page must leave as a complete, professional product surface, the quality you would expect from a top product or from Claude's own chat app, never a bare minimum stub. This is not optional styling advice. It is the definition of done for a UI build, committed here, before you start, so it cannot get crowded out by the token and accessibility rules later in this guide.
 
-1. MCP source (Figma or another design MCP): pull real design data, create `design.md`, implement.
-2. Image provided: extract tokens, replicate pixel-perfectly.
-3. Existing `design.md` or current UI: implement to it, or extract `design.md` from shipped UI.
-4. No source: guide template selection or custom style generation, create `design.md`, implement.
+**Design first, then integrate.** The same model produces beautiful UI in a chat app and plain UI in a codebase because the codebase makes it satisfy tokens, libraries, and accessibility before it has designed anything, and the ambition dies. Build in two passes:
+1. **Design the surface** (bold, complete, opinionated), as if you were shipping it standalone, to the agreed design system. Compose the whole page (`ui/implementation.md` Phase 0).
+2. **Integrate it** into the codebase: installed styling library, real tokens, semantic HTML, accessibility, responsive (Phases 1 to 5).
 
-All paths: component-or-screen → stack detection → styling library → dark mode → token sync → font → five phases.
+**Disqualifiers, any one means NOT done, fix before you report:**
+- a lone centered form or single input box floating on an empty page
+- large dead zones, or content stranded in a narrow column with blank canvas around it
+- naked / unstyled / full-bleed elements (a raw black bar, an unstyled header, a default browser control)
+- default-only styling (one flat button, hairline default borders, system font, no considered accent, no depth)
+- missing states (no empty / loading / error) or orphaned controls (a toggle or quick-action with nothing around it)
+- a bare functional widget where a product would ship a full surface (brand, real copy, layout, supporting content, footer)
+
+**Prove it before you report.** Before declaring the UI done, self-audit the build against these disqualifiers and against the page's `design.md` mandate, and fix every hit. When you have a browser or screenshot tool, render the page and look at it, the way a designer checks their own work, and fix any visual defect you see (the only reliable way to catch a broken render like a stray black bar). Say in the report what you audited.
+
+## Design source (route by what you were given)
+
+1. **Figma connected (the ADR says use it)** → pull the real design from Figma, build to the frames. Route: `ui/mcp.md`.
+2. **Image provided (pasted in chat, not a repo file)** → replicate it pixel-perfect. The image is both the look and the composition, so match it faithfully and do NOT embellish beyond it. Tokenize what you see (values into CSS, character into `design.md`) and derive the responsive and accessible behavior a single screenshot cannot show. Route: `ui/image.md`.
+3. **A design system already exists** (`design.md` + tokens in CSS) → design the new page WITHIN that system, at the bar above: a full professional surface, consistent with what is already shipped. Route: `ui/existing.md`.
+4. **Nothing provided** → establish the design system first (the frontend-design skill when available, else a template seed), record it in `design.md` (character + mandate + pointers) with the tokens written to CSS, then build to the bar above, maximalist and complete. Route: `ui/generate.md`.
+
+Cases 3 and 4 get the full chat-app treatment (bold, complete, product-level); case 2 gets faithful fidelity; case 1 gets Figma fidelity. Follow the source the ADR recorded; never default to Figma just because an MCP is connected.
+
+All paths converge on: component-or-screen → stack detection → styling library → dark mode → token sync → font → the implementation phases.
 
 ## How the UI build fits the project's approach
 
@@ -25,13 +43,13 @@ Any Agent Skills client, macOS/Linux/Windows. Detection snippets (`find`, `cat |
 
 ## Step 0 — Did the ADR already decide the design system?
 
-Check the governing ADR first (`/develop` read it in Step 2). If it settled the design direction (named template, "extract from existing UI", described style, or page composition), execute it; never re-ask, `/architect` already grilled the engineer on this. Create `design.md` from the ADR's decision (e.g. "use the Raycast template" → copy that template; "extract from existing UI" → Step 0.2 extraction), then implement.
+Check the governing ADR first (`/develop` read it in Step 2). If it settled the design direction (named template, "extract from existing UI", described style, or page composition), execute it; never re-ask, `/architect` already grilled the engineer on this. Create `design.md` (art direction) plus CSS tokens from the ADR's decision (e.g. "use the Raycast template" → `ui/generate.md` B2: its token values to CSS, its character to `design.md`; "extract from existing UI" → Step 0.2), then implement.
 
 Only if no ADR governs this UI, or it is silent on the design system, fall through to the detection below.
 
 ## Step 0.0 — Check for existing design.md
 
-File-search for `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, `.claude`. Found: validate; it needs at least a `colors:` block and a `typography:` block. Either missing, or file empty: treat as not found and warn the user.
+File-search for `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, `.claude`. Found: validate; a real one has a `character` and a `## Build mandate` (art direction) and points at the CSS for tokens. Empty, or only a stub: treat as not found and warn the user. (An older `design.md` that still carries inline `colors:` / `typography:` value blocks is still valid; treat the CSS as authoritative for values.)
 
 Found and valid → **Design.md path**, skip Steps 1 onward.
 Not found → **Step 0.1 (brownfield check)**.
@@ -55,15 +73,15 @@ Found (brownfield): ask before proceeding, via your agent's interactive option p
 - **question**: "There's no `design.md`, but this project already has UI. How should I get the design system?"
 - **header**: "Design system"
 - **options**:
-  1. `Extract from existing code` — "Recommended — reverse-engineer `design.md` from the current tokens/components so new UI matches what's shipped." → **Step 0.2**.
+  1. `Extract from existing code` — "Recommended — capture the design direction from the current tokens/components into `design.md`, pointing at the existing CSS tokens, so new UI matches what's shipped." → **Step 0.2**.
   2. `Use a reference` — "I'll give a screenshot or a `design.md` URL, or pick a template." → **Step 1**.
   3. `Match a specific file` — "Build to mirror an existing component/page I name; I'll point you at it." → read that file's styles, treat them as the local source of truth.
 
 No existing UI (greenfield) → **Step 0.5**.
 
-### Step 0.2 — Extract design.md from existing code
+### Step 0.2 — Capture the design direction from existing code
 
-Read the token files and 3–5 representative components/pages. Recover the real system into `design.md` (same schema as generated): colors (light + dark if present), typography (families, scale, weights), spacing scale, radii, shadows, motion, and conventions visible in components. Pull values from CSS variables / Tailwind config, never invent. Inconsistent codebase: pick the dominant value, note the variance. Write `./design.md`, show a short summary, confirm before building, then implement with it as source of truth.
+The existing CSS / Tailwind config already holds the token values (the source of truth); do not copy them into `design.md`. Read the token files and 3 to 5 representative components/pages to read the *system*, then write `design.md` as art direction (per `ui/generate.md` B2's schema): `source: extracted-from-code`, the character you observe, the composition and component patterns the app already uses, the build mandate, and a pointer to the CSS token file. Inconsistent codebase: note the dominant patterns and the variance. Show a short summary, confirm before building, then implement to the direction with the CSS as the token source of truth.
 
 ---
 
@@ -143,6 +161,6 @@ After the selected source has resolved tokens, assets, and design direction, rea
 
 - Accessibility checklist: `checklist.md`
 - Design templates: `templates/`
-- Project design system: `./design.md`
+- Project design system: `./design.md` (art direction and the build mandate; token values live in CSS)
 - UI source routes: `ui/mcp.md`, `ui/image.md`, `ui/existing.md`, `ui/generate.md`
 - UI implementation phases and report: `ui/implementation.md`

@@ -1,12 +1,6 @@
----
-name: review
-allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
-description: "Run /review for a rigorous, senior-level code review before merge, on a different Claude model than wrote the code — after implementing a feature or fix, before opening a PR, or whenever a change warrants a fresh-model look. Severity-ranked findings on correctness, security, performance, maintainability, and tests, written to docs/reviews/. Does not modify your code."
----
+# /check review (fresh-model code review)
 
-## Output style (plain words, no dashes)
-
-Write everything this skill produces (files, reports, every message to the engineer) in plain, simple language. Keep technical terms that carry real meaning but explain each in plain words. No dashes of any kind: no em dash, no en dash, no hyphen as punctuation. Use short sentences, commas, or parentheses. Clear beats clever.
+The `review` mode of `/check`: a senior pre-merge code review on a different model than wrote the code. Follow it fully.
 
 ## What this skill does
 
@@ -22,7 +16,7 @@ Owns review findings (`docs/reviews/`). Does not write code, tests, ADRs, or the
 
 Acts, with one deliberate exception: it confirms which model wrote the code before reviewing (a single MCQ, detected value pre-selected), because the model can't reliably detect itself and a wrong guess silently breaks the cross-model guarantee (see Step 1). Everything else (scoping, reviewing, writing findings) it does without asking. It states which model is reviewing so you can still redirect, and pauses if there is nothing to review (clean tree, no branch diff). The confirm is skipped when you pass an explicit `with <model>` override and detection was unambiguous.
 
-Steering: `/review` (default contrasting model), `/review with opus` (force a reviewer), or `/review uncommitted` (scope to working-tree changes only).
+Steering: `/check review` (default contrasting model), `/check review with opus` (force a reviewer), or `/check review uncommitted` (scope to working-tree changes only).
 
 ## Artifact ownership
 
@@ -95,25 +89,25 @@ If the user passed `uncommitted`, force `MODE=uncommitted` regardless of branch.
 
 De-duplicate the file list. Exclude lock files and generated output (`dist/`, `build/`, `.next/`, `coverage/`) from the count, but the subagent still sees the full diff.
 
-If the change set is empty: stop and tell the engineer there's nothing to review (make a change first, or point /review at a branch). Do not spawn.
+If the change set is empty: stop and tell the engineer there's nothing to review (make a change first, or point /check review at a branch). Do not spawn.
 
 ### 3. Gather lightweight pointers (do NOT read heavy files here)
 
 Paths and cheap signals only; the subagent reads on demand. Using your file tools: list the 3 most-recent ADR files under `docs/adr/` (paths only), and resolve the test signal, one of three states, not a yes/no:
 - `TESTS = configured`: `test-preferences.json` names a framework (a runner is set up). Judge test adequacy normally.
-- `TESTS = none-by-design`: `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, or the nearest `AGENTS.md`/governing ADR states a "no test runner" convention. Deliberate: the gate is typecheck + `/verify`, not a suite.
+- `TESTS = none-by-design`: `test-preferences.json` records a `"gate"` (e.g. `typecheck+verify`) with no framework, or the nearest `AGENTS.md`/governing ADR states a "no test runner" convention. Deliberate: the gate is typecheck + `/check verify`, not a suite.
 - `TESTS = none-yet`: no runner and no stated convention. A genuine gap.
 
 Pass to the subagent: project-context contents inline (read `AGENTS.md`, canonical, or `CLAUDE.md` as fallback; short), the 3 recent ADR paths, the base ref / merge-base, and the diff scope. The subagent reads ADRs only if they govern the changed code, runs `git diff` itself, and reads the changed files and their tests.
 
 ### 4. Spawn the review subagent — on the contrasting Claude model
 
-Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the absolute paths of two bundled files in the spawn prompt: `agent-prompt.md` (the spawn template) and `review-guide.md` (the rubric). Do not read their contents into the main context; the subagent's first action is to `Read` `agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Then spawn:
+Resolve this skill's folder to an absolute path (you, the main agent, already resolve these relative paths, so you know the folder) and pass the absolute paths of two bundled files in the spawn prompt: `review-agent-prompt.md` (the spawn template) and `review-guide.md` (the rubric). Do not read their contents into the main context; the subagent's first action is to `Read` `review-agent-prompt.md` by path and follow it. Pass the dynamic values as a labeled list in the spawn prompt (`Placeholder values: ...`). Fallback: if your client's subagents cannot read files, read both files and inline their contents into a filled prompt instead (the old behavior). Then spawn:
 
 - `model`: the reviewer model chosen in Step 1 (different family from the author)
 - `description`: `"Review: <N> changed files on <reviewer-model>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Write`, no `Edit` (the reviewer reports, it does not change code)
-- `prompt`: the absolute path to `agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:`, a labeled list supplying:
+- `prompt`: the absolute path to `review-agent-prompt.md` (Read it first, then follow it), plus `Placeholder values:`, a labeled list supplying:
   1. `REVIEW_GUIDE`: the absolute path to `review-guide.md` (the subagent reads it as its rubric)
   2. Diff scope: `MODE`, `BASE`, `MERGE_BASE`, and the changed-file list with the exact `git diff` command to run
   3. Project-context contents (inline), `AGENTS.md` or `CLAUDE.md` fallback, the conventions the review must enforce
@@ -126,7 +120,7 @@ Resolve this skill's folder to an absolute path (you, the main agent, already re
 If the subagent errored or wrote no findings file, report the failure and offer to re-run; don't relay an empty or fabricated review. Otherwise it writes the findings file and returns a compact summary. Relay:
 
 ```
-## /review complete
+## /check review complete
 
 **Reviewed by**: <reviewer-model> (you're on <author-model>)
 **Scope**: <N> files, <branch vs base | uncommitted>
@@ -148,13 +142,13 @@ If the subagent errored or wrote no findings file, report the failure and offer 
 Show all blockers and majors in chat; collapse minors/nits to a count with a pointer to the file. If there are zero blockers and zero majors, lead with the verdict and keep it short.
 
 For a high-stakes change (verdict was Blocked or Changes requested, or the change is high/critical severity), append one line:
-> "For an independent second opinion from a different provider, switch your model with `/model` (or paste the diff into another assistant) and re-run /review, no API keys needed."
+> "For an independent second opinion from a different provider, switch your model with `/model` (or paste the diff into another assistant) and re-run /check review, no API keys needed."
 
-This skill is complete after relaying. It does not fix the findings (the implementer does that) and does not invoke other skills. If the engineer wants the issues fixed, that's a normal follow-up; /review's job is the assessment.
+This skill is complete after relaying. It does not fix the findings (the implementer does that) and does not invoke other skills. If the engineer wants the issues fixed, that's a normal follow-up; /check review's job is the assessment.
 
 ---
 
 ## Reference files (in this skill's folder; relative paths)
 
-- `agent-prompt.md`: lean spawn template; the main model passes its absolute path in the spawn prompt and the subagent reads and follows it
+- `review-agent-prompt.md`: lean spawn template; the main model passes its absolute path in the spawn prompt and the subagent reads and follows it
 - `review-guide.md`: rubric, severity, findings format. The main model passes its absolute path in the subagent prompt; the subagent reads it (inline its text only if your client's subagents cannot read files).

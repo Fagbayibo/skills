@@ -59,9 +59,11 @@ When the real source lands (the feature's data-integration sub-task, or the Faca
 
 ## Implementation phases
 
-### Phase 0 — Compose the full product surface (screen builds)
+### Phase 0 — Design the full product surface (the gate, screen builds)
 
-Before the structure, decide what goes on the page: you are a senior product designer, not a form-wirer. Applies to every screen of any kind (sign-in, dashboard, feed, pricing, profile, item detail, list or search results, onboarding, settings, checkout, empty state, even a 404), not just auth. When building a screen (not a lone component) and the ADR gave no full page composition, compose the complete product surface in the chosen design system's language. Never ship the bare functional widget (a lone centered form, an unstyled table on a white page, a single box of inputs, a raw list with no header or context); that bare minimum makes a build feel like a stub, not a product.
+This is Pass 1 from the guide's bar: design before you integrate, and it is a gate, not advice. You do not write markup until you have designed the whole surface, and the build is not done until it clears the bar's disqualifiers. You are a senior product designer, not a form-wirer. Applies to every screen of any kind (sign-in, dashboard, feed, pricing, profile, item detail, list or search results, onboarding, settings, checkout, empty state, even a 404), not just auth.
+
+**Commit the composition first, in writing, before any markup.** List the sections this page will carry, top to bottom, and the brand, copy, and supporting content in each, in the chosen design system's language. Design it as if you were shipping it standalone in a chat app, to that level of ambition, then build it. Never ship the bare functional widget (a lone centered form, an unstyled table on a white page, a single box of inputs, a raw list with no header or context); that is the exact stub the bar disqualifies.
 
 A complete product screen has, cohesive and branded:
 - **Brand presence**: a logo or wordmark, used consistently. No asset: derive one from the product name (styled wordmark or simple mark); never leave the corner empty.
@@ -243,6 +245,16 @@ Use CSS logical properties, not physical, so layouts work for RTL without overri
 
 ---
 
+### Phase 6 — Self-audit before you report (the enforcement)
+
+The build is not done until you have checked it. Ambition in prose is not enough; this is the step that catches a build that quietly fell back to bare minimum.
+
+- **Audit against the bar's disqualifiers** (guide top) and this page's `design.md` mandate: lone form, dead space, naked or unstyled elements, default-only styling, missing states, orphaned controls, a widget where a full surface was owed. Any hit → fix it, do not report around it.
+- **Look at it, if you can.** With a browser or screenshot tool, render the page (a desktop and one mobile width) and actually look. Fix any visual defect you see: a stray unstyled bar, broken spacing, a blank half-page, a collapsed element. This is the only reliable catch for a render defect the code did not reveal.
+- **Report the audit.** State what you checked, and if you rendered it, what you saw and fixed.
+
+---
+
 ## Report
 
 ```
@@ -260,6 +272,7 @@ Use CSS logical properties, not physical, so layouts work for RTL without overri
 **Fonts**: <family> via <method> | <proprietary> to <substitute> | system
 **Assets**: project files | placeholders (<service>, swap at <where>) | none needed
 **Surface composed**: bare component | full product surface (brand, copy, layout, footer) | per ADR composition
+**Self-audit**: disqualifiers checked (none found | fixed: <list>) · rendered and looked (yes: <what you saw/fixed> | no browser tool)
 **Invented (for review, swap when you have the real thing)**: <brand name/wordmark · tagline/headline · body copy · placeholder assets>, or "none (all provided)"
 **Built**: <name> (<file paths>)
 **Token adherence**: all sourced from design.md | <deviations>

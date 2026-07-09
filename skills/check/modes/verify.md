@@ -1,25 +1,19 @@
----
-name: verify
-allowed-tools: Bash, Read, Grep, Glob, Write, Task, AskUserQuestion
-description: "Run /verify to confirm a change actually works by running the real app and watching behavior, not just tests — after /develop and before /review, or when a UI, API, CLI, job, or no-test-runner refactor needs runtime proof. Launches the app, exercises the changed flow, checks observable output, and diffs before/after for refactors. Does not write code."
----
+# /check verify (runtime proof)
 
-## Output style (plain words, no dashes)
-
-Write everything this skill produces (files, reports, every message to the engineer) in plain, simple language. Keep technical terms that carry real meaning but explain each in plain words. No dashes of any kind: no em dash, no en dash, no hyphen as punctuation. Use short sentences, commas, or parentheses. Clear beats clever.
+The `verify` mode of `/check`: run the real app and prove the change works. Follow it fully.
 
 ## What this skill does
 
 Your role: the acceptance engineer. Trust observed behavior over green checkmarks; a passing suite proves the code the author thought to test, not that the feature exists. Ask: "If I had to sign off that this is real, what would I need to watch happen with my own eyes?" Then drive the actual thing and judge what you see against what the slice was supposed to deliver.
 
-`/verify` closes the gap between "the tests are green" and "the feature actually works":
+`/check verify` closes the gap between "the tests are green" and "the feature actually works":
 
 1. Scopes what changed (from git) into observable behaviors to check, anchored to the spec's acceptance criteria when a governing ADR exists.
 2. Runs the app the project's own way, reusing its launch method when one exists.
 3. Exercises the changed flow and observes: screenshots for UI, response bodies for APIs, output for CLIs, logs for jobs.
 4. Reports pass/fail per behavior and per acceptance criterion, anything anomalous, and what `/test` should turn into permanent assertions.
 
-Runtime counterpart to `/test`: `/test` writes assertions that run forever; `/verify` opens the app once and confirms it's real before review.
+Runtime counterpart to `/test`: `/test` writes assertions that run forever; `/check verify` opens the app once and confirms it's real before review.
 
 Spec-conformance gate: when a governing ADR has IDed acceptance criteria (`## Requirements`, `AC-1…`), also prove the implementation conforms to the contract: every criterion met, every specced surface (page, route, table) actually built. Green tests and a working happy path never reveal a surface that was specced but never built, or a migration never applied. See Step 0b and Step 4b.
 
@@ -133,7 +127,7 @@ Missing = never built (a scope miss); not-applied = built but not live/correct a
 Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the verdict is PASS, tick its `Verify it` box; leave `Test it` and the `done` status to `/test` and `/sync`. On FAIL, tick nothing and report the gaps. On PASS, point to `/test <feature>` next and advise `/clear` before moving to a new feature (the ADR and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
 
 ```
-## /verify complete
+## /check verify complete
 
 **Ran**: <how the app was started: command or url>
 **Scope**: <N> behaviors checked
@@ -163,10 +157,10 @@ Update the roadmap: if this feature is on the roadmap (`docs/roadmap/`) and the 
 **What /test should lock in**:
 - <the behaviors above, as permanent assertions>
 
-**For /review or /harden**:
+**For /check review or /harden**:
 - <anything that worked but looked fragile: slow response, console warning, missing empty state>
 ```
 
 Drop the Spec conformance / Missed surfaces / Not applied sections when there was no governing ADR. Keep them but write "none" when a contract was loaded and every item is met.
 
-Clean up any process you started. `/verify` confirms reality, never fixes or asserts: `/debug` for failures, `/develop` to build a missing or un-applied surface, `/test` to make passing behaviors permanent. A FAIL conformance verdict means the feature is not done, even if every test is green.
+Clean up any process you started. `/check verify` confirms reality, never fixes or asserts: `/debug` for failures, `/develop` to build a missing or un-applied surface, `/test` to make passing behaviors permanent. A FAIL conformance verdict means the feature is not done, even if every test is green.

@@ -53,7 +53,7 @@ Only when you genuinely need the current usage/setup/API of a tool the ADR alrea
 
 ### Step 3 — Resume check, then build
 
-**Task source.** Governing ADR → its `## Build plan` is the atomic checklist (AC-tagged tasks, migration first): build from it and tick progress there, the resume trail. The roadmap carries only the milestone rollup under the feature's `Build it: /develop <feature>` box (2 to 5 sub-items), updated per Step 4; `Verify it` and `Test it` belong to `/verify` and `/test`. No ADR → the roadmap checkboxes are the tasks.
+**Task source.** Governing ADR → its `## Build plan` is the atomic checklist (AC-tagged tasks, migration first): build from it and tick progress there, the resume trail. The roadmap carries only the milestone rollup under the feature's `Build it: /develop <feature>` box (2 to 5 sub-items), updated per Step 4; `Verify it` and `Test it` belong to `/check verify` and `/test`. No ADR → the roadmap checkboxes are the tasks.
 
 **Build the coherent slice the approach calls for; don't silently skip surface.** Assemble as a senior build engineer per the Step 2 approach, and let the approach visibly shape the slice, not the same build relabeled: a Tracer Bullet slice is a thin thread wired end-to-end through every layer; a Skateboard slice is the smallest genuinely usable piece; a Facade slice is the UI shell on placeholder data, wired later; a Journey slice completes one user path fully (all its states) before another. Reason from the principle, not a recipe; none recorded → the Step 2 end-to-end default. Cross-check the task list against `## Requirements` (`AC-1…`) and the ADR's API/UI surface before building: required but uncovered (the classic missed verify-email page) → flag it and add the task. Every `AC-N` is satisfied by a task you build, or explicitly deferred with the engineer's agreement.
 
@@ -71,7 +71,7 @@ Tracks:
 - **Logical — big rollout of an already-decided pattern** (e.g. "swap inline inputs across 17 files") → still inline, sequenced to stay safe:
   1. **Primitive first**: build the shared thing (helper/module/schema) and confirm it typechecks before touching call sites.
   2. **Apply site by site**: work through the files in turn, applying `<primitive>` per the pattern the ADR fixes, preserving exact behavior; tick each as it lands.
-  3. **Gate once at the end**: package-wide typecheck/lint and `/verify` after all sites are migrated, not after each. Remove the superseded code only on this green sweep (ALL sites migrated AND typecheck/lint passing): un-migrated sites still reference it, deleting early breaks the build.
+  3. **Gate once at the end**: package-wide typecheck/lint and `/check verify` after all sites are migrated, not after each. Remove the superseded code only on this green sweep (ALL sites migrated AND typecheck/lint passing): un-migrated sites still reference it, deleting early breaks the build.
   4. **Partial progress; don't half-migrate**: if you stop before every site is done, keep the old code, leave the feature `in-progress`, report migrated-vs-pending sites explicitly (which files landed, which remain), and say re-running `/develop` resumes the pending sites (it detects and skips migrated ones; idempotent and resumable). The old code comes out on the run where the last site lands green.
 - **Both** → track order follows the build approach, not a fixed rule. Default (and for an end-to-end / tracer-bullet slice): logical interface first so the UI binds to something real, then UI. Facade (UI-shell-first): UI on placeholder data first, wire the logical layer after.
 
@@ -86,20 +86,20 @@ Tracks:
 ### Step 4 — Update the roadmap and report
 
 - **Only mark what actually landed.** Confirm first: files written, code present and typechecking; data-layer task → migration applied and schema confirmed live, not merely generated. Interrupted or half-done sub-task → leave the task unchecked, keep the feature `in-progress`, report exactly what's incomplete and why. Never mark a task `done` on an unverified or incomplete build.
-- **Tick atomic tasks in the ADR, milestones in the roadmap** (only what you verified built, only in the Step 0 roadmap file): each completed `## Build plan` task in the ADR; a milestone sub-box when its ADR tasks are done; the `Build it` box when all milestones are done; fill the pointer line (`code in <path>`). Do NOT tick `Verify it` or `Test it`; leave the status `in-progress` (built but unverified, untested is not `done`); tell the engineer to run `/verify <feature>` next. Only `/test` (with `/verify` passed) closes a feature to `done`. No-ADR feature → tick its roadmap checkbox(es) directly.
+- **Tick atomic tasks in the ADR, milestones in the roadmap** (only what you verified built, only in the Step 0 roadmap file): each completed `## Build plan` task in the ADR; a milestone sub-box when its ADR tasks are done; the `Build it` box when all milestones are done; fill the pointer line (`code in <path>`). Do NOT tick `Verify it` or `Test it`; leave the status `in-progress` (built but unverified, untested is not `done`); tell the engineer to run `/check verify <feature>` next. Only `/test` (with `/check verify` passed) closes a feature to `done`. No-ADR feature → tick its roadmap checkbox(es) directly.
 - **Mirror `done` onto the governing ADR.** When (and only when) the feature reaches `done` (every sub-task checked, build verified), advance the ADR's `**Status**:` line `In Progress` → `Accepted` ("done and dusted"; never while `in-progress`), surgically per Artifact ownership: re-read first; not `In Progress` (already `Accepted`, `Superseded`) → flag, don't clobber.
 - **Emit verify steps, then ASK where they go (every run — never auto-save).** Derive concrete verification steps from the ADR's acceptance criteria, actionable and specific, each tied to its `AC-N`, not vague advice (e.g. "visit `/signup` → sign up → expect redirect to `/auth/verify-email` → AC-1", "run `<migrate cmd>` → query confirms tables live → AC-4"). Always present this panel; write `verify.md` only on "Save" (single-select; `AskUserQuestion` on Claude Code):
   - **question**: "Save these verify steps to the feature's `verify.md`, or just show them in this summary?"
   - **header**: "Save verify steps?"
   - **options**:
-    1. `Save to verify.md` — "Recommended for data, auth, or higher-risk features: a durable checklist `/verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
+    1. `Save to verify.md` — "Recommended for data, auth, or higher-risk features: a durable checklist `/check verify` can run and `/test` can later lock." → write/append the steps to `verify.md` (below).
     2. `Just show in summary` — "Keep them inline in this report only; don't write a file." → include them in the report and stop.
 
-  The tool appends "Other" as a free-text option automatically. On **Save**, write/append `verify.md` beside the ADR. Single-file ADR → promote it to a directory, `docs/adr/NNNN-feature.md` → `docs/adr/NNNN-feature/{index.md, rationale.md, verify.md}` (split the decision-record sections Context/Options considered/Rationale/References into `rationale.md`, keep the build spec in `index.md`, never double the name), and repoint the roadmap feature's `ADR` link to the new `…/index.md` path. Directory ADR → drop `verify.md` in. Existing `verify.md` → append, don't clobber. Format (so `/verify` can consume it and `/test` can lock the durable steps):
+  The tool appends "Other" as a free-text option automatically. On **Save**, write/append `verify.md` beside the ADR. Single-file ADR → promote it to a directory, `docs/adr/NNNN-feature.md` → `docs/adr/NNNN-feature/{index.md, rationale.md, verify.md}` (split the decision-record sections Context/Options considered/Rationale/References into `rationale.md`, keep the build spec in `index.md`, never double the name), and repoint the roadmap feature's `ADR` link to the new `…/index.md` path. Directory ADR → drop `verify.md` in. Existing `verify.md` → append, don't clobber. Format (so `/check verify` can consume it and `/test` can lock the durable steps):
 
   ```markdown
   # Verify: <feature> · ADR NNNN · updated <date>
-  _Steps derived from ADR NNNN acceptance criteria. `/verify` runs these; `/test` locks the durable ones._
+  _Steps derived from ADR NNNN acceptance criteria. `/check verify` runs these; `/test` locks the durable ones._
   ## UI / manual
   - [ ] <action> → <expected>        → AC-N
   ## Commands
@@ -108,6 +108,6 @@ Tracks:
   - AC-1 … covered by step … · AC-2 … · …
   ```
 - Relay the track's report (the `## /develop complete` block from `ui-guide.md` and/or `logical-guide.md`).
-- Recommend the next step: usually `/verify` (run the steps just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote new area conventions into `AGENTS.md`. Always end by advising `/clear` before the next feature (the roadmap, ADR, and `AGENTS.md` hold the state, so a fresh session loses nothing; long sessions cost more even when cached). Suggest `/compact` mid-build if this single feature runs long. (On Claude Code `/clear` / `/compact`; your agent's fresh-session equivalent elsewhere.)
+- Recommend the next step: usually `/check verify` (run the steps just emitted/saved), then `/test` to lock the durable ones, then `/sync` to promote new area conventions into `AGENTS.md`. Always end by advising `/clear` before the next feature (the roadmap, ADR, and `AGENTS.md` hold the state, so a fresh session loses nothing; long sessions cost more even when cached). Suggest `/compact` mid-build if this single feature runs long. (On Claude Code `/clear` / `/compact`; your agent's fresh-session equivalent elsewhere.)
 
-`/develop` builds; it does not run `/verify`, `/test`, `/sync`, or `/architect` for you — it points; you decide.
+`/develop` builds; it does not run `/check verify`, `/test`, `/sync`, or `/architect` for you — it points; you decide.

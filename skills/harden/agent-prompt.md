@@ -40,7 +40,7 @@ PROJECT_CONTEXT
 
 - **Recent ADR paths**: ADR_PATHS  (constraints and decisions the change must hold up under)
 - **Latest review path**: REVIEW_PATH  (issues already found — don't re-report; build on them)
-- **Test signal**: TEST_SIGNAL  (`configured` → recommend a specific test for each risk · `none-by-design` → "verify with" is the typecheck/`/verify` gate, don't call it a missing safety net · `none-yet` → note the absence of a safety net)
+- **Test signal**: TEST_SIGNAL  (`configured` → recommend a specific test for each risk · `none-by-design` → "verify with" is the typecheck/`/check verify` gate, don't call it a missing safety net · `none-yet` → note the absence of a safety net)
 
 ## Where to write the checklist
 
@@ -52,7 +52,7 @@ OUTPUT_PATH   (e.g. docs/hardening/2026-06-20-main.md — create the docs/harden
 
 1. **Follow the Hardening guide above** — it's your rubric: the systems failure-mode taxonomy (concurrency, scale, resource exhaustion, network/partial failure, time, adversarial input, data integrity, observability), the severity/posture scale, and the exact checklist format.
 2. Run the diff command. Read each changed file in full — hardening is about the surrounding context (locks held, resources opened, trust boundaries crossed), which a diff hunk alone hides.
-3. Read ADR/review pointers only if they bear on the change. Don't re-raise issues the review already caught — extend past them.
+3. Read ADR/check review pointers only if they bear on the change. Don't re-raise issues the review already caught — extend past them.
 4. Walk the change against **every** category in the guide. For each plausible failure mode, write a concrete item: the scenario, the trigger, the impact, and a specific mitigation (described, not coded). Assign a severity.
 5. Decide an overall risk posture (Ship as-is / Harden before merge / Do not ship).
 6. Write the checklist at OUTPUT_PATH in the guide's format.

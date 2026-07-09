@@ -79,6 +79,8 @@ Make the edit only if it is:
 - Idempotent: if the same installed, recommended, connected, or declined item is already recorded (even worded differently), do not add it again.
 - Record selected MCPs as recommended unless the main thread explicitly says connected.
 
+**Design system pointer:** if this change added or established a `design.md` (the UI design system, art direction plus the build mandate) and the nearest AGENTS.md has no pointer to it, add one surgical line so the mandate is discoverable and auto-loads for UI work: `` - Design system: build all UI to `design.md` (art direction and the maximalist product bar); token values live in CSS. `` Put it in root AGENTS.md for a project-wide `design.md`, or the UI area's nested AGENTS.md if the system is area-scoped. Idempotent: skip if a `design.md` pointer already exists. Never paste design.md content into AGENTS.md; it is a pointer, not a copy.
+
 Rules you must not break:
 - **Idempotent, check before you add.** Re-read the target doc now (a teammate or another session may have edited it). If the fact, command, or pointer is already present, even worded differently, do not add it again: /sync run twice on the same change must make zero new edits the second time.
 - **Never overwrite or rewrite curated prose.** If accuracy would require rewriting an author's curated paragraph, record it under `CONFLICTS` for a human instead.

@@ -22,6 +22,7 @@ Closes the loop on a completed change: syncs AGENTS.md files, the roadmap, and l
 |---|---|---|
 | Edit existing root/nested AGENTS.md | ✅ maintains | /sync |
 | Reconcile root AGENTS.md's `## Build approach` line to the roadmap header's approach (surgical single-line edit, like the stack) | ✅ maintains; flags a curated divergence | /sync |
+| Add a one-line pointer to `design.md` (the UI design system) in the nearest AGENTS.md when a change establishes one | ✅ maintains (pointer only) | /sync |
 | Create nested `<area>/AGENTS.md` for an area **net-new in this change** | ✅ creates (diff = full area context) + adds root pointer | /sync |
 | Create nested doc for a **pre-existing** undocumented area (only sliced by the diff) | ❌ flags "run /audit" | /audit |
 | Create or restructure the **root** AGENTS.md | ❌ flags "run /audit" | /audit |

@@ -1,8 +1,12 @@
 # UI Source: generated
 
-## Path B — No image, no design.md
+## Path B — No source: establish the system, then build (design-first)
 
-### B1 — Present options
+This is case 4 from the guide: nothing was provided, so you establish the design system, then build to the bar. Design first, integrate second.
+
+**Prefer a proven design skill when one is available.** If the project has a design skill installed (Anthropic's `frontend-design` on Claude Code, Codex's frontend skill) or a design MCP connected, use it to set the visual direction; that is the same craft that makes the chat app's output good. With none available, use a curated template as the agnostic seed (below). Either way, the token values land in CSS and the art direction lands in `design.md` (B2).
+
+### B1 — Set the direction (template seed, or a proven design skill)
 
 For the picker read only the frontmatter (lines 1–30) of each of `templates/stripe.md`, `templates/posthog.md`, `templates/nike.md`, `templates/supabase.md`, `templates/raycast.md`, not the full files. Read the full selected file in B2, after the user chooses.
 
@@ -22,89 +26,51 @@ Then ask (as above) — question 2 (only for Light or Bold):
   Dark:  auto-select Raycast
 ```
 
-### B2 — Acquire the design system
+### B2 — Establish the system: token values to CSS, art direction to design.md
 
-**Template selected** → read the full file, copy it to `./design.md` (use your write tool: read `templates/<name>.md`, write its contents to `design.md`; don't rely on `cp`).
+Whatever set the direction (a selected template, a design skill, a described style, or a `design.md` URL), split the result so nothing is duplicated:
 
-**URL provided** → fetch, validate it has `colors:` and `typography:`, save as `./design.md`.
+**1. Write the token VALUES into the project's CSS** (`app/globals.css` / `src/styles/tokens.css`, plus tailwind config if used), per B3. This is the single source of truth for colors, typography, spacing, radius, shadows, and motion.
+- **Template selected** → read the full template file, take its token values into the CSS token file (B3).
+- **URL provided** → fetch, validate it has colors and typography, take its values into the CSS token file.
+- **Style description** → generate the values (aesthetic guide below) into the CSS token file.
 
-**Style description** → generate `./design.md` using this schema:
+**2. Write `design.md` as ART DIRECTION only** — never a copy of the token values, those live in CSS:
 
 ```yaml
 ---
-version: alpha
 name: <style>-design-system
-description: "<2–3 sentence character summary>"
-
-colors:
-  accent: ""
-  on-accent: ""
-  canvas: ""
-  surface: ""
-  ink: ""
-  body: ""
-  muted: ""
-  hairline: ""
-  success: ""
-  error: ""
-
-colors-dark:
-  accent: ""
-  on-accent: ""
-  canvas: ""
-  surface: ""
-  ink: ""
-  body: ""
-  muted: ""
-  hairline: ""
-
-typography:
-  body-md:    { fontFamily: "", fontSize: "16px", fontWeight: 400, lineHeight: 1.5 }
-  heading-lg: { fontFamily: "", fontSize: "24px", fontWeight: 600, lineHeight: 1.2 }
-  button-md:  { fontFamily: "", fontSize: "14px", fontWeight: 500 }
-
-rounded:
-  xs: ""  sm: ""  md: ""  lg: ""  xl: ""  full: "9999px"
-
-spacing:
-  xxs: "2px"  xs: "4px"  sm: "8px"  md: "12px"  lg: "16px"
-  xl: "24px"  2xl: "32px"  section: "48px"
-
-motion:
-  duration-instant: "0ms"
-  duration-fast: ""
-  duration-normal: ""
-  duration-slow: ""
-  easing-standard: ""
-  easing-out: ""
-  easing-spring: ""
-
-components:
-  <key components with {token.path} references>
+source: generated            # or template:<name> | url:<url> | skill:frontend-design
+character: "<2 to 3 sentences: the visual personality and mood>"
+tokens: "real values live in app/globals.css (and tailwind config); read them there, never duplicated here"
 ---
 
-## Overview
-## Colors
-## Typography
-## Layout
-## Elevation & Depth
-## Shapes
-## Components
-## Do's and Don'ts
-  ### Do
-  ### Don't
-## Responsive Behavior
+## Build mandate
+You are a senior product designer. Every page in this system ships as a complete, professional product surface: brand, real product-specific copy, a considered layout with hierarchy, all states (empty, loading, error), supporting content, and a footer where the page warrants one. Maximalist, not bare minimum, the quality of a top product or the chat app. Never a lone form on an empty page. Full disqualifier list: the UI guide's bar.
+
+## Character & direction
+<what makes this system distinct: the mood, the personality, the one or two moves that define it>
+
+## Composition patterns
+<how pages are assembled here: app shell, section rhythm, how auth / landing / list / detail pages lay out>
+
+## Component & usage rules (do's and don'ts)
+<accent usage (primary actions only, never decoration), elevation (hairline borders vs shadows), spacing rhythm, button and card conventions>
+
+## Responsive & accessibility direction
+<any project-specific direction beyond the implementation defaults>
+---
 ```
 
-Aesthetic guide:
-- **Cyberpunk**: near-black canvas, neon cyan/magenta accent, 0–2px radius, mono font, dense spacing, fast motion (80ms), harsh easing
-- **Brutalist**: pure black/white, 0px radius, thick borders, oversized type, zero motion (all durations 0ms)
-- **Glassmorphism**: frosted canvas, translucent surfaces, 16–24px radius, slow transitions (200–400ms), gentle spring
+**Aesthetic guide** (for a described style; informs the token VALUES you write to CSS and the character you record):
+- **Cyberpunk**: near-black canvas, neon cyan/magenta accent, 0 to 2px radius, mono font, dense spacing, fast motion (80ms), harsh easing
+- **Brutalist**: pure black/white, 0px radius, thick borders, oversized type, zero motion
+- **Glassmorphism**: frosted canvas, translucent surfaces, 16 to 24px radius, slow transitions (200 to 400ms), gentle spring
 - **Notion-like**: off-white canvas, Georgia display + Inter UI, 3px radius, generous line-height, fast subtle motion (100ms)
-- **Apple consumer**: white canvas, system font stack, 10–20px radius, spring motion (200–350ms)
-- **Named brand**: use that brand's documented colours/fonts; substitute proprietary fonts (see font installation)
+- **Apple consumer**: white canvas, system font stack, 10 to 20px radius, spring motion (200 to 350ms)
+- **Named brand**: use that brand's documented colors and fonts; substitute proprietary fonts (see font installation)
 
-Fill every field. No placeholders.
+Fill every design.md section with real, specific direction. No placeholders, and no token value dumps (values live in CSS).
 
 ### B3 — Create CSS token file
 

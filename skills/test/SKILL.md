@@ -170,7 +170,7 @@ The main thread writes the tests itself. Do not spawn a writer. Resolve this ski
 
 The inputs to apply (the labeled values you gathered):
 1. unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context plus the build approach line; the 3 recent ADR paths or `none` (read only if relevant to what you're testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing ADR path, and the `verify.md` path (each `none` if absent).
-2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /verify manual step`.
+2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /check verify manual step`.
 
 Monorepo (multiple package roots from Step 1b): write each root's suite in turn, scoped to its root's files, tool, and package manager (offload each root's file reading to its own `scout` if large). Single root (common case): just write it.
 
@@ -213,7 +213,7 @@ Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, `HARDEN_FLAG`, plus `RUN_
 
 **Not covered** (consider adding):
 - <gap and why>
-- AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /verify manual step   ← when TRACE_TO_CONTRACT=yes
+- AC-N, <criterion that can't be automated (visual/manual/env)> → defer to /check verify manual step   ← when TRACE_TO_CONTRACT=yes
 
 **What /harden should check**: <only if HARDEN_FLAG=yes, one sentence>
 ```
