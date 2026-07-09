@@ -51,4 +51,4 @@ Rules:
 - Write from the reader's perspective: "Added pagination to the orders endpoint", not "Added `limit` param to `getOrders`".
 - Map the change to the right category. A fix is `Fixed`; a new flag is `Added`; a behaviour change is `Changed`.
 - Only include categories that have entries. Don't leave empty headings.
-- Reference an ADR or issue number in parentheses when it adds traceability, e.g. "(see ADR 0007)".
+- Reference a spec or issue number in parentheses when it adds traceability, e.g. "(see spec 0007)".

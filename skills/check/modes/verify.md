@@ -8,14 +8,14 @@ Your role: the acceptance engineer. Trust observed behavior over green checkmark
 
 `/check verify` closes the gap between "the tests are green" and "the feature actually works":
 
-1. Scopes what changed (from git) into observable behaviors to check, anchored to the spec's acceptance criteria when a governing ADR exists.
+1. Scopes what changed (from git) into observable behaviors to check, anchored to the spec's acceptance criteria when a governing spec exists.
 2. Runs the app the project's own way, reusing its launch method when one exists.
 3. Exercises the changed flow and observes: screenshots for UI, response bodies for APIs, output for CLIs, logs for jobs.
 4. Reports pass/fail per behavior and per acceptance criterion, anything anomalous, and what `/test` should turn into permanent assertions.
 
 Runtime counterpart to `/test`: `/test` writes assertions that run forever; `/check verify` opens the app once and confirms it's real before review.
 
-Spec-conformance gate: when a governing ADR has IDed acceptance criteria (`## Requirements`, `AC-1…`), also prove the implementation conforms to the contract: every criterion met, every specced surface (page, route, table) actually built. Green tests and a working happy path never reveal a surface that was specced but never built, or a migration never applied. See Step 0b and Step 4b.
+Spec-conformance gate: when a governing spec has IDed acceptance criteria (`## Requirements`, `AC-1…`), also prove the implementation conforms to the contract: every criterion met, every specced surface (page, route, table) actually built. Green tests and a working happy path never reveal a surface that was specced but never built, or a migration never applied. See Step 0b and Step 4b.
 
 ## Asks vs acts
 
@@ -36,7 +36,7 @@ Any Agent Skills client on macOS, Linux, or Windows. Run/launch snippets are ref
 ### Step 0 — Pick the mode
 
 - Feature mode (default): the change adds or alters behavior. Confirm it does the new thing (Steps 1–5).
-- Refactor / regression mode: the change is behavior-preserving (a refactor, a dedup, a rename; the task or ADR says "behavior must not change"). "Works" means identical before and after: capture observable outputs before the change, capture them after, and diff. This is the safety net for projects with no test runner, and exactly what a "diff API responses before/after" ADR asks for; automate it.
+- Refactor / regression mode: the change is behavior-preserving (a refactor, a dedup, a rename; the task or spec says "behavior must not change"). "Works" means identical before and after: capture observable outputs before the change, capture them after, and diff. This is the safety net for projects with no test runner, and exactly what a "diff API responses before/after" spec asks for; automate it.
 
 ### Step 0a — Refactor mode: before/after diff (spawn a subagent)
 
@@ -49,15 +49,15 @@ Only in refactor mode. It drives the app twice and holds two output sets, so run
   4. Diff before vs after per surface. For a behavior-preserving change they must be byte-identical (modulo intentional, documented differences). Report any diff as a regression.
 - Relay: surfaces diffed, identical vs differing, the exact diff for any that changed → run `/debug`. Then stop (skip the feature-mode steps).
 
-### Step 0b — Load the spec contract (if a governing ADR exists)
+### Step 0b — Load the spec contract (if a governing spec exists)
 
-Before scoping, find the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single file `docs/adr/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a scope under `docs/scope/` points to the ADR. No governing ADR (a trivial change with no record)? Skip this step and verify against observed behavior only.
+Before scoping, find the governing spec: the feature dir `docs/specs/NNNN-<feature>/` (or single file `docs/specs/NNNN-<feature>.md`) this change implements. Match by branch/feature name or touched surfaces; a scope under `docs/scope/` points to the spec. No governing spec (a trivial change with no record)? Skip this step and verify against observed behavior only.
 
-The ADR carries the contract: `## Requirements` with IDed acceptance criteria (`AC-1`, `AC-2`, …) plus the surfaces it specs (pages, routes, tables, migrations). Load the checklist:
+The spec carries the contract: `## Requirements` with IDed acceptance criteria (`AC-1`, `AC-2`, …) plus the surfaces it specs (pages, routes, tables, migrations). Load the checklist:
 
-1. Prefer the per-feature `verify.md` beside the ADR (`docs/adr/NNNN-<feature>/verify.md`) if present; `/develop` emits it as concrete, already-resolved verify steps tagged with the `AC-N` each exercises:
+1. Prefer the per-feature `verify.md` beside the spec (`docs/specs/NNNN-<feature>/verify.md`) if present; `/develop` emits it as concrete, already-resolved verify steps tagged with the `AC-N` each exercises:
    ```markdown
-   # Verify: <feature> · ADR NNNN
+   # Verify: <feature> · spec NNNN
    ## UI / manual
    - [ ] <action> → <expected>   → AC-N
    ## Commands
@@ -65,13 +65,13 @@ The ADR carries the contract: `## Requirements` with IDed acceptance criteria (`
    ## Acceptance-criteria coverage
    - AC-1 … · AC-2 … · …
    ```
-2. Else fall back to the ADR's `## Requirements` directly, and turn each `AC-N` into an observable check yourself.
+2. Else fall back to the spec's `## Requirements` directly, and turn each `AC-N` into an observable check yourself.
 
 You now hold the `AC-N` list to confirm and the specced-surface list to confirm exists. Carry both into Steps 1–4; the per-AC verdict comes in Step 4b, reported in Step 5. Spec-conformance decides what to check and what "met" means; the feature/refactor modes are how you drive the app to check it.
 
 ### Step 0c — Calibrate "working" to the build approach
 
-Know what this slice was meant to be. Read the build approach for THIS feature with precedence: the feature's scope-row `Approach` override if its row declares one, else the project default (root `AGENTS.md`, else the scope header). This mirrors ADR-overrides-`AGENTS.md`: a feature declaring its own approach (e.g. a Facade prototype in an otherwise Skateboard project) is verified by ITS approach; every other feature uses the project default. If neither records one, use the reasoned default (an end-to-end / Tracer-Bullet slice for production work) and note the assumption. The wrong bar produces false failures (dinging a prototype for lacking a real backend) or false passes (blessing a slice that never proved the path it existed to prove).
+Know what this slice was meant to be. Read the build approach for THIS feature with precedence: the feature's scope-row `Approach` override if its row declares one, else the project default (root `AGENTS.md`, else the scope header). This mirrors spec-overrides-`AGENTS.md`: a feature declaring its own approach (e.g. a Facade prototype in an otherwise Skateboard project) is verified by ITS approach; every other feature uses the project default. If neither records one, use the reasoned default (an end-to-end / Tracer-Bullet slice for production work) and note the assumption. The wrong bar produces false failures (dinging a prototype for lacking a real backend) or false passes (blessing a slice that never proved the path it existed to prove).
 
 Reason as the acceptance engineer about what done means for this slice; no fixed per-approach script. The judgment: what did this slice promise to make real, and what is it explicitly still allowed to fake? Verify the former hard; don't fail the slice for the latter. Common framings and their bars: a thin end-to-end path wired through every layer (the whole path carries a real request to a real result); a thinnest-usable-whole core loop (that one loop genuinely works, not the trimmings); a UI-first shell wired to placeholders (the shell and its placeholder flow render and navigate; a stubbed data source is the plan, not a defect); a full user journey per phase (the journey end to end, not isolated screens). Let the label set the bar, then carry it into the scope and the conformance verdict. Acceptance criteria govern what must be true; the approach tells how much of the stack behind them is expected to be real yet.
 
@@ -81,7 +81,7 @@ Base branch `BASE`: `git rev-parse --verify main`; on success use `main`, otherw
 
 Spec contract loaded (Step 0b)? The checklist is your scope: each `verify.md` step / `AC-N` is an observable behavior to exercise, each specced surface (page, route, table, migration) a thing to confirm was built. Don't narrow to only the changed files: an AC or surface with no implementation is exactly the miss this gate catches; keep it listed and let Step 4b flag it. Use the git diff to locate where each is (or isn't) implemented.
 
-No ADR? From the changed files write the 2–5 concrete things a human could watch to know the change works, e.g. "the /pricing page renders all three tiers and the CTA opens checkout". If a feature scope exists (in `docs/scope/`), anchor these to that feature's acceptance criteria / sub-tasks. Keep them observable, not internal.
+No spec? From the changed files write the 2–5 concrete things a human could watch to know the change works, e.g. "the /pricing page renders all three tiers and the CTA opens checkout". If a feature scope exists (in `docs/scope/`), anchor these to that feature's acceptance criteria / sub-tasks. Keep them observable, not internal.
 
 ### Step 2 — Determine how to run the app
 
@@ -116,7 +116,7 @@ Per behavior, decide pass / fail / blocked against what should happen. A behavio
 Roll observations into a per-criterion and per-surface verdict. For every `AC-N` and specced surface, assign:
 
 - met ✅: the check passed / the surface exists and behaves as specced.
-- specced-but-missing 🚫: specced but no implementation at all; never built, nothing to exercise. Name the exact spec item and the fix, e.g. "ADR specs `/auth/verify-email`, page not found (no route, no file); build it before this is done."
+- specced-but-missing 🚫: specced but no implementation at all; never built, nothing to exercise. Name the exact spec item and the fix, e.g. "the spec requires `/auth/verify-email`, page not found (no route, no file); build it before this is done."
 - specced-but-not-applied ⚠️: the code exists but its runtime check fails. Classic case: a written-but-un-applied migration, e.g. "Migration `0007_add_verified_at.sql` is committed but the column isn't in the live schema; run the migration."
 - blocked ⚠️: couldn't be exercised (missing data/creds/env); say what's needed. Not-applied is a confirmed runtime failure; blocked is unknown.
 
@@ -124,14 +124,14 @@ Missing = never built (a scope miss); not-applied = built but not live/correct a
 
 ### Step 5 — Report
 
-Update the scope: if this feature is on the scope (`docs/scope/`) and the verdict is PASS, tick its `Verify it` box; leave `Test it` and the `done` status to `/test` and `/sync`. On FAIL, tick nothing and report the gaps. On PASS, point to `/test <feature>` next and advise `/clear` before moving to a new feature (the ADR and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
+Update the scope: if this feature is on the scope (`docs/scope/`) and the verdict is PASS, tick its `Verify it` box; leave `Test it` and the `done` status to `/test` and `/sync`. On FAIL, tick nothing and report the gaps. On PASS, point to `/test <feature>` next and advise `/clear` before moving to a new feature (the spec and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
 
 ```
 ## /check verify complete
 
 **Ran**: <how the app was started: command or url>
 **Scope**: <N> behaviors checked
-**Spec**: ADR NNNN <feature> · checklist from verify.md | ADR ## Requirements   (omit this line when no governing ADR)
+**Spec**: spec NNNN <feature> · checklist from verify.md | spec ## Requirements   (omit this line when no governing spec)
 
 **Verified** ✅:
 - <behavior>: <what you observed (e.g. "all 3 tiers render; CTA opens /checkout")>
@@ -145,10 +145,10 @@ Update the scope: if this feature is on the scope (`docs/scope/`) and the verdic
 **Spec conformance**: PASS | FAIL   (this whole block only when a spec contract was loaded)
 - AC-1 ✅ met: <what confirmed it>
 - AC-2 ✅ met: <what confirmed it>
-- AC-3 🚫 specced-but-missing: <ADR specs it, no implementation> → build it before done
+- AC-3 🚫 specced-but-missing: <spec requires it, no implementation> → build it before done
 - AC-4 ⚠️ specced-but-not-applied: <built but runtime check fails, e.g. migration not run> → <fix>
 
-**Missed surfaces** 🚫 (specced in ADR, not built):
+**Missed surfaces** 🚫 (specced in spec, not built):
 - <page / route / table>: <where it was expected> → build before done
 
 **Not applied** ⚠️ (built but not live/correct at runtime):
@@ -161,6 +161,6 @@ Update the scope: if this feature is on the scope (`docs/scope/`) and the verdic
 - <anything that worked but looked fragile: slow response, console warning, missing empty state>
 ```
 
-Drop the Spec conformance / Missed surfaces / Not applied sections when there was no governing ADR. Keep them but write "none" when a contract was loaded and every item is met.
+Drop the Spec conformance / Missed surfaces / Not applied sections when there was no governing spec. Keep them but write "none" when a contract was loaded and every item is met.
 
 Clean up any process you started. `/check verify` confirms reality, never fixes or asserts: `/debug` for failures, `/develop` to build a missing or un-applied surface, `/test` to make passing behaviors permanent. A FAIL conformance verdict means the feature is not done, even if every test is green.

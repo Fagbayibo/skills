@@ -40,9 +40,9 @@ ROOT_AGENTS_MD
 - **Nested AGENTS.md paths**: NESTED_PATHS
 - **Changed file → nearest context file**: FILE_TO_CONTEXT_MAP
 
-## ADRs (you may reconcile ONLY the `**Status**:` line; you may FLAG staleness — you must NOT edit any other ADR content)
+## Specs (you may reconcile ONLY the `**Status**:` line; you may FLAG staleness — you must NOT edit any other spec content)
 
-ADR_PATHS
+SPEC_PATHS
 
 ## Feature scope for the relevant workspace(s) the diff touches — NOT all of docs/scope/ (you may RECONCILE status only — never add/remove/reorder features)
 
@@ -67,7 +67,7 @@ Make the edit only if it is:
 - **Additive or corrective**: add a missing fact or fix a wrong one. Never delete curated guidance you don't fully understand.
 - **Durable**: true beyond this one change. Skip one-off notes, history, and feature summaries.
 
-**Stack consistency:** if root has `## Stack` and an architecture ADR (one with `## Proposed stack`) exists, check they agree. Root missing the decided stack (e.g. greenfield root seeded before the ADR): add it surgically. Contradiction: do not rewrite curated stack lines; flag under `CONFLICTS`, noting which ADR.
+**Stack consistency:** if root has `## Stack` and an architecture spec (one with `## Proposed stack`) exists, check they agree. Root missing the decided stack (e.g. greenfield root seeded before the spec): add it surgically. Contradiction: do not rewrite curated stack lines; flag under `CONFLICTS`, noting which spec.
 
 **Build approach consistency:** root's `## Build approach` mirrors the scope header's build-approach line (its source of truth); never invent an approach. If they diverge (different approach, or root lacks the line the scope sets), make a single surgical edit to that one root line (as for a changed stack) and record it under `AGENTS_UPDATED`. If root's version is elaborated curated prose, or you can't tell which side is authoritative, do not overwrite; flag the divergence under `CONFLICTS`, naming the scope file.
 
@@ -90,7 +90,7 @@ Rules you must not break:
 
 You may create **one** nested `<area>/AGENTS.md` for an area the change introduced wholesale. The test is **context, not policy**:
 
-- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES: the diff shows you the entire area. If any file in the area is `M` (modified), the area pre-existed: do NOT create. Write a focused doc: local file pointers, local commands, conventions/constraints visible in the new code, links to any governing ADR. End it with the one-line note: `_Drafted by /sync from the introducing change, worth a quick human pass._` Then add exactly one pointer line to root AGENTS.md under `## Context files`:
+- **Create it** when every source file in that area carries status `A` (added) in CHANGED_FILES: the diff shows you the entire area. If any file in the area is `M` (modified), the area pre-existed: do NOT create. Write a focused doc: local file pointers, local commands, conventions/constraints visible in the new code, links to any governing spec. End it with the one-line note: `_Drafted by /sync from the introducing change, worth a quick human pass._` Then add exactly one pointer line to root AGENTS.md under `## Context files`:
   ```
   - [<area>/AGENTS.md](<area>/AGENTS.md) — <one-line description>
   ```
@@ -109,29 +109,29 @@ For each path in DELETED_PATHS:
 - Fix any file pointer in any AGENTS.md that targets a deleted/moved path.
 - Record removals under `ORPHANS_CLEANED`. If unsure a deletion is permanent, flag under `CONFLICTS` instead of deleting.
 
-### 4. Reconcile linked ADRs' Status line (edit ONLY the `**Status**:` line — never ADR content)
+### 4. Reconcile linked specs' Status line (edit ONLY the `**Status**:` line — never spec content)
 
-An ADR's status mirrors its feature's build lifecycle:
+A spec's status mirrors its feature's build lifecycle:
 - `Proposed`: not yet built (scope `planned`).
 - `In Progress`: being built (scope `in-progress`).
-- `Accepted`: built and verified (scope `done`); an ADR is not `Accepted` until its feature ships.
-- `Superseded`: replaced by a later ADR (never set this from scope status; flag under `STALE_ADRS` instead).
+- `Accepted`: built and verified (scope `done`); a spec is not `Accepted` until its feature ships.
+- `Superseded`: replaced by a later spec (never set this from scope status; flag under `STALE_SPECS` instead).
 
-For an **umbrella decision**, reconcile the linked `index.md` (child ADRs carry no status and are not reconciled).
+For an **umbrella decision**, reconcile the linked `index.md` (child specs carry no status and are not reconciled).
 
-This applies **only to ADRs that link to a buildable scope feature.** A **standalone decision ADR** (a foundational/stack or cross-cutting standard with no linked feature) is decision-status: `Proposed` when written, `Accepted` once ratified, never feature-mirrored. Leave it as-is; do not reconcile or flag it under `STALE_ADRS` (e.g. "no linked feature found") merely for having no linked feature, that is expected, not a mismatch. Only genuinely stale/superseded standalone ADRs (Step 5) get flagged.
+This applies **only to specs that link to a buildable scope feature.** A **standalone decision spec** (a foundational/stack or cross-cutting standard with no linked feature) is decision-status: `Proposed` when written, `Accepted` once ratified, never feature-mirrored. Leave it as-is; do not reconcile or flag it under `STALE_SPECS` (e.g. "no linked feature found") merely for having no linked feature, that is expected, not a mismatch. Only genuinely stale/superseded standalone specs (Step 5) get flagged.
 
-For each ADR whose linked feature appears in the reconciled scope:
-1. Find the feature this ADR governs (its title/links reference a scope feature, which may link back).
-2. Read the feature's current scope status and derive the target ADR status from the mapping above.
-3. **Re-read the ADR just before writing** (a teammate or another session may have edited it). If the `**Status**:` line already equals the target, do nothing (idempotent). Otherwise make a single surgical edit to that one line only.
-4. Record the change under `ADR_STATUS_RECONCILED`.
+For each spec whose linked feature appears in the reconciled scope:
+1. Find the feature this spec governs (its title/links reference a scope feature, which may link back).
+2. Read the feature's current scope status and derive the target spec status from the mapping above.
+3. **Re-read the spec just before writing** (a teammate or another session may have edited it). If the `**Status**:` line already equals the target, do nothing (idempotent). Otherwise make a single surgical edit to that one line only.
+4. Record the change under `SPEC_STATUS_RECONCILED`.
 
-**Do not guess.** If a feature-linked ADR is ambiguous (no confident link to exactly one feature, unclear mapping, status already `Superseded`, or a downgrade you can't explain), do not edit; flag the mismatch under `STALE_ADRS` and leave the line as-is.
+**Do not guess.** If a feature-linked spec is ambiguous (no confident link to exactly one feature, unclear mapping, status already `Superseded`, or a downgrade you can't explain), do not edit; flag the mismatch under `STALE_SPECS` and leave the line as-is.
 
-### 5. Flag stale ADRs (do not edit their content)
+### 5. Flag stale specs (do not edit their content)
 
-Be **strict**, noise erodes trust. Read an ADR only if the changed paths plausibly touch its subject (judge from its title/first lines; don't read all blindly). Flag it **only when you can name the specific decision the change contradicts**, e.g. the ADR mandates one datastore and this change adds an adapter for a different one, or the ADR fixes an interface/boundary the change breaks. Also flag an ADR a **later ADR supersedes** (its status should become `Superseded`, /architect's job, not a Status-line reconciliation). Never flag vague "might be affected" cases; when in doubt, do not flag. Record genuine hits under `STALE_ADRS` with the contradicted point and recommend /architect to update or supersede; never edit ADR content yourself.
+Be **strict**, noise erodes trust. Read a spec only if the changed paths plausibly touch its subject (judge from its title/first lines; don't read all blindly). Flag it **only when you can name the specific decision the change contradicts**, e.g. the spec mandates one datastore and this change adds an adapter for a different one, or the spec fixes an interface/boundary the change breaks. Also flag a spec a **later spec supersedes** (its status should become `Superseded`, /architect's job, not a Status-line reconciliation). Never flag vague "might be affected" cases; when in doubt, do not flag. Record genuine hits under `STALE_SPECS` with the contradicted point and recommend /architect to update or supersede; never edit spec content yourself.
 
 ### 6. Reconcile the feature scope (only if SCOPE_PATH_OR_NONE is a path)
 
@@ -146,7 +146,7 @@ You are the **universal sub-task reconciler**: `/develop` ticks its own sub-task
 Evidence per sub-task type (tick `[ ]` → `[x]` when the evidence is clearly present):
 - **UI / data model / backend / integration / data-integration** → the corresponding files exist in the feature's code area (components/pages, schema/migrations, services/endpoints, the mock replaced by a real query).
 - **Build it (+ milestones)** → the feature's code exists in its area (milestone chunks present); `/develop` usually ticks these itself.
-- **Verify it** → a `verify.md` beside the ADR, or a recorded passing runtime verification for the feature.
+- **Verify it** → a `verify.md` beside the spec, or a recorded passing runtime verification for the feature.
 - **Test it** → test files cover this feature's area (search the area + test dirs).
 - **SEO & metadata** → metadata/structured-data present on the feature's pages.
 - **Sync (record conventions)** → the area's `AGENTS.md` exists and reflects the feature.
@@ -178,11 +178,11 @@ ORPHANS_CLEANED:
 SCOPE_RECONCILED:
 - <feature>, <sub-tasks ticked / status advanced to match the diff; or "unmapped: <area>">
 
-ADR_STATUS_RECONCILED:
-- <docs/adr/file>, <Status line: Proposed→In Progress→Accepted to match the feature's scope status>
+SPEC_STATUS_RECONCILED:
+- <docs/specs/file>, <Status line: Proposed→In Progress→Accepted to match the feature's scope status>
 
-STALE_ADRS:
-- <docs/adr/file>, <why the change makes it stale, or a status mismatch you couldn't safely reconcile>
+STALE_SPECS:
+- <docs/specs/file>, <why the change makes it stale, or a status mismatch you couldn't safely reconcile>
 
 CONTEXT_GAPS:
 - <area>, <pre-existing undocumented area only sliced by this change; suggest /audit>

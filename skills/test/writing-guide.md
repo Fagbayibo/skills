@@ -31,7 +31,7 @@ If `INSTALL_STATE = deferred`, still write complete, correct tests — they simp
 ### Reading context efficiently
 
 - Read each scoped source file — that is your primary input.
-- Read an ADR path you were given **only if** it plainly governs a file you're testing; skip the rest. Don't read all three reflexively.
+- Read a spec path you were given **only if** it plainly governs a file you're testing; skip the rest. Don't read all three reflexively.
 - Read the `design.md` path **only** when writing component/page accessibility cases.
 
 ---
@@ -149,7 +149,7 @@ Run from `PACKAGE_ROOT`. Keep your own context small — test output is verbose,
 Then iterate:
 
 1. **A test fails because the test is wrong** (bad import, wrong selector, incorrect expectation, missing setup): fix the test and re-run just that file. Repeat until these are gone.
-2. **A test fails because the application code is genuinely wrong** (the code violates its own contract or the ADR): this is the test doing its job. **Do not change the source to make it pass, and do not weaken the assertion.** Leave the test failing, capture it under `BUGS_FOUND`, and move on.
+2. **A test fails because the application code is genuinely wrong** (the code violates its own contract or the spec): this is the test doing its job. **Do not change the source to make it pass, and do not weaken the assertion.** Leave the test failing, capture it under `BUGS_FOUND`, and move on.
 3. Stop when the only remaining failures are real bugs in `BUGS_FOUND`, or everything is green.
 
 Distinguish the two honestly. Silencing a real failure by loosening the assertion defeats the purpose of the suite. Do not paste raw test output into your report — summarise to counts plus the specific failing cases.

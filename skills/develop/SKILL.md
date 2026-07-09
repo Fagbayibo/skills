@@ -1,7 +1,7 @@
 ---
 name: develop
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Task, AskUserQuestion, WebSearch, WebFetch
-description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no ADR records it, it stops and routes you to /architect; otherwise it reads the ADR plus AGENTS.md, builds, and advances the scope."
+description: "Run /develop to build a feature, UI or backend, from an approved design — a page, component, API, service, or data slice. If something load-bearing is undecided and no spec records it, it stops and routes you to /architect; otherwise it reads the spec plus AGENTS.md, builds, and advances the scope."
 ---
 
 ## Output style (plain words, no dashes)
@@ -10,18 +10,18 @@ Write everything this skill produces (files, reports, every message to the engin
 
 ## What this skill does
 
-The builder: turns an ADR plus project conventions into working code. Tracks: **UI** (components, pages, layouts; `ui-guide.md`), **Logical** (APIs, services, data layers, business logic, integrations; `logical-guide.md`), or both (e.g. "auth" = sign-in pages plus session logic → run both). Step 0 gates on the ADR so load-bearing choices (an auth approach, a payment provider) are decided in `/architect`, not silently invented mid-build.
+The builder: turns a spec plus project conventions into working code. Tracks: **UI** (components, pages, layouts; `ui-guide.md`), **Logical** (APIs, services, data layers, business logic, integrations; `logical-guide.md`), or both (e.g. "auth" = sign-in pages plus session logic → run both). Step 0 gates on the spec so load-bearing choices (an auth approach, a payment provider) are decided in `/architect`, not silently invented mid-build.
 
 ## Asks vs acts
 
-Gates, then acts: no upfront question rounds like `/architect`. Read the decision, build, ask only what the design left open (a UI template when no screenshot was given; a business rule the ADR didn't settle). Infer from the ADR, `AGENTS.md`, and codebase; ask only the un-inferable; recommend local implementation choices.
+Gates, then acts: no upfront question rounds like `/architect`. Read the decision, build, ask only what the design left open (a UI template when no screenshot was given; a business rule the spec didn't settle). Infer from the spec, `AGENTS.md`, and codebase; ask only the un-inferable; recommend local implementation choices.
 
 ## Artifact ownership
 
 - Writes app code (plus CSS/tokens for UI).
-- Scope (`docs/scope/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/check verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/scope/` (scopes only; analysis/research is `/architect`'s, in the ADR's `rationale.md`).
-- Never writes ADRs (flags the need, defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); new area conventions go via `/sync` afterwards.
-- One ADR touch: the `**Status**:` line (umbrella decision → the `index.md`'s, never a child's), plus filling the feature's ADR pointer line. Build start: `Proposed` → `In Progress`; build lands (feature → `done`): `In Progress` → `Accepted` (an ADR is not `Accepted` until its feature ships). Never edit ADR content, only that line, surgically: re-read it right before writing; unexpected state (already `Accepted`, `Superseded`) → flag, don't clobber.
+- Scope (`docs/scope/`): only the Step 4 touches (feature status → `in-progress`, milestone sub-boxes, `Build it` box, code pointer). Never marks a feature `done` (waits for `/check verify` and `/test`), never ticks `Verify it` or `Test it`, never creates files in `docs/scope/` (scopes only; analysis/research is `/architect`'s, in the spec's `rationale.md`).
+- Never writes specs (flags the need, defers to `/architect`); never restructures root `AGENTS.md` (that's `/audit`); new area conventions go via `/sync` afterwards.
+- One spec touch: the `**Status**:` line (umbrella decision → the `index.md`'s, never a child's), plus filling the feature's spec pointer line. Build start: `Proposed` → `In Progress`; build lands (feature → `done`): `In Progress` → `Accepted` (a spec is not `Accepted` until its feature ships). Never edit spec content, only that line, surgically: re-read it right before writing; unexpected state (already `Accepted`, `Superseded`) → flag, don't clobber.
 - Artifact base: `docs/` by default, `.workflow/` if `docs/` is a published docs site. Read from whichever exists (paths here assume `docs/`).
 - Shared scope: re-read it right before ticking, edit only the specific checkbox, status, or pointer line (never rewrite the file); feature not as expected (already `done`, reworked) → flag, don't overwrite. The freshness pre-check guards against rebuilding what a teammate shipped.
 
@@ -35,11 +35,11 @@ Any Agent Skills client, macOS/Linux/Windows. Detection snippets are POSIX refer
 
 ### Pre-check — the project must already exist (except the scaffold task)
 
-Exception: if this IS the scaffold sub-task of the Stack and architecture foundation feature (prompt says `scaffold`, or the step initializes the project from the stack ADR), creating the project IS the job. Read the ARCHITECTURE ADR's `## Proposed stack`; run the framework's own init (`create-next-app`, `cargo new`, etc. per that stack); install base dependencies (framework, core runtime, only what the first slice needs); lay out directories; confirm a dev server or build runs. Scaffold steps derive from the stack decision (a decision ADR has no build plan). Install just-in-time: NOT every library the ADR names (email, monitoring, and so on); each later feature installs its own when built; only cross-cutting tooling (lint, format, type strictness) comes early, via `/audit` + the tooling task. Then proceed.
+Exception: if this IS the scaffold sub-task of the Stack and architecture foundation feature (prompt says `scaffold`, or the step initializes the project from the stack spec), creating the project IS the job. Read the ARCHITECTURE spec's `## Proposed stack`; run the framework's own init (`create-next-app`, `cargo new`, etc. per that stack); install base dependencies (framework, core runtime, only what the first slice needs); lay out directories; confirm a dev server or build runs. Scaffold steps derive from the stack decision (a decision spec has no build plan). Install just-in-time: NOT every library the spec names (email, monitoring, and so on); each later feature installs its own when built; only cross-cutting tooling (lint, format, type strictness) comes early, via `/audit` + the tooling task. Then proceed.
 
 Otherwise `/develop` builds into an existing project. No skeleton (no `package.json`/`pyproject.toml`/`go.mod`/manifest, no source tree) and not the scaffold task → stop:
 
-> No project found to build into. Run the scaffold step first (the Stack and architecture feature's scaffold sub-task, per your architecture ADR), then run `/develop` again.
+> No project found to build into. Run the scaffold step first (the Stack and architecture feature's scaffold sub-task, per your architecture spec), then run `/develop` again.
 
 A project exists (even a bare scaffold) → proceed.
 
@@ -53,37 +53,37 @@ Before mutating anything (skip silently if solo, offline, or non-git): `git fetc
 
 Warnings, not hard blocks, but surface them.
 
-### Step 0 — The ADR gate (always first)
+### Step 0 — The spec gate (always first)
 
 Is a decision owed and unrecorded? The test:
 
 > **To build this, would you have to *invent* something the engineer hasn't decided?**
 
-If yes, stop and route to `/architect` (its ADR is the build spec; `/develop` implements decisions, it doesn't make them). You'd have to invent:
+If yes, stop and route to `/architect` (its spec is the build spec; `/develop` implements decisions, it doesn't make them). You'd have to invent:
 
 - **A provider, library, integration, data model, or cross-cutting pattern** (e.g. auth provider, DB/ORM, caching strategy).
-- **A whole UI page or screen**: its design system (`design.md` there? if not, which direction?), sections/composition, component inventory, asset strategy (no screenshot, no repo images → e.g. an online source). Owed unless a `design.md` AND a page-level spec/ADR pin these down.
-- **A feature's behavior** (search, a wizard: "what exactly should it do?" is open; `/architect` asks those questions). Owed unless an ADR specs it.
+- **A whole UI page or screen**: its design system (`design.md` there? if not, which direction?), sections/composition, component inventory, asset strategy (no screenshot, no repo images → e.g. an online source). Owed unless a `design.md` AND a page-level spec pin these down.
+- **A feature's behavior** (search, a wizard: "what exactly should it do?" is open; `/architect` asks those questions). Owed unless a spec defines it.
 
-NOT owed for pure implementation already specified: a small bug fix, a component matching an existing `design.md`, wiring already-decided pieces, a copy tweak, anything an existing ADR/`design.md`/`AGENTS.md` governs.
+NOT owed for pure implementation already specified: a small bug fix, a component matching an existing `design.md`, wiring already-decided pieces, a copy tweak, anything an existing spec/`design.md`/`AGENTS.md` governs.
 
-Don't hardcode to page names; apply the invent-test to whatever was asked (a "home page" or "search filter" fails on a fresh project, passes once an ADR/`design.md` exists). False negatives are the failure mode, building a real decision without noticing (what "just build the home page" looks like): when unsure, treat as owed and ask (panel below).
+Don't hardcode to page names; apply the invent-test to whatever was asked (a "home page" or "search filter" fails on a fresh project, passes once a spec/`design.md` exists). False negatives are the failure mode, building a real decision without noticing (what "just build the home page" looks like): when unsure, treat as owed and ask (panel below).
 
-Read only what this feature needs, never the whole `docs/` tree: its one scope file and its one governing ADR (single file, or umbrella `index.md` plus the one child speccing this sub-task). No other features' rows, scope files, workspaces, or unrelated ADRs.
+Read only what this feature needs, never the whole `docs/` tree: its one scope file and its one governing spec (single file, or umbrella `index.md` plus the one child speccing this sub-task). No other features' rows, scope files, workspaces, or unrelated specs.
 
 **Check, in order:**
-1. **Locate this feature's scope file (only that one).** Monorepo → `docs/scope/<workspace>/` for the task's package. Pick the file (`scope.md`, or the matching `<epic>.md` in a split) from the At-a-glance table alone; read just this feature's section. `needs a decision` with no ADR pointer yet → decision owed and missing. Malformed → flag and ask, don't guess.
-2. **Open the governing ADR via the feature's `ADR` pointer**, reading only its build-spec sections as defined in the build flow (`flow/build.md`), Step 2 item 1. Found → it's the spec; proceed. No pointer and no linked ADR → targeted look in `docs/adr/<workspace>/` for one matching this feature's scope, never a blanket read.
-3. The **nearest** `AGENTS.md` (workspace/area) may already capture the decision, synced from an earlier feature (e.g. "the auth provider is already chosen") → proceed without a new ADR.
+1. **Locate this feature's scope file (only that one).** Monorepo → `docs/scope/<workspace>/` for the task's package. Pick the file (`scope.md`, or the matching `<epic>.md` in a split) from the At-a-glance table alone; read just this feature's section. `needs a decision` with no spec pointer yet → decision owed and missing. Malformed → flag and ask, don't guess.
+2. **Open the governing spec via the feature's `spec` pointer**, reading only its build-spec sections as defined in the build flow (`flow/build.md`), Step 2 item 1. Found → it's the spec; proceed. No pointer and no linked spec → targeted look in `docs/specs/<workspace>/` for one matching this feature's scope, never a blanket read.
+3. The **nearest** `AGENTS.md` (workspace/area) may already capture the decision, synced from an earlier feature (e.g. "the auth provider is already chosen") → proceed without a new spec.
 
 Decision owed and unrecorded → don't guess, don't silently stop. Ask (single-select; `AskUserQuestion` on Claude Code):
 
 - **question**: "This looks like it needs an architecture decision first: `<name the specific load-bearing choice, e.g. 'which auth provider + session model'>`. How do you want to handle it?"
-- **header**: "ADR first?"
+- **header**: "spec first?"
 - **options**:
-  1. `Architect it first` — "Recommended. Capture the decision in an ADR before building, so the build has a spec." → **end here** with the handoff below. Do not build.
+  1. `Architect it first` — "Recommended. Capture the decision in a spec before building, so the build has a spec." → **end here** with the handoff below. Do not build.
   2. `No, not needed` — "I've judged there's no real decision here; build directly." → proceed to the build flow (`flow/build.md`).
-  3. `Skip for now` — "Build it without an ADR; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs ADR?` = `yes` with a `⚠ ADR pending` note in the scope (`docs/scope/`).
+  3. `Skip for now` — "Build it without a spec; I'll backfill the decision later." → proceed to the build flow (`flow/build.md`), leaving the feature's `Needs spec?` = `yes` with a `⚠ spec pending` note in the scope (`docs/scope/`).
 
 The tool appends "Other" as a free-text option automatically.
 
@@ -93,7 +93,7 @@ On `Architect it first`, end with:
 > ```
 > /architect <feature>: <the specific decision to settle>
 > ```
-> Once the ADR exists, re-run `/develop <task>` and I'll build to it.
+> Once the spec exists, re-run `/develop <task>` and I'll build to it.
 
 No decision owed (pure implementation) → skip the question, proceed.
 

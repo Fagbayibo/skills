@@ -6,7 +6,7 @@ You are choosing the foundational tech stack. Apply comprehensive stack evaluati
 
 **Step 1 — Establish product shape and read existing code if present**
 
-If SOURCE_FILE_COUNT > 0 (rebuilding or re-platforming an existing system): using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`). Read the existing stack manifest (`package.json`, `go.mod`, `Cargo.toml`), any existing ADRs in RELATED_ADR_PATHS, and the main entry point. Understand what exists before proposing a replacement; note constraints the existing system imposes (data formats, API contracts, integrations).
+If SOURCE_FILE_COUNT > 0 (rebuilding or re-platforming an existing system): using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`). Read the existing stack manifest (`package.json`, `go.mod`, `Cargo.toml`), any existing specs in RELATED_SPEC_PATHS, and the main entry point. Understand what exists before proposing a replacement; note constraints the existing system imposes (data formats, API contracts, integrations).
 If SOURCE_FILE_COUNT is 0: skip file reading.
 
 From the engineer's answers, define clearly: product category (web app, API service, mobile backend, data pipeline), user type and scale target, deployment target and operational preference, team language expertise and size, hard constraints (compliance, budget, deadline).
@@ -42,14 +42,14 @@ Reason in the durable CATEGORY, then pick the current product fresh. The table n
 
 - **Monolith first, always.** Faster to build, easier to debug, simpler to operate than microservices. You can extract services later; you cannot easily merge them back.
 - **A relational database is the right default.** 95% of products never hit a workload a mature relational database cannot handle. The NoSQL case is specific: document storage without relational queries, key-value at extreme read scale, time-series at high ingest rate. None apply to a typical web application.
-- **Serverless for APIs has real tradeoffs.** Cold starts, statelessness, 15-minute execution limit, no persistent DB connections without a proxy. State these explicitly in the ADR; it is not a free upgrade over a container.
+- **Serverless for APIs has real tradeoffs.** Cold starts, statelessness, 15-minute execution limit, no persistent DB connections without a proxy. State these explicitly in the spec; it is not a free upgrade over a container.
 - **Defer multi-region until it is required.** Active-active multi-region is one of the hardest distributed systems problems. Do not recommend it before proven product-market fit and the operational budget to run it.
 - **ORM for CRUD, SQL for complexity.** ORMs reduce boilerplate for standard CRUD. For reporting queries, aggregations, and complex joins, write SQL. Do not put complex logic in the ORM.
 - **Full container orchestration is for teams with a platform-engineering function.** A small team self-operating an orchestration platform burns a large share of its time on infrastructure instead of product. Until there are dedicated infra engineers, reach for a managed application platform that removes the orchestration burden; pick the current best fit for the stack (align with what `AGENTS.md` already uses), don't freeze a product name here.
 
-**Step 4 — Write the ADR**
+**Step 4 — Write the spec**
 
-This is a **decision ADR**: record the decision, not an implementation plan. Apply "Decision-only ADRs" under "Expert rules that apply to all modes": no `## Build plan` of scaffold steps (init the framework, create the project, add the health route, and so on), no meta acceptance criteria like "ADR records the stack." The spec IS `## Proposed stack`; scaffold work is executed by this feature's scaffold sub-task and derived by `/develop` from the Proposed stack at build time.
+This is a **decision spec**: record the decision, not an implementation plan. Apply "Decision-only specs" under "Expert rules that apply to all modes": no `## Build plan` of scaffold steps (init the framework, create the project, add the health route, and so on), no meta acceptance criteria like "spec records the stack." The spec IS `## Proposed stack`; scaffold work is executed by this feature's scaffold sub-task and derived by `/develop` from the Proposed stack at build time.
 
 Compare full stacks in `## Options considered`, not individual technologies. Include required `## Proposed stack` section:
 

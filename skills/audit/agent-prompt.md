@@ -27,9 +27,9 @@ Hard rules:
 
 ## Stack reconciliation (every phase that writes or audits root)
 
-Root's `## Stack` mirrors the architecture decision. Before finalizing root in any phase, check `docs/adr/` for an architecture ADR (one with a `## Proposed stack` section).
-- Creating root (greenfield, whole-repo): populate `## Stack` from that ADR if it exists (the source of truth, even on greenfield with no code); else derive from the code/manifest, else `<to be filled>`.
-- Auditing existing root (gap-fill): `## Stack` missing or placeholder → ROOT_GAPS; contradicts the ADR → CONTRADICTIONS. Never silently overwrite curated stack text.
+Root's `## Stack` mirrors the architecture decision. Before finalizing root in any phase, check `docs/specs/` for an architecture spec (one with a `## Proposed stack` section).
+- Creating root (greenfield, whole-repo): populate `## Stack` from that spec if it exists (the source of truth, even on greenfield with no code); else derive from the code/manifest, else `<to be filled>`.
+- Auditing existing root (gap-fill): `## Stack` missing or placeholder → ROOT_GAPS; contradicts the spec → CONTRADICTIONS. Never silently overwrite curated stack text.
 
 This keeps the `/architect → /audit` handoff order-independent: root absorbs the decided stack whenever audit runs.
 
@@ -88,15 +88,15 @@ ADDITIONAL_STANDARDS_OR_NONE
 
 ### GREENFIELD phase
 
-New project, possibly just scaffolded from its chosen stack (there may be a manifest and scaffold source, but no real feature code yet, and usually an architecture ADR that decided the stack). Create a root AGENTS.md encoding the engineer's chosen standards.
+New project, possibly just scaffolded from its chosen stack (there may be a manifest and scaffold source, but no real feature code yet, and usually an architecture spec that decided the stack). Create a root AGENTS.md encoding the engineer's chosen standards.
 
 **Step 1 — Minimal discovery**
 
-With your file tools, list the top couple of project levels (excluding `.git`); read the manifest if present (note language, package manager). Check `docs/adr/` for numbered ADRs (`NNNN-*.md`); if an architecture ADR exists (`## Proposed stack` section), read it: the stack is already decided via `/architect`, use it for `## Stack`, no placeholders, never contradict it. Check `docs/scope/` (or `.workflow/scope/`): if the scope header records a build approach (name + one-line principle), capture it verbatim as the `## Build approach` seed; else `<TBD, set by /scope>`.
+With your file tools, list the top couple of project levels (excluding `.git`); read the manifest if present (note language, package manager). Check `docs/specs/` for numbered specs (`NNNN-*.md`); if an architecture spec exists (`## Proposed stack` section), read it: the stack is already decided via `/architect`, use it for `## Stack`, no placeholders, never contradict it. Check `docs/scope/` (or `.workflow/scope/`): if the scope header records a build approach (name + one-line principle), capture it verbatim as the `## Build approach` seed; else `<TBD, set by /scope>`.
 
 **Step 2 — Create root AGENTS.md**
 
-Use the template below. `## Stack`: ADR, else findings, else `<to be filled>`. `## Build approach`: scope header, else `<TBD, set by /scope>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
+Use the template below. `## Stack`: spec, else findings, else `<to be filled>`. `## Build approach`: scope header, else `<TBD, set by /scope>`. `## Rules`: base on SELECTED_PATTERNS (Read it if given as a path); if "Other" free text was chosen, include it verbatim, never interpret or reformat it; append ADDITIONAL_STANDARDS as extra bullets at the end.
 
 If `INSTALLED_SKILLS_OR_NONE` is provided, write a `## Agent skills` section (template above): ONE bullet per installed skill, `- [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it covers>`, so a later skill loads only the ones a task needs, never a single dense line of names. Detect the project's real skills directory (`.claude/skills/` on Claude Code, `.agents/skills/` on other agents, or a plain `skills/`) and use it in the link; never hardcode a Claude-only path, since every tool reads this file. Keep the registry source `<owner>/<repo>` on each bullet as the tool-agnostic identity a different agent resolves in its own dir. If `DECLINED_TOOLS_OR_NONE` is provided, add a compact `Declined: <tool>, <tool>` line in that section (a decline has nothing to load, so it needs no location; it stops a later `/audit` or `/architect` re-offering). If `MCP_SERVERS_OR_NONE`, add a compact `MCP servers: <server> (connected|recommended)` line (a connected service has no local file to open). Project-wide tech at root; area-specific at that area's nested doc, using the same `## Agent skills` section.
 
@@ -168,7 +168,7 @@ If no gaps: `ROOT_GAPS: none`. Keep the exact text to insert so you can apply it
 
 Warrant (own patterns, non-obvious rules, local commands, or constraints a developer needs to know first) vs not (a simple CRUD module with no surprises, or already well-covered by root AGENTS.md).
 
-- Missing + warranted → create with the nested template, then add a pointer to root AGENTS.md (all root modifications via Edit): `## Context files` holding only a placeholder comment (`<!-- ... -->`) → replace the comment line with the pointer; existing entries → append the pointer line; section absent → add the section and pointer before `## ADRs` (or at the end if no ADRs section).
+- Missing + warranted → create with the nested template, then add a pointer to root AGENTS.md (all root modifications via Edit): `## Context files` holding only a placeholder comment (`<!-- ... -->`) → replace the comment line with the pointer; existing entries → append the pointer line; section absent → add the section and pointer before `## specs` (or at the end if no specs section).
 - Missing + not warranted → note why in the report and skip.
 - Exists → propose additions only (never overwrite), via the diff format below.
 
@@ -193,7 +193,7 @@ With your file tools, list the project tree a few levels deep, skipping vendored
 - (a) Global facts missing from root: a daily command, stack element, project-wide rule, or the build approach (in the scope header but absent from root) that's true but not recorded. Collect each as a `ROOT_GAPS` line (exact markdown + target section) and apply it only with the engineer's permission (the gap-handling step in `modes/gapfill.md`), never silently, since a root line may be curated.
 - (b) Undocumented areas: a major area with distinct conventions/gotchas and no nested AGENTS.md. Create the nested doc (nested template + sibling CLAUDE.md pointer) and add its root pointer line via Edit (safe to do directly: creating, not overwriting).
 - (c) Stale/incomplete nested docs: an existing nested AGENTS.md missing something now true of its area. Return as `PROPOSED_ADDITIONS`; do NOT edit it yourself.
-- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture ADR; `## Build approach` differs from the scope header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Collect each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/ADR/scope actually shows; surface these to the human, don't auto-fix.
+- (d) Contradictions: a doc states something the codebase or its governing records disprove (documented test runner or framework isn't the one actually used; `## Stack` conflicts with the architecture spec; `## Build approach` differs from the scope header; a documented command no longer exists). Worse than a gap, the docs are actively wrong; do NOT auto-fix (the line may be curated). Collect each as a `CONTRADICTIONS` entry naming the doc, what it says, and what the code/spec/scope actually shows; surface these to the human, don't auto-fix.
 
 Be conservative: flag only durable findings you're confident about; when unsure, leave it. Do not flag implementation detail, TODOs, or anything that churns.
 
@@ -239,9 +239,9 @@ Be conservative: flag only durable findings you're confident about; when unsure,
 <command>
 ```
 
-## ADRs
+## Specs
 
-Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
+Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
 
 ## Rules
 
@@ -310,9 +310,9 @@ Stored in `docs/adr/`. Format: `docs/adr/NNNN-title.md`.
   - [<skill>](<skills-dir>/<skill>/) — `<owner>/<repo>`, <what it governs for this area>
   A declined tool or MCP server stays a compact `Declined:` / `MCP servers:` line, as in root.>
 
-## Related ADRs
+## Related specs
 
-<Links once ADRs exist, omit section if none yet>
+<Links once specs exist, omit section if none yet>
 ```
 
 ---
@@ -369,6 +369,6 @@ Only propose what is absent and genuinely useful. Do not rewrite existing conten
 - Do not create a nested AGENTS.md unless the area genuinely warrants it.
 - Root AGENTS.md must stay under ~60 lines. Cut ruthlessly.
 - Never overwrite an existing AGENTS.md — propose additions only via the diff format.
-- Do not create ADRs. Do not write plans. Stay in your lane.
+- Do not create specs. Do not write plans. Stay in your lane.
 - Proposed additions must be additions only — no rewrites of existing sections.
 - When the engineer selected "Other" for architecture style, use their free-text verbatim in `## Rules`. Do not interpret or paraphrase it.

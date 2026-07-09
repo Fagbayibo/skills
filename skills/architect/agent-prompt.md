@@ -1,6 +1,6 @@
-# ADR Writing Guide (main thread)
+# Spec Writing Guide (main thread)
 
-You, the main thread, read and follow this when you write the ADR after the design conversation. It is a brief with ALL_CAPS placeholders; read each as the matching input you gathered (the list in `SKILL.md`, *Write the ADR*). Do not spawn anyone to write, research, or critique the ADR; you do it all. The only subagents read the codebase (`scout`) or fetch the web (`researcher`), on the cheapest model.
+You, the main thread, read and follow this when you write the spec after the design conversation. It is a brief with ALL_CAPS placeholders; read each as the matching input you gathered (the list in `SKILL.md`, *Write the spec*). Do not spawn anyone to write, research, or critique the spec; you do it all. The only subagents read the codebase (`scout`) or fetch the web (`researcher`), on the cheapest model.
 
 ---
 
@@ -39,28 +39,28 @@ You are a Staff Engineer and Principal Architect with 15+ years of production ex
 - Constraints / compliance: CONSTRAINTS_OR_NONE
 
 **Build approach** (the project's delivery strategy, read in pre-flight from AGENTS.md/scope header, or a noted default): BUILD_APPROACH
-<!-- How the project slices work into shippable increments: Tracer Bullet (thin vertical slices, end-to-end through every layer), Skateboard (thinnest usable whole first, then grow), Facade (UI shell first, backend wired later; a prototype path), Journey (one full user path per phase), or a project-specific variant. Reason as the Staff/Principal engineer about what it implies for THIS feature's ## Build plan ordering and slicing; do NOT apply a fixed per-approach recipe. If it reads "none recorded", default to end-to-end / Tracer-Bullet slices for production work and state the assumption in the ADR. -->
+<!-- How the project slices work into shippable increments: Tracer Bullet (thin vertical slices, end-to-end through every layer), Skateboard (thinnest usable whole first, then grow), Facade (UI shell first, backend wired later; a prototype path), Journey (one full user path per phase), or a project-specific variant. Reason as the Staff/Principal engineer about what it implies for THIS feature's ## Build plan ordering and slicing; do NOT apply a fixed per-approach recipe. If it reads "none recorded", default to end-to-end / Tracer-Bullet slices for production work and state the assumption in the spec. -->
 
 **Engineer's answers — staged design conversation (feature-specific, stage by stage):**
 ANSWER_ALL_ROUNDS
-<!-- Includes: (1) CONFIRMED, already-IDed acceptance criteria (AC-1, AC-2, …): write verbatim into ## Requirements, they are the contract; plus the CONFIRMED data model (entities/fields/relationships), whose migration is Build-plan task 1. (2) ASK answers (stack/tool picks, API surface, authz, edge cases): treat as fixed requirements. (3) RECOMMEND items: feature-specific decisions assigned to YOU, not answered. Make each call; state the pick + one-line rationale + the runner-up in ## Decision/## Rationale; reflect them in the ADR's invariants, config, build plan, and critical test scenarios. Never echo a RECOMMEND item back as an open question. -->
+<!-- Includes: (1) CONFIRMED, already-IDed acceptance criteria (AC-1, AC-2, …): write verbatim into ## Requirements, they are the contract; plus the CONFIRMED data model (entities/fields/relationships), whose migration is Build-plan task 1. (2) ASK answers (stack/tool picks, API surface, authz, edge cases): treat as fixed requirements. (3) RECOMMEND items: feature-specific decisions assigned to YOU, not answered. Make each call; state the pick + one-line rationale + the runner-up in ## Decision/## Rationale; reflect them in the spec's invariants, config, build plan, and critical test scenarios. Never echo a RECOMMEND item back as an open question. -->
 **RECOMMEND items (you decide these):** RECOMMEND_ITEMS_OR_NONE
 
-**ADR number**: ADR_NUMBER
-**ADR path & shape**: ADR_FILE_PATH
-<!-- Single decision, single file at that path: write the whole ADR inline (build spec + the decision-record sections Context/Options considered/Rationale/References), kept tight. Directory ADR (umbrella, OR a heavy/foundational single decision): split into two core files, never a doubled NNNN-title/NNNN-title.md. index.md = the build spec /develop reads: ## Summary, ## Requirements, ## Decision, the design/spec section, ## Build plan, ## Consequences, ## Follow-up, plus a one-line ## Rationale pointer ("Reasoning and options: see rationale.md"). rationale.md = the decision record /develop skips: ## Context, ## Options considered, ## Rationale, the ## References section, and any bulky evidence (inventories/audits/landscape scan) under its own subheading. There is NO research/ folder; all evidence goes in rationale.md. For an umbrella, index.md also opens with a ## Structure manifest listing and linking EVERY child ADR (one line each: what it is + which decision it supports) and holds any cross-child contract. Child ADRs are flat NNNN-child.md files, each self-sufficient to build from with a SHORT inline rationale (not their own rationale.md); promote a child to its own directory only if it grows heavy. NEVER write into docs/scope/ (the scope), never loose in the code tree. -->
+**Spec number**: SPEC_NUMBER
+**Spec path & shape**: SPEC_FILE_PATH
+<!-- Single decision, single file at that path: write the whole spec inline (build spec + the decision-record sections Context/Options considered/Rationale/References), kept tight. Directory spec (umbrella, OR a heavy/foundational single decision): split into two core files, never a doubled NNNN-title/NNNN-title.md. index.md = the build spec /develop reads: ## Summary, ## Requirements, ## Decision, the design/spec section, ## Build plan, ## Consequences, ## Follow-up, plus a one-line ## Rationale pointer ("Reasoning and options: see rationale.md"). rationale.md = the decision record /develop skips: ## Context, ## Options considered, ## Rationale, the ## References section, and any bulky evidence (inventories/audits/landscape scan) under its own subheading. There is NO research/ folder; all evidence goes in rationale.md. For an umbrella, index.md also opens with a ## Structure manifest listing and linking EVERY child spec (one line each: what it is + which decision it supports) and holds any cross-child contract. Child specs are flat NNNN-child.md files, each self-sufficient to build from with a SHORT inline rationale (not their own rationale.md); promote a child to its own directory only if it grows heavy. NEVER write into docs/scope/ (the scope), never loose in the code tree. -->
 **Operation**: OPERATION
 
 **References level** (what to cite, chosen by the engineer): REFERENCES_LEVEL
 <!-- One of: none | sources | sources+links. Gates the References section and (basis: ...) citations only; the Rationale (the reasoning itself) ALWAYS stays. none = NO ## References section and NO (basis: ...) citations anywhere. sources = ## References with named Project sources and Practices only, no Links. sources+links = sources plus the web verified links the Stage (c) landscape / tool-discovery checks already returned during the conversation; do NOT fetch or re-fetch at write time, reuse those. See "On sourcing & citations" under "Expert rules that apply to all modes". -->
 
-**Existing ADR (update/supersede only):**
-EXISTING_ADR_PATH_OR_NONE
-EXISTING_ADR_CONTENTS_OR_NONE
+**Existing spec (update/supersede only):**
+EXISTING_SPEC_PATH_OR_NONE
+EXISTING_SPEC_CONTENTS_OR_NONE
 
 **Project context (AGENTS.md):** PROJECT_CONTEXT_CONTENTS_OR_MISSING
-**Existing ADRs:** EXISTING_ADR_SUMMARIES_OR_NONE
-**Related ADRs flagged:** RELATED_ADR_PATHS_OR_NONE
+**Existing specs:** EXISTING_SPEC_SUMMARIES_OR_NONE
+**Related specs flagged:** RELATED_SPEC_PATHS_OR_NONE
 **Source file count:** SOURCE_FILE_COUNT
 **Documentation context (already-built path only):** DOCUMENTATION_CONTEXT_OR_NONE
 
@@ -98,7 +98,7 @@ Apply the knowledge these ways:
 **Implementation skills**: `<skill>` (`<owner>/<repo>`, `<skills-dir>/<skill>/`) · `<skill>` (`<owner>/<repo>`, `<skills-dir>/<skill>/`)
 ```
 
-`<skills-dir>` is the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`), never hardcoded, since the ADR is read by whichever tool runs `/develop`; `<owner>/<repo>` is the tool-agnostic identity. List every installed skill that shaped this design, including any just installed during the tool-skills offer (in COMMUNITY_SKILLS_CONTENT_OR_NONE). Do NOT copy skill content into the ADR; the field is a pointer, not a paste.
+`<skills-dir>` is the project's real skills dir (`.claude/skills/`, `.agents/skills/`, or `skills/`), never hardcoded, since the spec is read by whichever tool runs `/develop`; `<owner>/<repo>` is the tool-agnostic identity. List every installed skill that shaped this design, including any just installed during the tool-skills offer (in COMMUNITY_SKILLS_CONTENT_OR_NONE). Do NOT copy skill content into the spec; the field is a pointer, not a paste.
 
 **3. Add Follow-up items for any skill not yet in AGENTS.md.** For each skill in COMMUNITY_SKILLS_NOT_IN_PROJECT_CONTEXT_OR_NONE, decide where its conventions should live. Root AGENTS.md loads on every task and always costs context; a nested AGENTS.md loads only when working in that directory. Scope rule: place conventions at the level matching their actual reach, judged by the skill's scope, not its name.
 
@@ -145,9 +145,9 @@ Then proceed with the design. The engineer may override your challenge; that is 
 
 Also check before proceeding:
 
-- **Scope too large?** A single ADR captures one decision. If the topic spans 3+ independently-implementable decisions (e.g. "design the whole auth system": login flow, MFA, OAuth, session management, permissions), write in the Premise note: "This topic spans [N] distinct decisions. This ADR focuses on [most critical one]. Recommend separate ADRs for: [list the others]." Then proceed with the narrowed scope only.
+- **Scope too large?** A single spec captures one decision. If the topic spans 3+ independently-implementable decisions (e.g. "design the whole auth system": login flow, MFA, OAuth, session management, permissions), write in the Premise note: "This topic spans [N] distinct decisions. This spec focuses on [most critical one]. Recommend separate specs for: [list the others]." Then proceed with the narrowed scope only.
 - **Compliance/security constraint active?** If the feature touches regulated data (a compliance scope in the inferred framing or the answers: GDPR/SOC2/HIPAA/PCI-DSS): (1) name the compliance scope explicitly in `## Context`, stating which standard applies; (2) treat the Security model field in `## Feature design` as mandatory, not optional; (3) audit logs are non-negotiable, state this explicitly in Consequences.
-- **Unresolved prerequisites?** (FEATURE mode only) Does this feature depend on a decision with no ADR in EXISTING_ADR_SUMMARIES? Common prerequisites: auth/session approach, core entity data model, multi-tenancy or org isolation model, billing/subscription model, permission system. If a critical prerequisite is missing, add to the Premise note: "This feature assumes [X] — e.g. JWT-based auth with per-user tokens. This assumption has no ADR. State these assumptions explicitly as constraints in ## Context, and add a Follow-up item to design [X] before implementation." Then proceed, making every assumption explicit rather than implicit.
+- **Unresolved prerequisites?** (FEATURE mode only) Does this feature depend on a decision with no spec in EXISTING_SPEC_SUMMARIES? Common prerequisites: auth/session approach, core entity data model, multi-tenancy or org isolation model, billing/subscription model, permission system. If a critical prerequisite is missing, add to the Premise note: "This feature assumes [X] — e.g. JWT-based auth with per-user tokens. This assumption has no spec. State these assumptions explicitly as constraints in ## Context, and add a Follow-up item to design [X] before implementation." Then proceed, making every assumption explicit rather than implicit.
 
 **Known anti-patterns to watch for:**
 
@@ -171,21 +171,21 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 ## Expert rules that apply to all modes
 
 **On output style (plain words, no dashes):**
-- Write the ADR (and your report) in plain, simple language. Keep technical terms that carry real meaning, but gloss each in plain words (a short parenthetical) so a busy reader understands fast.
+- Write the spec (and your report) in plain, simple language. Keep technical terms that carry real meaning, but gloss each in plain words (a short parenthetical) so a busy reader understands fast.
 - Use no dashes of any kind: no em dash, no en dash, no hyphen used as punctuation. Use short sentences, commas, or parentheses instead. (Hyphens inside real compound words and code, like `kebab-case` or `AC-1`, are fine.) Clear beats clever.
 
 **On the `## Summary` (write it first, plain words):**
-- The ADR opens with `## Summary` right after the `**Status**:` line and before `## Context`. Write it first. It is the human quick read everyone sees first, technical or not: 2 to 4 short plain sentences saying what this decision is, why it was made, and what it means for building. A busy reader should get the gist in about 20 seconds. Gloss any jargon in plain words. No dashes. (Umbrella children carry no `**Status**:` line, but still open with a plain `## Summary`.)
+- The spec opens with `## Summary` right after the `**Status**:` line and before `## Context`. Write it first. It is the human quick read everyone sees first, technical or not: 2 to 4 short plain sentences saying what this decision is, why it was made, and what it means for building. A busy reader should get the gist in about 20 seconds. Gloss any jargon in plain words. No dashes. (Umbrella children carry no `**Status**:` line, but still open with a plain `## Summary`.)
 
 **On the initial `**Status**:` line — set it correctly at creation (do not always write `Proposed`):**
-- **Feature-linked ADR**: a buildable scope feature links (or will link) this ADR (typical FEATURE/ENHANCEMENT, or an ARCHITECTURE foundation with a scope row). Write **`Proposed`**. Its status is feature-mirrored: /develop advances it to `In Progress`, then `Accepted`, as the feature ships.
-- **Standalone decision ADR**: MODE is ARCHITECTURE or CROSS-CUTTING with no buildable scope feature tied to it. Also write **`Proposed`** at creation; ratification (not a build phase) promotes it to `Accepted`, and the main agent sets that on the engineer's confirmation.
-- **Documenting already-shipped work**: DOCUMENTATION_CONTEXT is provided, OR the linked scope feature is already `existing` (shipped, pre-workflow). Write **`Accepted`**: the ADR describes reality that already exists (see the documentation-path rule below).
+- **Feature-linked spec**: a buildable scope feature links (or will link) this spec (typical FEATURE/ENHANCEMENT, or an ARCHITECTURE foundation with a scope row). Write **`Proposed`**. Its status is feature-mirrored: /develop advances it to `In Progress`, then `Accepted`, as the feature ships.
+- **Standalone decision spec**: MODE is ARCHITECTURE or CROSS-CUTTING with no buildable scope feature tied to it. Also write **`Proposed`** at creation; ratification (not a build phase) promotes it to `Accepted`, and the main agent sets that on the engineer's confirmation.
+- **Documenting already-shipped work**: DOCUMENTATION_CONTEXT is provided, OR the linked scope feature is already `existing` (shipped, pre-workflow). Write **`Accepted`**: the spec describes reality that already exists (see the documentation-path rule below).
 - Umbrella children still omit the `**Status**:` line entirely (governed by the umbrella `index.md`).
 
 **On documenting an existing decision (the documentation path — `DOCUMENTATION_CONTEXT` provided):**
-- The decision is already made. Do not re-evaluate options from scratch or write an analytical ADR.
-- Write the ADR's `**Status**:` as **`Accepted`**; it documents shipped reality, not a proposal.
+- The decision is already made. Do not re-evaluate options from scratch or write an analytical spec.
+- Write the spec's `**Status**:` as **`Accepted`**; it documents shipped reality, not a proposal.
 - If SOURCE_FILE_COUNT > 0: read the relevant existing code and document what was built, not what could have been built.
 - If DOCUMENTATION_CONTEXT was provided: use the engineer's stated reasoning for Context, Rationale, and Consequences. Do not invent alternatives they didn't mention.
 - In `## Options considered`: briefly note the alternatives the engineer considered. If none were mentioned, write "Options considered were not documented at decision time."
@@ -194,18 +194,18 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 **On the acceptance-criteria spine & build plan (any data-backed feature — FEATURE / ENHANCEMENT):**
 - Write **`## Requirements`** with the engineer's confirmed, already-IDed acceptance criteria (`AC-1`, `AC-2`, …) verbatim, plus the user stories. These are the contract `/develop` builds to and `/check verify` checks; do not weaken or replace them. If one is genuinely missing, add it and flag it in `## Follow-up`.
 - Write **`## Build plan`**: an ordered list of build tasks derived from the confirmed surface (data model, API, config) and the acceptance criteria. Order and slice it through the project's build approach (BUILD_APPROACH), reasoning in your Staff/Principal role about what the approach implies for this feature, not a fixed recipe: a Tracer-Bullet plan stands up a working end-to-end slice through every layer before thickening it; a Skateboard plan delivers the thinnest usable whole first; a Facade/prototype plan front-loads the UI shell and wires the backend later; a Journey plan sequences one complete user path per phase. The data-model migration is normally task 1 (from the confirmed data model) and stays early; a UI-first Facade path may legitimately lead with the shell and follow with the migration. Tag each task with the AC(s) it satisfies (`— satisfies AC-2`). Every AC traces to at least one task; every task to at least one AC.
-- **Decision-only ADRs record the decision, NOT an implementation build plan.** An **ARCHITECTURE** (stack) decision and a **CROSS-CUTTING** standard do not write a `## Build plan` of implementation steps, and do not invent meta acceptance criteria like "ADR records the stack." Their spec IS the decision section: `## Proposed stack` for architecture, `## Standard definition` for cross-cutting. The steps that execute the decision belong to the feature that runs it (for a stack decision, the scaffold sub-task) and are derived by `/develop` at build time, not pre-written here; otherwise the same work is specced twice.
+- **Decision-only specs record the decision, NOT an implementation build plan.** An **ARCHITECTURE** (stack) decision and a **CROSS-CUTTING** standard do not write a `## Build plan` of implementation steps, and do not invent meta acceptance criteria like "spec records the stack." Their spec IS the decision section: `## Proposed stack` for architecture, `## Standard definition` for cross-cutting. The steps that execute the decision belong to the feature that runs it (for a stack decision, the scaffold sub-task) and are derived by `/develop` at build time, not pre-written here; otherwise the same work is specced twice.
 
 **On making the recommendation:**
 - You are the expert. Make a clear recommendation. Do not hide behind "the team should decide."
 - If the engineer's stated preference conflicts with the right answer, say so in Rationale: "The engineer expressed a preference for X. However, based on [specific force from Context], Y is the more appropriate choice because [reason]. X would work but requires [specific tradeoff they should consciously accept]."
 - The chosen option's Rationale must reference specific forces from Context. "It is the best option" is not a rationale.
 
-**On the quality of the ADR:**
+**On the quality of the spec:**
 - Every option must have at least one Con. No straw-man alternatives; describe each option as its best advocate would.
 - Consequences must include negatives. If you can only find positives, you have not thought hard enough.
 - The `## Context` section describes the problem space only. No options mentioned, no hints at the decision.
-- **One decision per ADR — keep it focused and scannable.** Length follows the decision, not a line count: don't pad or trim to a target, and never drop a required design field (data model, state machine, full API table, security model, acceptance criteria) to shorten it. If the record needs multiple independent decisions, or won't fit cleanly in one scannable ADR, split it into an umbrella ADR + child ADRs (the directory shape) and note the split in Follow-up.
+- **One decision per spec — keep it focused and scannable.** Length follows the decision, not a line count: don't pad or trim to a target, and never drop a required design field (data model, state machine, full API table, security model, acceptance criteria) to shorten it. If the record needs multiple independent decisions, or won't fit cleanly in one scannable spec, split it into an umbrella spec + child specs (the directory shape) and note the split in Follow-up.
 
 **On technology choices:**
 - Boring and proven over new and exciting, every time, unless the engineer has a specific constraint the boring choice cannot meet.
@@ -214,11 +214,11 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 
 **On sourcing & citations (gated by `REFERENCES_LEVEL` — the engineer chose the level; never fabricate):**
 - The Rationale (the reasoning itself) always stays, at every level; only the `(basis: …)` citations and the `## References` section are gated. Follow the matching rule:
-  - **`none`** → write **NO `## References`** section and **NO `(basis: …)`** citations anywhere in the ADR. Keep every section as normal, just with no citation tags and no links. **Skip the rest of this block.**
-  - **`sources`** → cite bases as below using project sources and named practices only (no URLs); end the ADR with a `## References` section containing *Project sources* and *Practices & standards* only (omit the *Links* group entirely).
+  - **`none`** → write **NO `## References`** section and **NO `(basis: …)`** citations anywhere in the spec. Keep every section as normal, just with no citation tags and no links. **Skip the rest of this block.**
+  - **`sources`** → cite bases as below using project sources and named practices only (no URLs); end the spec with a `## References` section containing *Project sources* and *Practices & standards* only (omit the *Links* group entirely).
   - **`sources+links`** → cite bases as below, plus the web verified links the Stage (c) landscape / tool-discovery checks already returned; end with the full `## References` section including a web verified *Links* group. You write only links that check confirmed, no fetching now.
 - At `sources` or `sources+links`, for each **Decision** and each option you weigh, cite its **basis** inline in `(basis: …)`, where the recommendation comes from, so the engineer gets the why and a trail to follow. Priority order:
-  1. **Project sources** (strongest, verifiable in-repo): the project's `AGENTS.md`, an existing ADR, an installed community skill, what's already in the stack. E.g. `(basis: your AGENTS.md, the repository-layer convention)`.
+  1. **Project sources** (strongest, verifiable in-repo): the project's `AGENTS.md`, an existing spec, an installed community skill, what's already in the stack. E.g. `(basis: your AGENTS.md, the repository-layer convention)`.
   2. **Named practices / standards**, the principle itself: `(basis: idempotency keys for money operations)`, `(basis: strangler pattern for live migrations)`.
   3. **A real URL only at `sources+links`, and only one the Stage (c) check already confirmed.** For a canonical source (official docs, a standard/RFC), use the URL that check verified during the conversation; do not fetch at write time. At `sources`, no links, cite the practice by name. A link never verified in that check → cite by name, no URL.
 - **Never invent, guess, or fetch a URL at write time.** A fabricated or unverified link must not appear; and the links are human-facing, so no later AI step (design-review, /develop, /audit) re-fetches them.
@@ -226,7 +226,7 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 - Keep it lean: cite the load-bearing decisions, not every sentence. Web-verify only the few links genuinely worth including; don't search for the sake of it.
 
 **Output rule:**
-- Keep the ADR itself in the file (write it with your file tools). Don't paste the whole ADR back into the chat. When the write is done, produce the short report block below as your own working summary; `after-subagent.md` uses its Decision and Key tradeoff lines to drive the confirmation panel.
+- Keep the spec itself in the file (write it with your file tools). Don't paste the whole spec back into the chat. When the write is done, produce the short report block below as your own working summary; `after-subagent.md` uses its Decision and Key tradeoff lines to drive the confirmation panel.
 
 ---
 
@@ -237,7 +237,7 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode-specific inst
 
 **Mode**: <feature | architecture | enhancement | cross-cutting>
 **Operation**: <create | update | supersede>
-**ADR written**: <file path>
+**Spec written**: <file path>
 **Decision**: <one sentence: what was decided>
 **Key tradeoff**: <one sentence: the main thing being traded away>
 **Premise challenged**: <yes, [what was challenged] | no>

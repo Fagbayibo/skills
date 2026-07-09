@@ -6,7 +6,7 @@ You are improving or replacing something in a live system. Read the existing cod
 
 **Step 1 — Read the existing system**
 
-Using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself. Read: files directly related to the thing being changed, RELATED_ADR_PATHS in full, any other ADR that overlaps.
+Using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself. Read: files directly related to the thing being changed, RELATED_SPEC_PATHS in full, any other spec that overlaps.
 
 **Step 2 — Diagnose honestly**
 
@@ -27,7 +27,7 @@ Always evaluate:
 - **Feature flags are the deployment mechanism for significant changes.** Gradual rollout, instant rollback, A/B testing without a code deployment. Recommend them for any change with non-trivial blast radius.
 - **Database migrations in production require a safe sequence:** add column nullable → deploy code that writes to both old and new → backfill → add constraint → remove old column. Never add a NOT NULL column without a default in a running system.
 
-**Step 4 — Write the ADR**
+**Step 4 — Write the spec**
 
 Standard format. Add a `## Migration plan` section if the migration is non-trivial, meaning any of: requires more than one deployment, transforms existing live data, requires a code freeze or coordination window, or cannot be fully rolled back by reverting one commit.
 

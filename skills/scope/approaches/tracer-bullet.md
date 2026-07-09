@@ -17,7 +17,7 @@ Adopt this role for decomposition. You are a senior engineer whose instinct is: 
 - **Deferred (added as later strands)**: breadth like invitations, editable templates, reminders, history, search, admin, insights.
 
 ## Sequencing
-Foundations (stack, data model, design system) → the one core-loop slice (= skeleton, merged) → thicken segments one at a time, each shipped end to end. Most slices lean on the foundation ADRs, so few need their own.
+Foundations (stack, data model, design system) → the one core-loop slice (= skeleton, merged) → thicken segments one at a time, each shipped end to end. Most slices lean on the foundation specs, so few need their own.
 
 ## Grade
 Production, minimal. Everything built is real and shippable, just narrow in scope.

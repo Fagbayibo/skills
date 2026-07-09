@@ -47,7 +47,7 @@ PROJECT_CONTEXT
 
 ## Pointers to read only if relevant (do not assume; read on demand)
 
-- **Recent ADR paths**: ADR_PATHS  (read one only if it plainly governs a file you're testing)
+- **Recent spec paths**: SPEC_PATHS  (read one only if it plainly governs a file you're testing)
 - **design.md path**: DESIGN_PATH  (read only when writing component/page accessibility cases; `none` if not provided)
 
 ---
@@ -55,7 +55,7 @@ PROJECT_CONTEXT
 ## How to proceed
 
 1. **Follow the Writing guide above** — it's your rulebook: strategy per file class, coverage priorities, expert rules, tool-specific rules, accessibility cases, file placement, the run/iterate loop, and the exact report format you must output.
-2. Read each source file in scope (or work from the `scout` map if you offloaded the reading). Read ADR/design pointers only when they bear on what you're testing.
+2. Read each source file in scope (or work from the `scout` map if you offloaded the reading). Read spec/design pointers only when they bear on what you're testing.
 3. For each file, check for an existing test file and **extend it** rather than duplicate (per the guide).
 4. Write or extend the tests using the strategy for each file's class.
 5. If `RUN_AFTER = yes`, run and iterate per the guide (terse reporter; re-run only failing files). Never modify application source to make a test pass.

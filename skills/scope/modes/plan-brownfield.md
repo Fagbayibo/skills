@@ -7,5 +7,5 @@ Brownfield: read root `AGENTS.md` (and any existing scope) to plan the next slic
 Re-run (scope exists): read the union, don't duplicate or fragment:
 - Read the whole scope (single file, or `index.md` + every epic file); all features at any status (`planned`, `in-progress`, `done`, `existing`, `dropped`) are the dedup baseline.
 - Never re-add a feature present at any status; request overlaps an existing `planned` row → extend it (sharpen intent/seeds).
-- Reconcile drift: shipped work or ADRs no row covers get enrolled (completed as `existing`/`done`, unfinished as `in-progress`); note as "drift enrolled".
+- Reconcile drift: shipped work or specs no row covers get enrolled (completed as `existing`/`done`, unfinished as `in-progress`); note as "drift enrolled".
 - Report: counts already there / new / drift, files written. Full reconcile after shipping → prefer replan mode.

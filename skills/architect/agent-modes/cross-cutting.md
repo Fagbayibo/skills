@@ -6,7 +6,7 @@ You are defining a standard pattern that every file in the codebase must follow.
 
 **Step 1 — Sample the current state**
 
-Using your file tools, list a sample of the codebase's source files (e.g. `.ts`, `.tsx`, `.js`, `.py`, `.go`), excluding `node_modules/` and `.git/`; enough to see the competing patterns (around 50 files is plenty). Read 4–6 representative files showing the current inconsistency, not the whole codebase: enough to identify the competing patterns, not a full audit. Also read RELATED_ADR_PATHS if any exist.
+Using your file tools, list a sample of the codebase's source files (e.g. `.ts`, `.tsx`, `.js`, `.py`, `.go`), excluding `node_modules/` and `.git/`; enough to see the competing patterns (around 50 files is plenty). Read 4–6 representative files showing the current inconsistency, not the whole codebase: enough to identify the competing patterns, not a full audit. Also read RELATED_SPEC_PATHS if any exist.
 
 **Step 2 — Characterise the inconsistency**
 
@@ -32,11 +32,11 @@ Options here are about enforcement level and rollout strategy, not technology:
 
 1. **Document + enforce going forward** — define the standard, add a lint rule or type, all new code complies, existing violations become tracked debt
 2. **Document + single migration PR** — fix all non-compliant files at once in one coordinated change
-3. **Document only** — write the ADR, rely on code review, no automated enforcement
+3. **Document only** — write the spec, rely on code review, no automated enforcement
 
 For each: describe the approach, its enforcement strength, and the realistic blast radius.
 
-**Step 5 — Write the ADR**
+**Step 5 — Write the spec**
 
 Standard format. Include a `## Standard definition` section after `## Rationale`:
 

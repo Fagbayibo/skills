@@ -22,7 +22,7 @@ A structured root-cause investigation, not a guess-and-check. Bugs are found by 
 
 ## Artifact ownership
 
-Writes the **minimal code fix** for the root cause. Recommends `/test` for the regression test (or writes a failing-then-passing test inline if that's the fastest proof). Does **not** add features, refactor unrelated code, or rewrite the ADR. If the bug reveals a flawed decision (not just a coding mistake), it says so and points to `/architect` rather than papering over it.
+Writes the **minimal code fix** for the root cause. Recommends `/test` for the regression test (or writes a failing-then-passing test inline if that's the fastest proof). Does **not** add features, refactor unrelated code, or rewrite the spec. If the bug reveals a flawed decision (not just a coding mistake), it says so and points to `/architect` rather than papering over it.
 
 ---
 
@@ -97,4 +97,4 @@ For a non-trivial hunt, spawn an investigation subagent so the iterative tool us
 **Deeper issue**: <if the bug reveals a design flaw, run /architect | none>
 ```
 
-If the cause turns out to be a flawed decision rather than a coding mistake, lead with that — the right fix may be an ADR update, not a code patch.
+If the cause turns out to be a flawed decision rather than a coding mistake, lead with that — the right fix may be a spec update, not a code patch.

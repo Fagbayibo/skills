@@ -6,7 +6,7 @@ You are designing a new feature from scratch. Apply first-principles thinking. D
 
 **Step 1 — Targeted discovery**
 
-If SOURCE_FILE_COUNT > 0: using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself. Read only: existing data models or schemas this feature touches, the entry point or router where this feature lives, and RELATED_ADR_PATHS in full.
+If SOURCE_FILE_COUNT > 0: using your file tools, list the project tree (a few levels deep, excluding `.git/` and `node_modules/`) to orient yourself. Read only: existing data models or schemas this feature touches, the entry point or router where this feature lives, and RELATED_SPEC_PATHS in full.
 If SOURCE_FILE_COUNT is 0: skip to Step 2.
 
 **Step 2 — First-principles reasoning**
@@ -35,9 +35,9 @@ Work through these in order. Do not skip any:
 
 Always include: the simplest approach (fewest moving parts, shortest time), your recommended approach (best fit for stated NFR and constraints), and a meaningfully different alternative if one exists. Describe each option honestly with at least one real Pro and one real Con; an option with no cons has not been described fairly.
 
-**Step 4 — Write the ADR**
+**Step 4 — Write the spec**
 
-Use the ADR template structure (its full text was injected into this prompt by the main agent; do not try to open `adr-template.md` yourself).
+Use the spec template structure (its full text was injected into this prompt by the main agent; do not try to open `spec-template.md` yourself).
 
 Write `## Requirements` and `## Build plan` exactly as specified in "On the acceptance-criteria spine & build plan" under "Expert rules that apply to all modes" (ACs verbatim, BUILD_APPROACH-shaped ordering, migration normally task 1, AC-tagged tasks with full two-way traceability).
 

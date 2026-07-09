@@ -14,18 +14,18 @@ Turns an idea into an ordered, coarse, living plan and keeps it honest as the pr
 
 Scope shape, coarse and small: a slim At a glance table (`# · Feature · Phase · Status`) + feature sections grouped by phase (see `scope-template.md`). Each section: heading `### N. Name` with short tags only when they matter (`needs a decision`, an approach override, `full` weight), a 1 to 2 line intent, one `Done when:` line (acceptance-criteria seeds, the WHAT), checkbox steps.
 
-Feature shape lifecycle: not yet designed → one box, its entry command. On ADR capture, `/architect` fills the built-ready shape: `Design it (ADR)` ticked, ADR linked, `Build it: /develop <feature>` with 2 to 5 milestone sub-items rolled up from the ADR's `## Build plan`, then `Verify it: /check verify <feature>` and `Test it: /test <feature>`. Atomic build tasks stay in the ADR's `## Build plan`, never here; every box is a command or tracked milestone. Status: in the table and beside the heading; ADR and code pointers once they exist. `/scope` seeds the what; `/architect` designs the how and defines milestones; `/develop` builds; `/check verify` and `/test` close; `/sync` reconciles conventions after.
+Feature shape lifecycle: not yet designed → one box, its entry command. On spec capture, `/architect` fills the built-ready shape: `Design it (spec)` ticked, spec linked, `Build it: /develop <feature>` with 2 to 5 milestone sub-items rolled up from the spec's `## Build plan`, then `Verify it: /check verify <feature>` and `Test it: /test <feature>`. Atomic build tasks stay in the spec's `## Build plan`, never here; every box is a command or tracked milestone. Status: in the table and beside the heading; spec and code pointers once they exist. `/scope` seeds the what; `/architect` designs the how and defines milestones; `/develop` builds; `/check verify` and `/test` close; `/sync` reconciles conventions after.
 
 One command, inferred intent (`/scope [what]`, never a subcommand):
 - **plan** (default): no scope yet + a product-sized idea, or asking for the next slice. Full pass: ask → decompose into coarse feature sections → order + phase → write.
-- **replan**: scope exists + no argument. Opens with a short where-things-stand readout (git branch and ahead/behind the remote, feature counts by status, and each in-progress feature's resume point) so a bare `/scope` doubles as the "where was I, what is safe to pick up" orientation, then reconciles what shipped, surfaces plan-vs-reality drift (code or ADRs with no scope row), enrolls needs surfaced during the build, reorders, and queues the next slice. The normal living rhythm, not rare: run bare `/scope` again.
-- **add**: scope exists + argument names a single feature. Enroll one coarse row (intent + order + weight + Needs ADR) without re-planning: `/scope <a feature>`.
+- **replan**: scope exists + no argument. Opens with a short where-things-stand readout (git branch and ahead/behind the remote, feature counts by status, and each in-progress feature's resume point) so a bare `/scope` doubles as the "where was I, what is safe to pick up" orientation, then reconciles what shipped, surfaces plan-vs-reality drift (code or specs with no scope row), enrolls needs surfaced during the build, reorders, and queues the next slice. The normal living rhythm, not rare: run bare `/scope` again.
+- **add**: scope exists + argument names a single feature. Enroll one coarse row (intent + order + weight + Needs spec) without re-planning: `/scope <a feature>`.
 
 ## Asks vs acts
 
-Senior product engineer, thorough across all dimensions. Same infer / ask / recommend discipline as `/architect`: INFER what the idea states (category, obvious capabilities); ASK the un-inferable across business, product, go-to-market in batched rounds (up to 4 questions per round; see Decision panels); RECOMMEND build approach, build order, each feature's weight, which need an ADR (expert calls: present them, let the engineer override).
+Senior product engineer, thorough across all dimensions. Same infer / ask / recommend discipline as `/architect`: INFER what the idea states (category, obvious capabilities); ASK the un-inferable across business, product, go-to-market in batched rounds (up to 4 questions per round; see Decision panels); RECOMMEND build approach, build order, each feature's weight, which need a spec (expert calls: present them, let the engineer override).
 
-Never pick tools: no provider, library, ORM, host, or BaaS chosen or named; that is `/architect`'s job per feature in the ADR. A feature implying a tool choice is exactly `Needs ADR: yes`. Keep the scope tool-agnostic so it doesn't rot.
+Never pick tools: no provider, library, ORM, host, or BaaS chosen or named; that is `/architect`'s job per feature in the spec. A feature implying a tool choice is exactly `Needs spec: yes`. Keep the scope tool-agnostic so it doesn't rot.
 
 ## Decision panels (every user-facing choice)
 
@@ -33,7 +33,7 @@ Every choice is an options panel, never a neutral menu: 2 to 4 concrete options 
 
 ## Artifact ownership
 
-`docs/scope/` is the feature scope, owned by this skill; `/architect` owns `docs/adr/`. Other skills find a feature by scanning `docs/scope/` for its row. Living document: `plan`, `replan`, `add` all edit in place (reconcile and append, never a new dated file). Writes nothing else: no ADRs, code, or `AGENTS.md`. `docs/scope/` holds scope files only; inventories, analyses, research docs live with the ADR in its `rationale.md` (owned by `/architect`).
+`docs/scope/` is the feature scope, owned by this skill; `/architect` owns `docs/specs/`. Other skills find a feature by scanning `docs/scope/` for its row. Living document: `plan`, `replan`, `add` all edit in place (reconcile and append, never a new dated file). Writes nothing else: no specs, code, or `AGENTS.md`. `docs/scope/` holds scope files only; inventories, analyses, research docs live with the spec in its `rationale.md` (owned by `/architect`).
 
 File shape:
 - Small product: one file, `docs/scope/scope.md` (At-a-glance table + phase-grouped sections + legend).
@@ -47,7 +47,7 @@ Status lifecycle (`/scope` sets initial status; the pipeline advances it):
 - `done` ≠ `existing`: `done` = this pipeline built and verified it; `existing` predates the workflow; `/develop` and `/sync` never touch `existing` rows.
 - `replan` may set a de-scoped feature to `dropped`, never deletes rows; `dropped` keeps history, excluded from active counts and work; `/develop` and `/sync` skip it.
 
-Process weight (absorbs the old `/triage`): every feature carries Weight `lean` · `medium` · `full`, one column turning downstream process on or off. `lean`: trivial, low-risk, well-understood; skip the fresh-model review; often `Needs ADR: no`. `medium`: moderate scope or a real decision; normal path. `full`: high risk, large scope, or compliance-sensitive; a fresh-model `/check review` warranted; almost always `Needs ADR: yes`. `/scope` sets the initial weight (same signals `/architect` and `/develop` use; README Tiers are the reference); downstream skills read this column.
+Process weight (absorbs the old `/triage`): every feature carries Weight `lean` · `medium` · `full`, one column turning downstream process on or off. `lean`: trivial, low-risk, well-understood; skip the fresh-model review; often `Needs spec: no`. `medium`: moderate scope or a real decision; normal path. `full`: high risk, large scope, or compliance-sensitive; a fresh-model `/check review` warranted; almost always `Needs spec: yes`. `/scope` sets the initial weight (same signals `/architect` and `/develop` use; README Tiers are the reference); downstream skills read this column.
 
 Artifact base: `docs/` by default; if `docs/` is a published docs site (`docusaurus.config.*`, `.vitepress/`, `mkdocs.yml`, Astro Starlight, or Nextra detected), use `.workflow/` (`.workflow/scope/…`). Always follow whichever base already exists (paths here assume `docs/`).
 

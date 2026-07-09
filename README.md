@@ -2,7 +2,7 @@
 
 A set of [Agent Skills](https://agentskills.io) that take a change from a vague idea to shipped, verified, documented code, for any AI coding agent. One skill per phase. Run only the ones a change needs, in any order.
 
-The state lives in files (a scope, ADRs, AGENTS.md, tests), not in a chat session. So work survives across sessions, picks up where it left off, and works for a whole team.
+The state lives in files (a scope, specs, AGENTS.md, tests), not in a chat session. So work survives across sessions, picks up where it left off, and works for a whole team.
 
 ```
 idea → /scope → /audit → /architect → /develop → /check verify → /test → /check review → /document → /sync
@@ -16,12 +16,12 @@ Run `/debug` anytime something breaks. Run a bare `/scope` anytime to see where 
 |---|---|
 | `scope` | Turns a product idea into a living, coarse scope and keeps it current as you ship. |
 | `audit` | Writes the AGENTS.md context files every other skill reads. |
-| `architect` | Makes a load bearing decision and writes it as a build spec ADR in `docs/adr/`. |
-| `develop` | Builds a feature, UI or backend, from its ADR. Gates to `/architect` if a decision is owed. |
+| `architect` | Makes a load bearing decision and writes it as a build spec in `docs/specs/`. |
+| `develop` | Builds a feature, UI or backend, from its spec. Gates to `/architect` if a decision is owed. |
 | `check` | Confirms a change before merge. `/check verify` runs the real app; `/check review` reads the code on a second model. |
 | `test` | Writes a test suite for the code you just changed. |
 | `document` | Writes the PR text, changelog, release note, or postmortem from the real diff. |
-| `sync` | Keeps AGENTS.md, the scope, and ADR statuses current after a change. |
+| `sync` | Keeps AGENTS.md, the scope, and spec statuses current after a change. |
 | `debug` | Finds and fixes the root cause of a bug, then hands a regression test to `/test`. |
 
 Hardening (systems level failure mode analysis) is temporarily removed and will return as a system design specialization.
@@ -56,14 +56,14 @@ Works on any Agent Skills client (Claude Code, Cursor, Codex, Gemini CLI, and [m
 /architect → /develop → /check verify → /test → /check review → /document → /sync
 ```
 
-`/scope` fixes what to build. `/architect` designs how, as an ADR whose acceptance criteria are the contract; every later step traces back to that contract. `/develop` gates on the ADR: if building would mean inventing an undecided design, provider, or data model, it stops and sends you to `/architect` first.
+`/scope` fixes what to build. `/architect` designs how, as a spec whose acceptance criteria are the contract; every later step traces back to that contract. `/develop` gates on the spec: if building would mean inventing an undecided design, provider, or data model, it stops and sends you to `/architect` first.
 
 ## What gets written, and where
 
 | Artifact | Path | Owner |
 |---|---|---|
 | Scope | `docs/scope/` | scope |
-| ADRs | `docs/adr/` | architect |
+| Specs | `docs/specs/` | architect |
 | Context files | AGENTS.md (plus a thin CLAUDE.md pointer) | audit, kept current by sync |
 | Design system | `design.md` (art direction; token values live in CSS) | develop |
 | Review findings | `docs/reviews/` | check |
@@ -83,10 +83,10 @@ When: to start a new product or plan the next slice. Greenfield: run it first. B
 **audit**: Writes the AGENTS.md context files that give every skill your project's stack, commands, and conventions.
 When: brownfield, run it first. Greenfield, run it after the stack is chosen and the project is scaffolded. Monorepo: gives each workspace its own nested AGENTS.md.
 
-**architect**: Runs a deep design conversation and writes the decision as a build spec ADR.
+**architect**: Runs a deep design conversation and writes the decision as a build spec.
 When: a load bearing choice is unmade (a stack, a data model, a provider, a page design), or `/develop` says a decision is owed. Greenfield: it decides the stack first. Monorepo: reads the target workspace's stack.
 
-**develop**: Builds a feature, UI or backend, from its ADR, runs migrations, and advances the scope.
+**develop**: Builds a feature, UI or backend, from its spec, runs migrations, and advances the scope.
 When: after the decision exists. It gates to `/architect` if a design is owed. Monorepo: builds inside the target workspace using its commands.
 
 **check**: Confirms a change before merge, in two modes.
@@ -98,7 +98,7 @@ When: after building a feature or fixing a bug. Monorepo: resolves the framework
 **document**: Writes the human facing prose (PR, changelog, release note, postmortem) from the real diff.
 When: a finished change needs writing up. Any project type.
 
-**sync**: Reconciles AGENTS.md, the scope, and ADR statuses to what the repo now shows.
+**sync**: Reconciles AGENTS.md, the scope, and spec statuses to what the repo now shows.
 When: the last step around merge. Monorepo: reconciles the right workspace.
 
 **debug**: Runs a disciplined root cause loop and hands a regression test to `/test`.

@@ -12,7 +12,7 @@ Write everything this skill produces (files, reports, every message shown to the
 
 Role: a senior test engineer writing the suite the code deserves, no more, no less. Test what a caller relies on and what would actually break someone, not lines for a coverage number. Pick a strategy per file by reading what the thing is. Refuse tests that lock in scaffolding the slice was never meant to make real.
 
-Target: the code changed in this branch but not yet committed. Each changed file is classified (pure logic, component, API route, page/flow) and tested with the right strategy; tests verify real behavior and catch regressions, not coverage farming. The main thread writes the tests itself (a read-only `scout` may do the heavy file reading for a large set); with a governing ADR, tests trace to its acceptance criteria (Steps 7 and 8).
+Target: the code changed in this branch but not yet committed. Each changed file is classified (pure logic, component, API route, page/flow) and tested with the right strategy; tests verify real behavior and catch regressions, not coverage farming. The main thread writes the tests itself (a read-only `scout` may do the heavy file reading for a large set); with a governing spec, tests trace to its acceptance criteria (Steps 7 and 8).
 
 Does not write application code. Does not update `AGENTS.md`/`CLAUDE.md` context files (/sync owns that).
 
@@ -55,7 +55,7 @@ Combine, de-duplicate, filter out non-testable files:
 - Config: `*.config.*`, `.*rc`, `tsconfig*`, `*.json` (except where logic lives in JSON), `Dockerfile`, CI yaml
 - Lock files, `.lock`, generated/build output (`dist/`, `build/`, `.next/`, `coverage/`)
 - Styling: `*.css`, `*.scss`, `*.module.css`; type-only declarations: `*.d.ts`
-- Docs and markdown, ADRs, `design.md`, `test-preferences.json`
+- Docs and markdown, specs, `design.md`, `test-preferences.json`
 
 The remainder is the scope. Empty: go to Step 3. Otherwise continue.
 
@@ -143,11 +143,11 @@ go get github.com/stretchr/testify                           # Go
 
 #### 7. Gather lightweight pointers (do NOT read heavy files here)
 
-Paths and cheap signals only; the heavy reading happens at write time (by you, or a `scout` if offloaded). Do not read ADRs or `design.md` in full here. Don't read source files here; they're read at write time.
+Paths and cheap signals only; the heavy reading happens at write time (by you, or a `scout` if offloaded). Do not read specs or `design.md` in full here. Don't read source files here; they're read at write time.
 
 With file tools:
-- List the 3 most-recently-modified ADR paths under `docs/adr/` (paths only).
-- Identify the governing ADR: the feature dir `docs/adr/NNNN-<feature>/` (or single `docs/adr/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/scope/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/adr/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing ADR exists, else `no`.
+- List the 3 most-recently-modified spec paths under `docs/specs/` (paths only).
+- Identify the governing spec: the feature dir `docs/specs/NNNN-<feature>/` (or single `docs/specs/NNNN-<feature>.md`) these files implement, matched by branch/feature name or touched surfaces (a `docs/scope/` entry, if present, points to it). Note its path and whether a `verify.md` sits beside it (`docs/specs/NNNN-<feature>/verify.md`). This contract is what tests trace to; it may not be among the 3 recent paths. Set `TRACE_TO_CONTRACT = yes` when a governing spec exists, else `no`.
 - Note whether `design.md` exists at the project root; use its path only when a **component** or **page/flow** file is in scope, else `none`.
 - Read `AGENTS.md` (canonical; `CLAUDE.md` if absent) as project context (short and cheap). Also note the build approach as one line: the slice-shaping approach the team chose, recorded in the scope header (or root `AGENTS.md`), e.g. thin end-to-end path, thinnest-usable-whole core loop, UI-first shell on placeholders, full user journey per phase. It doesn't branch the logic; it calibrates your judgment when writing (Step 8, rule a).
 - Read `package.json`, note `scripts.test`. `RUN_COMMAND` = `<pkgmgr> test` when a `test` script exists (`<pkgmgr> run test` for npm); a raw invocation (e.g. `pnpm exec vitest run`) only when none does.
@@ -169,8 +169,8 @@ Set `RUN_AFTER = yes | no` and apply it at write time.
 The main thread writes the tests itself. Do not spawn a writer. Resolve this skill's folder to an absolute path (you already resolve these relative paths, so you know the folder) and Read `agent-prompt.md` and `writing-guide.md` now (only now, at write time): `agent-prompt.md` is your operating template, `writing-guide.md` is the strategy, tool rules, iteration loop, and report format you follow. Reading the changed files under test is the one expensive part; for a large or unfamiliar set, offload just the reading to a read-only `scout` subagent on the cheapest model (Claude Code: `haiku`, not inheriting the session model) that returns a compact map, then write from it.
 
 The inputs to apply (the labeled values you gathered):
-1. unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context plus the build approach line; the 3 recent ADR paths or `none` (read only if relevant to what you're testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing ADR path, and the `verify.md` path (each `none` if absent).
-2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the ADR's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /check verify manual step`.
+1. unit tool, E2E tool, additional tools, `INSTALL` state; `testDir`, `filePattern`, package manager, stack/framework, `packageRoot`; the classified scope (each file path with its class: logic / component / page-flow / api-server / cli); `RUN_COMMAND`, `RUN_AFTER`; project context plus the build approach line; the 3 recent spec paths or `none` (read only if relevant to what you're testing); the design.md path or `none`; `TRACE_TO_CONTRACT`, the governing spec path, and the `verify.md` path (each `none` if absent).
+2. Two rules to apply: (a) let the build approach calibrate which behaviors are durably real for this slice (lock those in as stable assertions) versus deliberate scaffolding the slice fakes by design (don't assert a real implementation the plan hasn't built yet, e.g. a real-backend expectation on a shell that stubs its data). (b) when `TRACE_TO_CONTRACT = yes`, read the acceptance criteria (from `verify.md` if present, preferring its already-resolved `AC-N`-tagged checklist, else the spec's `## Requirements`) and lock in the durable ones: an automated test for every criterion that can be pinned as a stable assertion, each test tagged with the `AC-N` it covers (e.g. a `covers: AC-3` comment, or `AC-3` in the test title) so the suite traces back to the contract. Never fake a criterion that can't be automated (visual/manual/environmental, e.g. "email actually arrives"); record it in `NOT_COVERED` as `AC-N — <why not automatable> → defer to /check verify manual step`.
 
 Monorepo (multiple package roots from Step 1b): write each root's suite in turn, scoped to its root's files, tool, and package manager (offload each root's file reading to its own `scout` if large). Single root (common case): just write it.
 
@@ -180,7 +180,7 @@ Monorepo (multiple package roots from Step 1b): write each root's suite in turn,
 
 If the write failed or produced no report: say so and re-do it; never report a passing or failing suite you didn't actually produce. Otherwise relay the format matching `RUN_AFTER`.
 
-Update the scope: if this feature is on the scope (`docs/scope/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the scope and ADR hold everything, a fresh session keeps the next build cheap.
+Update the scope: if this feature is on the scope (`docs/scope/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At-a-glance table and beside the heading). If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. On `done`, advise `/clear` before the next feature: the scope and spec hold everything, a fresh session keeps the next build cheap.
 
 Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
 
@@ -196,7 +196,7 @@ Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, plus `RUN_RESULT` and `BU
 
 **Run result**: <X passed, Y failed> via `<RUN_COMMAND>`   ← yes
 
-**Traceability** (only when TRACE_TO_CONTRACT=yes, ADR NNNN):
+**Traceability** (only when TRACE_TO_CONTRACT=yes, spec NNNN):
 - AC-1 ✅ locked in, `<test file · test name>`
 - AC-3 ✅ locked in, `<test file · test name>`
 

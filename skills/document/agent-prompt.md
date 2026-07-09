@@ -26,7 +26,7 @@ TEMPLATE_CONTENT
 ## Context
 
 - **Project (AGENTS.md, inlined)**: PROJECT_CONTEXT
-- **Recent ADR paths (the "why" — read only if you need the rationale)**: ADR_PATHS
+- **Recent spec paths (the "why" — read only if you need the rationale)**: SPEC_PATHS
 - **Today**: DATE
 
 ## Output
@@ -45,7 +45,7 @@ TEMPLATE_CONTENT
 
 1. Read the diff (and changed files as needed) so every statement is backed by a real change. For a postmortem, build the narrative from INCIDENT_FACTS, not the diff.
 2. Write strictly to the template's structure — same sections, same order. Fill every section; if a section genuinely has nothing, write "None" rather than padding.
-3. Use the ADR rationale for the "why" when the template asks for motivation; don't speculate beyond it.
+3. Use the spec rationale for the "why" when the template asks for motivation; don't speculate beyond it.
 4. Write to the correct target for the type. Keep prose tight — no restating the same point, no boilerplate.
 5. Return the compact summary the SKILL expects: for `pr`, the full title + body; for the others, a 2–3 line preview and the file path written.
 

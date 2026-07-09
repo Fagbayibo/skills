@@ -49,7 +49,7 @@ Placeholder rules: real `width`/`height` (or aspect-ratio box) to avoid layout s
 
 Applies only when the UI stands up before its data source exists: the Facade mode (build the shell, wire it later), or any slice genuinely built ahead of its backend. Under end-to-end / tracer-bullet the data layer lands in the same slice: bind to the real source, skip this. With no real data source yet, bind the page to a clearly-marked local mock module so it renders fully; don't block on the backend and don't invent a real data layer here:
 
-- Mock data in one obvious place, e.g. `lib/<feature>.placeholder.ts` (or `mocks/`), exporting typed objects shaped like the real data the ADR specifies, so the swap to the real source is a single import change.
+- Mock data in one obvious place, e.g. `lib/<feature>.placeholder.ts` (or `mocks/`), exporting typed objects shaped like the real data the spec specifies, so the swap to the real source is a single import change.
 - Cover the real states (populated list, empty list, loading, error) so those UI states are built now.
 - Mark it unmistakably (a `// PLACEHOLDER — replaced by <feature>'s data-integration sub-task` header) and note it in the report.
 
@@ -67,7 +67,7 @@ This is Pass 1 from the guide's bar: design before you integrate, and it is a ga
 
 A complete product screen has, cohesive and branded:
 - **Brand presence**: a logo or wordmark, used consistently. No asset: derive one from the product name (styled wordmark or simple mark); never leave the corner empty.
-- **Product context and copy**: real, product-specific copy saying what this is and why, written from the product's purpose (`AGENTS.md`, the ADR's intent, or the scope; never lorem ipsum): a headline or tagline, a supporting line, honest microcopy.
+- **Product context and copy**: real, product-specific copy saying what this is and why, written from the product's purpose (`AGENTS.md`, the spec's intent, or the scope; never lorem ipsum): a headline or tagline, a supporting line, honest microcopy.
 - **A considered layout, not a lone box.** Compose the page as a whole. The same completeness applies to every page; the list below is a sample to calibrate on, not a checklist, and not the only pages treated. Reason about what a senior designer would ship for THIS screen and product:
   - **Auth (sign in / up):** a branded card, or two-pane (brand, value proposition, and a visual on one side; the form on the other), secondary links (forgot password, switch mode, terms), often light social proof. Not a naked input box.
   - **Dashboard / feed:** an app shell (header with logo, primary nav, user menu), clear page title and context, main content with real hierarchy, a proper empty state.
@@ -83,7 +83,7 @@ This is composition (completeness), not look: the design source (template, gener
 
 Nothing provided: derive a wordmark from the product name; use a tasteful visual (gradient, subtle pattern, abstract illustration, or a placeholder image via *Asset resolution*) rather than blank space; write real copy from the product's purpose. Invent tastefully to make it feel like a product, but surface what you invented: list the brand name/wordmark, the copy, and any placeholder assets in the completion report so the engineer can correct them. A product feel is wanted; pretending invented brand and copy are final is not.
 
-If the ADR already settled the page composition (`/architect`'s page-design stage), execute that; this phase fills the gap only when it didn't. Keep it real, not busy: a complete surface is not a cluttered one; every element earns its place in the design system's spacing and hierarchy.
+If the spec already settled the page composition (`/architect`'s page-design stage), execute that; this phase fills the gap only when it didn't. Keep it real, not busy: a complete surface is not a cluttered one; every element earns its place in the design system's spacing and hierarchy.
 
 ### Phase 1 — Semantic structure
 
@@ -271,7 +271,7 @@ The build is not done until you have checked it. Ambition in prose is not enough
 **Token file**: created | updated | unchanged (<path>)
 **Fonts**: <family> via <method> | <proprietary> to <substitute> | system
 **Assets**: project files | placeholders (<service>, swap at <where>) | none needed
-**Surface composed**: bare component | full product surface (brand, copy, layout, footer) | per ADR composition
+**Surface composed**: bare component | full product surface (brand, copy, layout, footer) | per spec composition
 **Self-audit**: disqualifiers checked (none found | fixed: <list>) · rendered and looked (yes: <what you saw/fixed> | no browser tool)
 **Invented (for review, swap when you have the real thing)**: <brand name/wordmark · tagline/headline · body copy · placeholder assets>, or "none (all provided)"
 **Built**: <name> (<file paths>)

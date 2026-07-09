@@ -15,7 +15,7 @@ One line, imperative mood, ≤ 72 chars. Match the project's commit convention i
 
 ## Why
 
-<The motivation. Link the ADR if one governs this change, e.g. "Implements docs/adr/0007-rate-limiting.md". Reference the issue/ticket if known.>
+<The motivation. Link the spec if one governs this change, e.g. "Implements docs/specs/0007-rate-limiting.md". Reference the issue/ticket if known.>
 
 ## Changes
 

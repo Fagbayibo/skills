@@ -40,7 +40,7 @@ const SKILL_BYTE_BUDGET = 32 * 1024;
 const SKILL_BYTE_OVERRIDES = {};
 const SUPPORT_MD_BYTE_BUDGET = 24 * 1024;
 const SUPPORT_MD_OVERRIDES = {
-  'architect/agent-prompt.md': 28 * 1024, // common ADR writer prompt; ratchet down after more common-rule trimming
+  'architect/agent-prompt.md': 28 * 1024, // common spec writer prompt; ratchet down after more common-rule trimming
   'architect/internal/design-conversation.md': 25344, // main-thread design walk; ratcheted down from 25*1024 after per-stage framing dedup; tool discovery split to internal/tool-discovery.md; split by stage if it grows further
 };
 const DESCRIPTION_CHAR_CAP = 400;
@@ -52,8 +52,11 @@ const HOT_PATH_BUDGETS = [
   },
   {
     name: 'architect subagent write path',
-    budget: 48 * 1024,
-    required: ['architect/agent-prompt.md', 'architect/adr-template.md'],
+    // Ratcheted 48K -> 49K for the ADR -> spec rename (the word grew by one byte
+    // per occurrence). This budget was fitted to the files, not to a target, so it
+    // sat at 99.9% and any edit broke it. Re-derive from a target, don't keep bumping.
+    budget: 49 * 1024,
+    required: ['architect/agent-prompt.md', 'architect/spec-template.md'],
     oneOf: [
       'architect/agent-modes/feature.md',
       'architect/agent-modes/architecture.md',
@@ -100,7 +103,9 @@ const HOT_PATH_BUDGETS = [
     // Build path: gate router + post-gate build flow + the larger track guide.
     // The gate-only path (route to /architect) reads SKILL.md alone.
     name: 'develop build path',
-    budget: 44 * 1024,
+    // Ratcheted 44K -> 45K for the ADR -> spec rename. Same story as the architect
+    // subagent path above: fitted to the files at 99.8%, so it broke on first edit.
+    budget: 45 * 1024,
     required: ['develop/SKILL.md', 'develop/flow/build.md'],
     oneOf: ['develop/ui-guide.md', 'develop/logical-guide.md'],
   },
