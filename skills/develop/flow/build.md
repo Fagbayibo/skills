@@ -36,14 +36,14 @@ Read:
 
 Locating files to touch and patterns/interfaces to match and reuse means reading code, the top context cost in a large or monorepo repo (inline, every opened file stays in the main context all session). Isolate it in a read-only subagent that returns a compact map (~1–2k tokens).
 
-- **Skip it** when the change is tiny and you already know the single file.
-- **Run it** for an unfamiliar area, several files, or a large/monorepo repo.
+- **Skip it** when the change is tiny and you know the file, and on a fresh (just-cleared) session where context is still light: inline reading is then fast and mostly cache-cheap, while a subagent adds spawn latency for little saving. It only pays when context is the scarce thing, not on every build.
+- **Run it** when the reading would genuinely bloat the main context: a large or monorepo repo, many files, an unfamiliar area, or a session already carrying a lot.
 
 Spawn a read-only exploration subagent (Claude Code: the `scout` subagent type, which is read-only and pins its model to a fast, low-cost tier; else Cursor `Explore`, Antigravity `research`, Codex `spawn_agent`; else a plain subagent, or inline if your agent has none). Where the type does not pin it, set its model explicitly to a fast, low-cost tier and do not let it inherit this session's model. Tools `Read`/`Grep`/`Glob` only, no `Edit`/`Write`. Brief: target workspace, exact sub-task, the ADR's key interfaces; return only a compact map, files to create/edit (paths), patterns/conventions to match (`file:line`), symbols/types/helpers to reuse, and gotchas, no file contents or dumps.
 
 Build from the map: offload the token-heavy reading, keep the deciding and writing on the main thread (Step 3).
 
-**Rules of thumb (large repos & monorepos):** the Step 0 read scope (one workspace, one roadmap file, one governing ADR); one sub-task per run, `/clear` between features; keep exploration (Step 2.5) and web lookups (Step 2.6) on the cheapest model in a subagent, and do all the building inline on the main thread.
+**Rules of thumb (large repos & monorepos):** hold the Step 0 read scope (one workspace, one roadmap file, one governing ADR), one sub-task per run, and build inline on the main thread.
 
 ### Step 2.6 — Doc-check (only when needed): offload current-usage lookups to a web subagent
 
