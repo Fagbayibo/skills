@@ -3,12 +3,12 @@ Scope structure `/scope` writes to: the reference shapes read while writing the 
 ## What keeps it readable (the format rules)
 
 - **Two parts:** a slim **At a glance** table for a quick scan, then **the plan** as clean feature sections grouped by phase. Build order is just the section order. There is no separate "build order" list to keep in sync.
-- **Clean headings.** A heading is `### <N>. <Feature name>` plus a short status word and short tags **only when they carry real information** (`needs a decision`, a per-feature approach override, `full` weight). Never a pipe-delimited metadata row like `Title | P0 | inherit | …`.
-- **Each fact appears once.** Intent, the definition of done, tasks, and pointers live in the section; the At-a-glance table is the quick index. Status is shown in the table and beside the heading, and nowhere else.
+- **Clean headings.** A heading is `### <N>. <Feature name>` plus a short status word and short tags **only when they carry real information** (`needs a decision`, a per feature approach override, `full` weight). Never a pipe delimited metadata row like `Title | P0 | inherit | …`.
+- **Each fact appears once.** Intent, the definition of done, tasks, and pointers live in the section; the At a glance table is the quick index. Status is shown in the table and beside the heading, and nowhere else.
 - **Only what is set.** No `n/a`, no `inherit`, no empty fields. A pointer line (`spec <n> · code in <path>`) appears **only once those exist**: the spec link added by `/architect` at capture, the code path by `/develop`.
-- **A feature grows a defined shape.** It has a one- or two-line **intent**, a single **Done when:** line (the acceptance-criteria seeds), and **checkbox steps**. A **not-yet-designed** feature has **one box** (its entry command: `/architect` when it `needs a decision`, else `/develop`, or `/audit` for standards & tooling). **When its spec is captured, `/architect` fills in the built-ready shape:** `Design it` (ticked) → `Build it: /develop <feature>` with **2 to 5 milestone sub-items rolled up from the spec** → `Verify it: /check verify <feature>` → `Test it: /test <feature>`. **The atomic build tasks stay in the spec's `## Build plan`, never here**. The scope carries only the milestone rollup. The next step is always the first unticked box.
+- **A feature grows a defined shape.** It has a one or two line **intent**, a single **Done when:** line (the acceptance criteria seeds), and **checkbox steps**. A **not yet designed** feature has **one box** (its entry command: `/architect` when it `needs a decision`, else `/develop`, or `/audit` for standards & tooling). **When its spec is captured, `/architect` fills in the built ready shape:** `Design it` (ticked) → `Build it: /develop <feature>` with **2 to 5 milestone sub items rolled up from the spec** → `Verify it: /check verify <feature>` → `Test it: /test <feature>`. **The atomic build tasks stay in the spec's `## Build plan`, never here**. The scope carries only the milestone rollup. The next step is always the first unticked box.
 
-## Single-file scope
+## Single file scope
 
 ```markdown
 # Scope: <Product name>
@@ -113,7 +113,7 @@ Out of scope for the current build pass, kept so the plan stays honest.
 
 ## Brownfield enrollment
 
-Already-built features are enrolled **for context**, above the planned ones, with status `existing` (complete, no task list) or `in-progress` (partial, finish via `/develop`), each with a code pointer. They also appear in the At-a-glance table.
+Already built features are enrolled **for context**, above the planned ones, with status `existing` (complete, no task list) or `in-progress` (partial, finish via `/develop`), each with a code pointer. They also appear in the At a glance table.
 
 ```markdown
 ### A. Auth · existing
@@ -125,9 +125,9 @@ Partial catalog; finish the remaining pieces via /develop. code in `src/catalog/
 
 `existing` is not `done`: it predates the workflow, so `/develop` and `/sync` leave it alone.
 
-## Large product: epic-split
+## Large product: epic split
 
-When `scope.md` outgrows a comfortable scan (roughly a dozen-plus features across clearly distinct areas), split by epic: **rename `scope.md` to `docs/scope/index.md`** (keep the At-a-glance table across all epics + a one-line status rollup per epic, each linking its file), and **move each area's feature sections out into its own `docs/scope/<epic>.md`**. Promote **on demand**; don't pre-split a small product. File names are always **semantic** (`scope.md` / `index.md` / `<epic>.md`), never numbered. In a monorepo, each workspace gets its own `docs/scope/<workspace>/` the same way, with a top-level `docs/scope/index.md` mapping the workspaces (one line + rollup each).
+When `scope.md` outgrows a comfortable scan (roughly a dozen plus features across clearly distinct areas), split by epic: **rename `scope.md` to `docs/scope/index.md`** (keep the At a glance table across all epics + a one line status rollup per epic, each linking its file), and **move each area's feature sections out into its own `docs/scope/<epic>.md`**. Promote **on demand**; don't split a small product early. File names are always **semantic** (`scope.md` / `index.md` / `<epic>.md`), never numbered. In a monorepo, each workspace gets its own `docs/scope/<workspace>/` the same way, with a top level `docs/scope/index.md` mapping the workspaces (one line + rollup each).
 
 ## Completion report block
 
@@ -144,4 +144,4 @@ When `scope.md` outgrows a comfortable scan (roughly a dozen-plus features acros
 **First step**: <run `/clear` first, then the first unticked box, usually `/architect <first feature>` (or `/audit` if a brownfield repo has no root AGENTS.md), each skill reads its inputs from the files just written, so a fresh session keeps every step cheap>
 ```
 
-_Context hygiene: the scope, the specs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/scope`, after each `/architect`, between features) and `/compact` mid-unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh-session equivalent elsewhere._
+_Context hygiene: the scope, the specs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/scope`, after each `/architect`, between features) and `/compact` mid unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh session equivalent elsewhere._

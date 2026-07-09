@@ -14,10 +14,10 @@ Read `design.md` in full: character, the build mandate, composition patterns, an
 
 ### DS2: Confirm token coverage
 
-Run stack, styling, and dark mode detection. If the page needs a token the CSS does not have yet, add it in the system's language (derive from the nearest existing token, follow the `design.md` rules), never a one-off hardcoded value. Never silently overwrite an existing token; a genuine conflict → list it in the report, let the engineer decide.
+Run stack, styling, and dark mode detection. If the page needs a token the CSS does not have yet, add it in the system's language (derive from the nearest existing token, follow the `design.md` rules), never a one off hardcoded value. Never silently overwrite an existing token; a genuine conflict → list it in the report, let the engineer decide.
 
 ### DS3: Implement
 
-Run the implementation phases (`ui/implementation.md`): Phase 0 composes the full surface in the existing system, Phases 1 to 5 integrate it, Phase 6 self-audits against the bar. `design.md` governs direction, the CSS tokens govern values.
+Run the implementation phases (`ui/implementation.md`): Phase 0 composes the full surface in the existing system, Phases 1 to 5 integrate it, Phase 6 audits the build against the bar. `design.md` governs direction, the CSS tokens govern values.
 
 ---

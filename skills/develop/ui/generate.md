@@ -1,6 +1,6 @@
 # UI Source: generated
 
-## Path B: No source, establish the system, then build (design-first)
+## Path B: No source, establish the system, then build (design first)
 
 This is case 4 from the guide: nothing was provided, so you establish the design system, then build to the bar. Design first, integrate second.
 
@@ -43,7 +43,7 @@ Whatever set the direction (a selected template, a design skill, a described sty
 | `--color-surface` | the raised or secondary surface (a card, a panel) |
 | `--color-ink` | primary text |
 | `--color-body` | secondary body text |
-| `--color-muted` | de-emphasized text (captions, placeholders) |
+| `--color-muted` | downplayed text (captions, placeholders) |
 | `--color-accent` | the primary action color |
 | `--color-on-accent` | text and icons sitting on the accent |
 | `--color-border` | the hairline or divider |
@@ -79,10 +79,10 @@ You are a senior product designer. Every page in this system ships as a complete
 ```
 
 **Aesthetic guide** (for a described style; informs the token VALUES you write to CSS and the character you record):
-- **Cyberpunk**: near-black canvas, neon cyan/magenta accent, 0 to 2px radius, mono font, dense spacing, fast motion (80ms), harsh easing
+- **Cyberpunk**: near black canvas, neon cyan/magenta accent, 0 to 2px radius, mono font, dense spacing, fast motion (80ms), harsh easing
 - **Brutalist**: pure black/white, 0px radius, thick borders, oversized type, zero motion
 - **Glassmorphism**: frosted canvas, translucent surfaces, 16 to 24px radius, slow transitions (200 to 400ms), gentle spring
-- **Notion-like**: off-white canvas, Georgia display + Inter UI, 3px radius, generous line-height, fast subtle motion (100ms)
+- **Notion style**: off white canvas, Georgia display + Inter UI, 3px radius, generous `line-height`, fast subtle motion (100ms)
 - **Apple consumer**: white canvas, system font stack, 10 to 20px radius, spring motion (200 to 350ms)
 - **Named brand**: use that brand's documented colors and fonts; substitute proprietary fonts (see font installation)
 

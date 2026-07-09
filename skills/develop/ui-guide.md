@@ -13,37 +13,37 @@ You are a senior product designer shipping a real product, not a developer wirin
 **Disqualifiers, any one means NOT done, fix before you report:**
 - a lone centered form or single input box floating on an empty page
 - large dead zones, or content stranded in a narrow column with blank canvas around it
-- naked / unstyled / full-bleed elements (a raw black bar, an unstyled header, a default browser control)
-- default-only styling (one flat button, hairline default borders, system font, no considered accent, no depth)
-- missing states (no empty / loading / error) or orphaned controls (a toggle or quick-action with nothing around it)
+- naked / unstyled / full bleed elements (a raw black bar, an unstyled header, a default browser control)
+- default only styling (one flat button, hairline default borders, system font, no considered accent, no depth)
+- missing states (no empty / loading / error) or orphaned controls (a toggle or quick action with nothing around it)
 - a bare functional widget where a product would ship a full surface (brand, real copy, layout, supporting content, footer)
 
-**Prove it before you report.** Before declaring the UI done, self-audit the build against these disqualifiers and against the page's `design.md` mandate, and fix every hit. When you have a browser or screenshot tool, render the page and look at it, the way a designer checks their own work, and fix any visual defect you see (the only reliable way to catch a broken render like a stray black bar). Say in the report what you audited.
+**Prove it before you report.** Before declaring the UI done, audit the build yourself against these disqualifiers and against the page's `design.md` mandate, and fix every hit. When you have a browser or screenshot tool, render the page and look at it, the way a designer checks their own work, and fix any visual defect you see (the only reliable way to catch a broken render like a stray black bar). Say in the report what you audited.
 
 ## Design source (route by what you were given)
 
 1. **Figma connected (the spec says use it)** → pull the real design from Figma, build to the frames. Route: `ui/mcp.md`.
-2. **Image provided (pasted in chat, not a repo file)** → replicate it pixel-perfect. The image is both the look and the composition, so match it faithfully and do NOT embellish beyond it. Tokenize what you see (values into CSS, character into `design.md`) and derive the responsive and accessible behavior a single screenshot cannot show. Route: `ui/image.md`.
+2. **Image provided (pasted in chat, not a repo file)** → replicate it pixel perfect. The image is both the look and the composition, so match it faithfully and do NOT embellish beyond it. Tokenize what you see (values into CSS, character into `design.md`) and derive the responsive and accessible behavior a single screenshot cannot show. Route: `ui/image.md`.
 3. **A design system already exists** (`design.md` + tokens in CSS) → design the new page WITHIN that system, at the bar above: a full professional surface, consistent with what is already shipped. Route: `ui/existing.md`.
-4. **Nothing provided** → establish the design system first (the frontend-design skill when available, else a template seed), record it in `design.md` (character + mandate + pointers) with the tokens written to CSS, then build to the bar above, maximalist and complete. Route: `ui/generate.md`.
+4. **Nothing provided** → establish the design system first (the `frontend-design` skill when available, else a template seed), record it in `design.md` (character + mandate + pointers) with the tokens written to CSS, then build to the bar above, maximalist and complete. Route: `ui/generate.md`.
 
-Cases 3 and 4 get the full chat-app treatment (bold, complete, product-level); case 2 gets faithful fidelity; case 1 gets Figma fidelity. Follow the source the spec recorded; never default to Figma just because an MCP is connected.
+Cases 3 and 4 get the full chat app treatment (bold, complete, product level); case 2 gets faithful fidelity; case 1 gets Figma fidelity. Follow the source the spec recorded; never default to Figma just because an MCP is connected.
 
-All paths converge on: component-or-screen → stack detection → styling library → dark mode → token sync → font → the implementation phases.
+All paths converge on: component or screen → stack detection → styling library → dark mode → token sync → font → the implementation phases.
 
 ## How the UI build fits the project's approach
 
-The UI build serves the project's build approach (read in `SKILL.md` Step 2), never dictates one. Shell-first on placeholder data, wired later, is the Facade mode: one strategy, not the universal default. An end-to-end / tracer-bullet slice lands the data layer in the same pass, so bind to the real source; a Journey completes the whole user path for the phase. The phases below apply under every approach; only when real data arrives differs. No recorded approach: build the UI as part of a coherent end-to-end slice.
+The UI build serves the project's build approach (read in `SKILL.md` Step 2), never dictates one. Shell first on placeholder data, wired later, is the Facade mode: one strategy, not the universal default. An end to end / tracer bullet slice lands the data layer in the same pass, so bind to the real source; a Journey completes the whole user path for the phase. The phases below apply under every approach; only when real data arrives differs. No recorded approach: build the UI as part of a coherent end to end slice.
 
 ---
 
 ## Portability (any OS, any agent)
 
-Any Agent Skills client, macOS/Linux/Windows. Detection snippets (`find`, `cat | grep`, `cp`) are POSIX reference, not literal scripts: use your agent's own cross-platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are paths relative to this skill's folder, read on demand: load only the ONE chosen template (full file only after selection), never all of them, and read this guide's phases as reached, not front-loaded. The UI build runs inline (it is interactive); heavy code exploration (finding existing components/tokens to match) goes to a read-only subagent per `SKILL.md` Step 2.5. App code/CSS is inherently cross-platform. No interactive-question picker: ask the prompts as plain text with the same options.
+Any Agent Skills client, macOS/Linux/Windows. Detection snippets (`find`, `cat | grep`, `cp`) are POSIX reference, not literal scripts: use your agent's own cross platform file tools to find files, read `package.json`/config, and copy a template to `design.md`. Bundled files (`templates/*.md`, `checklist.md`) are paths relative to this skill's folder, read on demand: load only the ONE chosen template (full file only after selection), never all of them, and read this guide's phases as reached, not all up front. The UI build runs inline (it is interactive); heavy code exploration (finding existing components/tokens to match) goes to a read only subagent per `SKILL.md` Step 2.5. App code/CSS is inherently cross platform. No interactive question picker: ask the prompts as plain text with the same options.
 
 ## Step 0: Where the design comes from (one decision, made once)
 
-Check the governing spec first (`/develop` read it in Step 2). The design source is the engineer's choice and `/architect` already grilled them on it, so follow what the spec recorded, never re-ask, and never default to Figma just because an MCP is connected.
+Check the governing spec first (`/develop` read it in Step 2). The design source is the engineer's choice and `/architect` already grilled them on it, so follow what the spec recorded, never ask again, and never default to Figma just because an MCP is connected.
 
 Route on what the spec recorded, using the *Design source* table above:
 - Figma or another design MCP → `ui/mcp.md`.
@@ -55,7 +55,7 @@ No spec governs this UI, or the spec is silent on the design system → fall thr
 
 ## Step 0.1: Check for existing design.md
 
-File-search for `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, `.claude`. Found: validate; a real one has a `character` and a `## Build mandate` (art direction) and points at the CSS for tokens. Empty, or only a stub: treat as not found and warn the user. (An older `design.md` that still carries inline `colors:` / `typography:` value blocks is still valid; treat the CSS as authoritative for values.)
+File search for `design.md` within about 3 levels of the project root, ignoring `node_modules`, `.git`, `.claude`. Found: validate; a real one has a `character` and a `## Build mandate` (art direction) and points at the CSS for tokens. Empty, or only a stub: treat as not found and warn the user. (An older `design.md` that still carries inline `colors:` / `typography:` value blocks is still valid; treat the CSS as authoritative for values.)
 
 Found and valid → **Design.md path**, skip Steps 1 onward.
 Not found → **Step 0.2 (brownfield check)**.
@@ -64,11 +64,11 @@ Not found → **Step 0.2 (brownfield check)**.
 
 ## Step 0.2: Brownfield check (no design.md, but is there existing UI?)
 
-Before generating a fresh design system, check for an existing visual language to match; a new one over an existing app clashes with what's shipped. File-search (ignoring `node_modules`) for:
+Before generating a fresh design system, check for an existing visual language to match; a new one over an existing app clashes with what's shipped. File search (ignoring `node_modules`) for:
 - Styling/token files: `globals.css`, `tokens.css`, `theme.*`, `tailwind.config.*`.
 - Component directories: a `components/` tree or a `ui` directory.
 
-Found (brownfield): ask before proceeding, via your agent's interactive option picker (`AskUserQuestion` on Claude Code) or plain-text options with the same choices:
+Found (brownfield): ask before proceeding, via your agent's interactive option picker (`AskUserQuestion` on Claude Code) or plain text options with the same choices:
 - **question**: "There's no `design.md`, but this project already has UI. How should I get the design system?"
 - **header**: "Design system"
 - **options**:
@@ -101,7 +101,7 @@ If ambiguous, ask (as above):
   - Full page / screen: owns layout, integrates with router
 ```
 
-**Component rules** (apply throughout all phases): define the `interface Props` before any markup; named export from its own file; no router imports, no page-level data fetching inside the component; Storybook present (`*.stories.*`) → create a story file alongside; file naming matches the convention of existing components.
+**Component rules** (apply throughout all phases): define the `interface Props` before any markup; named export from its own file; no router imports, no page level data fetching inside the component; Storybook present (`*.stories.*`) → create a story file alongside; file naming matches the convention of existing components.
 
 **Screen rules** (apply throughout all phases): integrate with the detected router (Next.js App Router, Vite React Router, Nuxt, SvelteKit); include loading, error, and empty states at page level; wrap with the existing layout component if the project has one.
 
@@ -109,13 +109,13 @@ If ambiguous, ask (as above):
 
 ## Stack detection
 
-File-search near the project root (ignoring `node_modules`) for a framework config (`next.config.*`, `vite.config.*`, `nuxt.config.*`, `svelte.config.*`); read `package.json` dependencies for `next`, `vite`, `nuxt`, `svelte`, or `astro`. The framework affects routing integration, image primitives, and font loading.
+File search near the project root (ignoring `node_modules`) for a framework config (`next.config.*`, `vite.config.*`, `nuxt.config.*`, `svelte.config.*`); read `package.json` dependencies for `next`, `vite`, `nuxt`, `svelte`, or `astro`. The framework affects routing integration, image primitives, and font loading.
 
 ---
 
 ## Styling library, dark mode, and icon detection
 
-Using your file-search and read tools (ignoring `node_modules`):
+Using your file search and read tools (ignoring `node_modules`):
 - **Styling**: `package.json` dependencies for `@shadcn`, `@radix-ui`, `@mui`, `antd`, `@chakra-ui`, `@mantine`, `styled-components`, `@emotion`, `tailwindcss`; a `components/ui` directory (shadcn); any `*.module.css` / `*.module.scss` files.
 - **Dark mode strategy**: `next-themes` in `package.json`; `darkMode` setting in any `tailwind.config.*`.
 - **Icon library**: `package.json` dependencies for `lucide-react`, `@heroicons`, `phosphor-react`, `@phosphor-icons`, `react-icons`, `@tabler/icons`.
@@ -130,7 +130,7 @@ Using your file-search and read tools (ignoring `node_modules`):
 | `styled-components` / `@emotion` | Tagged template literals referencing CSS variables |
 | Nothing | Semantic HTML + external CSS referencing CSS custom properties |
 
-Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, vanilla-extract, Stylex, …): use it, follow its idiom. The rule is "use what's installed, the way it's meant to be used," never "only these."
+Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, `vanilla-extract`, Stylex, …): use it, follow its idiom. The rule is "use what's installed, the way it's meant to be used," never "only these."
 
 **Dark mode strategy:**
 
@@ -141,7 +141,7 @@ Common cases, not exhaustive. Another styling library installed (UnoCSS, Panda, 
 | `darkMode: 'media'` in tailwind config | `@media (prefers-color-scheme: dark)` |
 | Nothing detected | Both: `@media` query + `.dark {}` fallback |
 
-**Icon library:** use whatever is installed. Nothing installed: note it in the report; never emoji or placeholder SVGs. Icon size always references a spacing token, never hardcoded. Decorative icons: `aria-hidden="true"`. Standalone interactive icons: visually-hidden label or `aria-label` on the wrapping button.
+**Icon library:** use whatever is installed. Nothing installed: note it in the report; never emoji or placeholder SVGs. Icon size always references a spacing token, never hardcoded. Decorative icons: `aria-hidden="true"`. Standalone interactive icons: visually hidden label or `aria-label` on the wrapping button.
 
 ---
 

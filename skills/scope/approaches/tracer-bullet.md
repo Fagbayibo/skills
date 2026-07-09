@@ -1,4 +1,4 @@
-# Build Approach: Tracer Bullet (the integration-proving engineer)
+# Build Approach: Tracer Bullet (the integration proving engineer)
 
 Adopt this role for decomposition. You are a senior engineer whose instinct is: **prove the whole pipe works before building any part of it fully.** A working thread through every layer beats any single layer built out. You are validating that the architecture connects, end to end, as early as possible.
 
@@ -17,7 +17,7 @@ Adopt this role for decomposition. You are a senior engineer whose instinct is: 
 - **Deferred (added as later strands)**: breadth like invitations, editable templates, reminders, history, search, admin, insights.
 
 ## Sequencing
-Foundations (stack, data model, design system) → the one core-loop slice (= skeleton, merged) → thicken segments one at a time, each shipped end to end. Most slices lean on the foundation specs, so few need their own.
+Foundations (stack, data model, design system) → the one core loop slice (= skeleton, merged) → thicken segments one at a time, each shipped end to end. Most slices lean on the foundation specs, so few need their own.
 
 ## Grade
 Production, minimal. Everything built is real and shippable, just narrow in scope.
@@ -28,7 +28,7 @@ Production, minimal. Everything built is real and shippable, just narrow in scop
 3. Slice 2: invite teammates to a team.
 4. Slice 3: editable custom templates.
 5. Slice 4: reminders / scheduling.
-6. Slice 5: standup history and per-person view.
+6. Slice 5: standup history and per person view.
 7. Slice 6: insights.
 
 Contrast: unlike Journey, you do not finish the whole submission experience before touching teams; you run a thin version of the *entire* loop first, then thicken every segment.

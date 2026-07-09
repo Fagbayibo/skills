@@ -1,6 +1,6 @@
 # Test Writing Guide (read by the main thread at write time)
 
-The main thread reads this file in full at write time (Step 8), just before it writes the tests. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Reading it only at write time keeps this detail out of context through the earlier pre-flight and question steps.
+The main thread reads this file in full at write time (Step 8), just before it writes the tests. It holds the strategy, rules, tool specifics, iteration loop, and required report format. Reading it only at write time keeps this detail out of context through the earlier startup checks and question steps.
 
 ---
 
@@ -42,9 +42,9 @@ If `INSTALL_STATE = deferred`, still write complete, correct tests, they simply 
 |---|---|
 | **logic** | Pure unit tests. Call the function with real inputs, assert outputs. Cover edge and error cases exhaustively. Mock only true boundaries (network, fs, clock, randomness). |
 | **component** | Render the component, interact via user events, assert what the user sees (rendered text, roles, disabled/expanded state) and accessibility. Never assert internal state or class names. |
-| **page/flow** | If E2E_TOOL is set, write a real-browser flow test for the primary path through the page (load → act → assert outcome) plus one failure path. Also component-test any non-trivial pieces. If E2E_TOOL is `none`, cover the page at the component level. |
+| **page/flow** | If E2E_TOOL is set, write a real browser flow test for the primary path through the page (load → act → assert outcome) plus one failure path. Also component test any pieces that are not trivial. If E2E_TOOL is `none`, cover the page at the component level. |
 | **api/server** | Integration test: invoke the handler/route/action with representative requests. Assert status, response shape, and error responses (bad input, unauthorized, not found). Mock the DB/external services at the boundary only. |
-| **cli** | Invoke the command with arguments, assert stdout/exit code/side effects. Cover an invalid-args path. |
+| **cli** | Invoke the command with arguments, assert stdout/exit code/side effects. Cover an invalid args path. |
 
 ---
 
@@ -56,7 +56,7 @@ If `INSTALL_STATE = deferred`, still write complete, correct tests, they simply 
 4. **State transitions**: initial → action → expected new state (components, reducers, state machines)
 5. **Accessibility** (component/page scope): keyboard reachable, ARIA present, accessible names correct
 
-A good suite for a changed feature has more than the happy path. If you only wrote happy-path tests, you are not done.
+A good suite for a changed feature has more than the happy path. If you only wrote happy path tests, you are not done.
 
 ---
 
@@ -73,7 +73,7 @@ A good suite for a changed feature has more than the happy path. If you only wro
 
 ---
 
-## Tool-specific rules
+## Tool specific rules
 
 ### Vitest / Jest
 - `describe` groups by file or function under test
@@ -89,26 +89,26 @@ A good suite for a changed feature has more than the happy path. If you only wro
 - Assert what the user perceives: text, role, disabled/expanded, not `className` or React state
 
 ### Playwright (E2E)
-- Each test self-contained: setup in `test.beforeEach`, teardown in `test.afterEach`
+- Each test stands on its own: setup in `test.beforeEach`, teardown in `test.afterEach`
 - `page.getByRole()` / `page.getByLabel()` over CSS selectors
 - Wait on assertions, never arbitrary timeouts: `await expect(locator).toBeVisible()`
 - Test mobile (375px) and desktop (1280px) when the page is responsive
 - Forms: fill → submit → assert success or error state
 
 ### Cypress (E2E)
-- `cy.findByRole()` (with @testing-library/cypress) or `cy.get()` with data attributes
+- `cy.findByRole()` (with @testing library/cypress) or `cy.get()` with data attributes
 - Assert with `.should(...)`; let Cypress retry, no fixed `cy.wait(ms)`
 - Stub network with `cy.intercept()` at the boundary
 
 ### pytest
 - `@pytest.fixture` for shared setup; `@pytest.mark.parametrize` for input variations
 - `with pytest.raises(ValueError):` for error assertions
-- Mock with the `mocker` fixture (pytest-mock)
+- Mock with the `mocker` fixture (pytest mock)
 - Async: `@pytest.mark.asyncio`
 
 ### Go testing + testify
 - Name `Test<Func>_<scenario>`; `assert.Equal(t, want, got)`; `require.NoError(t, err)` for early exit
-- Table-driven tests with `t.Run(tt.name, ...)`; `t.Parallel()` when no shared mutable state
+- Table driven tests with `t.Run(tt.name, ...)`; `t.Parallel()` when no shared mutable state
 
 ### Rust (cargo test)
 - Unit tests in `#[cfg(test)] mod tests`; integration tests in `tests/`
@@ -124,7 +124,7 @@ A good suite for a changed feature has more than the happy path. If you only wro
 - Error messages link to their input via `aria-describedby`
 - Modal/dialog traps focus while open and returns focus to the trigger on close
 - `aria-expanded` toggles correctly on disclosure triggers
-- Icon-only buttons expose screen-reader text
+- Icon only buttons expose screen reader text
 - Do not test colour contrast here (visual, defer to design review)
 
 ---
@@ -133,7 +133,7 @@ A good suite for a changed feature has more than the happy path. If you only wro
 
 Follow TEST_DIR and FILE_PATTERN exactly, and match any existing test convention in the repo.
 
-- **Co-located**: `<source>.test.ts` beside `<source>.ts`
+- **Beside the source**: `<source>.test.ts` beside `<source>.ts`
 - **Dedicated dir**: mirror the source path under TEST_DIR (e.g. `src/auth/login.ts` → `tests/auth/login.test.ts`)
 - **E2E**: under the E2E tool's directory (`e2e/`, `cypress/e2e/`), named by the flow not the source file
 
@@ -144,11 +144,11 @@ Follow TEST_DIR and FILE_PATTERN exactly, and match any existing test convention
 Run from `PACKAGE_ROOT`. Keep your own context small, test output is verbose, so:
 
 - **First run**: use the terse reporter for your tool (`--reporter=dot` for Vitest/Jest, `--reporter=line` for Playwright, `-q` for pytest, `-q` for `go test`). You want pass/fail counts and the failing names, not full passing output.
-- **On each retry, re-run only the file(s) that failed**, never the whole suite. E.g. `<RUN_COMMAND> path/to/failing.test.ts`. This keeps each iteration's output small and fast.
+- **On each retry, run only the file(s) that failed**, never the whole suite. E.g. `<RUN_COMMAND> path/to/failing.test.ts`. This keeps each iteration's output small and fast.
 
 Then iterate:
 
-1. **A test fails because the test is wrong** (bad import, wrong selector, incorrect expectation, missing setup): fix the test and re-run just that file. Repeat until these are gone.
+1. **A test fails because the test is wrong** (bad import, wrong selector, incorrect expectation, missing setup): fix the test and run just that file again. Repeat until these are gone.
 2. **A test fails because the application code is genuinely wrong** (the code violates its own contract or the spec): this is the test doing its job. **Do not change the source to make it pass, and do not weaken the assertion.** Leave the test failing, capture it under `BUGS_FOUND`, and move on.
 3. Stop when the only remaining failures are real bugs in `BUGS_FOUND`, or everything is green.
 

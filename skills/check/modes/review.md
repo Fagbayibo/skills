@@ -1,22 +1,22 @@
-# /check review (fresh-model code review)
+# /check review (fresh model code review)
 
-The `review` mode of `/check`: a senior pre-merge code review on a different model than wrote the code. Follow it fully.
+The `review` mode of `/check`: a senior code review, before merge, on a different model than wrote the code. Follow it fully.
 
 ## What this skill does
 
-Your role: the senior reviewer with fresh eyes, the one who didn't write the code. Read the diff for what it actually does, not what it was meant to do; rank findings by the harm they'd cause in production. The one non-negotiable: the review runs on a different model than wrote the code, because a model reviewing its own output shares its own blind spots; a second model catches what the first missed. Reviews the change set as a senior engineer reviews a teammate's pull request, and writes severity-ranked findings.
+Your role: the senior reviewer with fresh eyes, the one who didn't write the code. Read the diff for what it actually does, not what it was meant to do; rank findings by the harm they'd cause in production. The one rule that never bends: the review runs on a different model than wrote the code, because a model reviewing its own output shares its own blind spots; a second model catches what the first missed. Reviews the change set as a senior engineer reviews a teammate's pull request, and writes severity ranked findings.
 
 - Different Claude model, automatically: the review runs in a subagent on the contrasting Claude model. No API keys, no external setup.
-- Read-only on code: produces findings, never edits the code under review.
+- Read only on code: produces findings, never edits the code under review.
 - Want a different provider? For the most independent review, switch your active model (`/model`, or your other AI tool) and run the review there; a recommendation, not machinery. The skill never sends your code anywhere itself.
 
 Owns review findings (`docs/reviews/`). Does not write code, tests, specs, or the `AGENTS.md`/`CLAUDE.md` context files.
 
 ## Asks vs acts
 
-Acts, with one deliberate exception: it confirms which model wrote the code before reviewing (a single MCQ, detected value pre-selected), because the model can't reliably detect itself and a wrong guess silently breaks the cross-model guarantee (see Step 1). Everything else (scoping, reviewing, writing findings) it does without asking. It states which model is reviewing so you can still redirect, and pauses if there is nothing to review (clean tree, no branch diff). The confirm is skipped when you pass an explicit `with <model>` override and detection was unambiguous.
+Acts, with one deliberate exception: it confirms which model wrote the code before reviewing (a single MCQ, with the detected value selected by default), because the model can't reliably detect itself and a wrong guess silently breaks the cross model guarantee (see Step 1). Everything else (scoping, reviewing, writing findings) it does without asking. It states which model is reviewing so you can still redirect, and pauses if there is nothing to review (clean tree, no branch diff). The confirm is skipped when you pass an explicit `with <model>` override and detection was unambiguous.
 
-Steering: `/check review` (default contrasting model), `/check review with opus` (force a reviewer), or `/check review uncommitted` (scope to working-tree changes only).
+Steering: `/check review` (default contrasting model), `/check review with opus` (force a reviewer), or `/check review uncommitted` (scope to working tree changes only).
 
 ## Artifact ownership
 

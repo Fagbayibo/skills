@@ -1,30 +1,30 @@
 ---
 name: debug
 allowed-tools: Bash, Read, Grep, Glob, Write, Edit, Agent
-description: "Run /debug to find and fix the root cause of a bug (something failing, broken, throwing, or behaving wrong) when a test fails for a non-obvious reason, /check verify finds a failure, or behavior is unexpected. Runs a reproduce, localize, hypothesize, test, fix, verify loop, makes the minimal fix, and hands a regression test to /test. No features, no extra refactors."
+description: "Run /debug to find and fix the root cause of a bug (something failing, broken, throwing, or behaving wrong) when a test fails for a reason that is not obvious, /check verify finds a failure, or behavior is unexpected. Runs a reproduce, localize, hypothesize, test, fix, verify loop, makes the minimal fix, and hands a regression test to /test. No features, no extra refactors."
 ---
 
-## Output style (plain words, no dashes)
+## Output style (plain words, no dashes, no hyphens)
 
-<!-- OUTPUT-STYLE:START (identical in every skill; edit all or none) -->
-Write everything this skill produces, the files it writes and every message it shows the engineer, in plain simple language. Keep the technical terms that carry real meaning, and explain each one in plain words. Never use a dash as punctuation: no em dash, no en dash, and no hyphen standing in for a comma or a colon. Use short sentences, commas, or parentheses instead. Hyphens inside a compound word (build-spec, read-only) are fine. Clear beats clever.
+<!-- OUTPUT-STYLE:START -->
+Write everything this skill produces, files and messages alike, in plain simple language. Keep technical terms that carry real meaning; explain each in plain words. Never use a dash or a hyphen as punctuation: no em dash, no en dash, and no hyphenated compounds. Write `read only`, not `read-only`. Say it in simple words, or reword the sentence. Code, file paths, command flags, and values other skills match on keep their hyphens. Use short sentences, commas, or parentheses. Clear beats clever.
 <!-- OUTPUT-STYLE:END -->
 
 ## What this skill does
 
 **Your role:** the investigator who trusts evidence over intuition. You treat a bug like a case to be proven, not a symptom to be silenced. You reproduce it on demand, narrow it to the smallest surface that still fails, and change exactly one thing at a time so every result *means* something. You resist the pull to patch what you see (the null, the crash) before you understand *why* it's there, because a fix you can't explain is a bug you haven't caught. You stop when the cause is proven and the fix is the smallest one that addresses it, no opportunistic refactors riding along.
 
-A structured root-cause investigation, not a guess-and-check. Bugs are found by a **loop**: reproduce → localize → hypothesize → test the hypothesis → fix the root cause → verify. This skill runs that loop with discipline (**one hypothesis at a time**, each confirmed or rejected by evidence before moving on) until the actual cause is proven, then applies the smallest fix that addresses it.
+A structured root cause investigation, not a guess and check. Bugs are found by a **loop**: reproduce → localize → hypothesize → test the hypothesis → fix the root cause → verify. This skill runs that loop with discipline (**one hypothesis at a time**, each confirmed or rejected by evidence before moving on) until the actual cause is proven, then applies the smallest fix that addresses it.
 
-> This is an *internal investigation loop within a single run*, not the `/loop` skill (which re-runs a command on a time interval). Reach for `/loop` only when you need to watch something over time, e.g. poll a flaky test across many runs.
+> This is an *internal investigation loop within a single run*, not the `/loop` skill (which runs a command again on a time interval). Reach for `/loop` only when you need to watch something over time, e.g. poll a flaky test across many runs.
 
 ## Asks vs acts
 
-**Acts.** It reproduces, investigates, and fixes. It **asks only** when it cannot reproduce the bug from what it's given, then it asks for exact steps, inputs, environment, and the observed-vs-expected behavior. It does not ask permission to investigate.
+**Acts.** It reproduces, investigates, and fixes. It **asks only** when it cannot reproduce the bug from what it's given, then it asks for exact steps, inputs, environment, and the observed vs expected behavior. It does not ask permission to investigate.
 
 ## Artifact ownership
 
-Writes the **minimal code fix** for the root cause. Recommends `/test` for the regression test (or writes a failing-then-passing test inline if that's the fastest proof). Does **not** add features, refactor unrelated code, or rewrite the spec. If the bug reveals a flawed decision (not just a coding mistake), it says so and points to `/architect` rather than papering over it.
+Writes the **minimal code fix** for the root cause. Recommends `/test` for the regression test (or writes a failing then passing test inline if that's the fastest proof). Does **not** add features, refactor unrelated code, or rewrite the spec. If the bug reveals a flawed decision (not just a coding mistake), it says so and points to `/architect` rather than papering over it.
 
 ---
 
@@ -50,17 +50,17 @@ Get a **deterministic reproduction** (a failing test, a command, a request) that
 ### Step 2: Localize
 
 Narrow the failure to the smallest possible surface before theorizing:
-- **Bisect the code path**: binary-search where good input becomes bad output (logging/print at midpoints, breakpoints, or commenting out).
+- **Bisect the code path**: binary search where good input becomes bad output (logging/print at midpoints, breakpoints, or commenting out).
 - **Bisect history**: if it's a regression, `git bisect` (or `git log -p` on the suspect files) to find the introducing change.
 - **Read the actual values**: instrument inputs/outputs at the boundary; don't assume what they are.
 
 ### Step 3: Hypothesize (one at a time)
 
-State a single, specific, falsifiable hypothesis for the root cause, e.g. "the date is parsed as local time, so the cutoff is off by the timezone offset." Root cause, not symptom: "the value is null here" is a symptom; *why* it's null is the cause. Resist shotgun-changing several things at once.
+State a single, specific, falsifiable hypothesis for the root cause, e.g. "the date is parsed as local time, so the cutoff is off by the timezone offset." Root cause, not symptom: "the value is null here" is a symptom; *why* it's null is the cause. Resist shotgun changing several things at once.
 
 ### Step 4: Test the hypothesis
 
-Design the smallest experiment that confirms or refutes it (a targeted log, an assertion, a one-line change, a unit test). Run it.
+Design the smallest experiment that confirms or refutes it (a targeted log, an assertion, a one line change, a unit test). Run it.
 - **Refuted** → discard it, return to Step 2/3 with what you learned. Do not keep a change that didn't help.
 - **Confirmed** → you've found the root cause. Proceed.
 
@@ -72,14 +72,14 @@ Make the **minimal, targeted** change that addresses the proven cause. Don't fix
 
 ### Step 6: Verify and protect
 
-- Re-run the Step 1 reproduction, confirm it now passes.
+- Run the Step 1 reproduction again, confirm it now passes.
 - Run the surrounding test suite, confirm no regression.
 - **Add a regression test** that fails without the fix and passes with it, so this bug can't silently return; write it inline, or hand the spec to `/test`.
 - **Check for siblings**: the same root cause often hides in other places (same pattern, same bad assumption). Grep for them and note or fix them.
 
 ### Optional: run it in a subagent
 
-For a non-trivial hunt, spawn an investigation subagent so the iterative tool use doesn't fill the main context:
+For a hunt that is not trivial, spawn an investigation subagent so the iterative tool use doesn't fill the main context:
 - `model`: set explicitly to a strong model, do not inherit the session model (Claude Code: `sonnet`)
 - `description: "Debug: <symptom>"`
 - Tools: `Read`, `Bash`, `Grep`, `Glob`, `Edit`, `Write`

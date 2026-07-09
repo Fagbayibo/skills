@@ -1,6 +1,6 @@
 # UI Accessibility and Token Checklist
 
-Loaded by /develop (UI track) during Phase 5. Work through each section. Items marked **required** must pass before the skill is complete. Best-effort items should be completed where scope allows.
+Loaded by /develop (UI track) during Phase 5. Work through each section. Items marked **required** must pass before the skill is complete. Best effort items should be completed where scope allows.
 
 ---
 
@@ -33,8 +33,8 @@ Loaded by /develop (UI track) during Phase 5. Work through each section. Items m
 
 - [ ] Every `<input>`, `<select>`, `<textarea>` has a `<label>` associated via `for`/`id` or wrapping
 - [ ] Placeholder text is not the only label, placeholder disappears on input
-- [ ] Icon-only buttons have `aria-label` describing the action (e.g. `aria-label="Close"`)
-- [ ] Non-decorative images have `alt` text describing content (not filename, not "image of")
+- [ ] Icon only buttons have `aria-label` describing the action (e.g. `aria-label="Close"`)
+- [ ] Images that are not decorative have `alt` text describing content (not filename, not "image of")
 - [ ] Decorative images have `alt=""` and no `aria-label`
 - [ ] Linked images: `alt` describes the destination, not the image appearance
 
@@ -75,17 +75,17 @@ Loaded by /develop (UI track) during Phase 5. Work through each section. Items m
 - [ ] No rgb / hsl colour functions with raw values
 - [ ] No raw pixel values for spacing, padding, margin, or gap (exception: `1px`, `0`)
 - [ ] No raw pixel values for font sizes or line heights
-- [ ] No raw pixel or rem values for border-radius or box-shadow
+- [ ] No raw pixel or rem values for `border-radius` or `box-shadow`
 - [ ] All values reference the design system (Tailwind classes, CSS custom properties, design tokens)
 - [ ] Missing tokens are documented as `// TODO: missing token: <what's needed>` not invented inline
 
-## Responsive (best-effort verification)
+## Responsive (best effort verification)
 
 - [ ] No horizontal scroll at 375px viewport width
 - [ ] Touch targets ≥ 44×44px at mobile viewport
 - [ ] Body copy ≥ 16px (1rem) at mobile viewport
 - [ ] Images do not overflow their container
-- [ ] Table or data-heavy content has a mobile strategy (horizontal scroll with overflow, card layout, etc.)
+- [ ] Table or data heavy content has a mobile strategy (horizontal scroll with overflow, card layout, etc.)
 
 ## Loading and error states (required)
 

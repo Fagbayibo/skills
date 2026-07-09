@@ -73,7 +73,7 @@ Each skill's instructions live in its `SKILL.md`, which is what every client rea
 | App code | your source tree | develop |
 | Human docs | PR body, CHANGELOG.md, `docs/releases/`, `docs/postmortems/` | document |
 
-If `docs/` is a published docs site, these move to `.workflow/` so they do not ship with your site. Because state lives in files, each skill suggests `/clear` at handoffs, so a fresh session re-reads from disk and long chats do not pile up cost.
+If `docs/` is a published docs site, these move to `.workflow/` so they do not ship with your site. Because state lives in files, each skill suggests `/clear` at handoffs, so a fresh session reads from disk again and long chats do not pile up cost.
 
 ## Skill reference
 

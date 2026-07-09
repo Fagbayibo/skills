@@ -27,6 +27,9 @@
 //  9. A marked contract block duplicated across skills stays byte-identical.
 // 10. No em or en dash in any instruction file or `description` (the skills teach
 //     the no-dash rule, so their own prose follows it). Templates are exempt.
+// 11. No hyphen in prose. Compounds become simple words (read only, not read-only).
+//     Code, paths, flags, ALL CAPS keywords, and the parsed artifact literals
+//     (in-progress, gap-fill, whole-repo, Follow-up) keep their hyphens.
 //
 // Budgets (rule 5) are also reported as utilization on every run, and anything
 // above WARN_AT is called out while it is still passing. See BUDGET POLICY below.
@@ -159,6 +162,28 @@ function frontmatter(text) {
   return m ? m[1] : '';
 }
 
+// Rule 11 helpers. Prose carries no hyphens; code does. Mask every exempt region
+// with spaces (never delete, so byte offsets still map to line numbers), then any
+// hyphenated word left standing is prose and must be rewritten into simple words.
+const MASK = (s) => ' '.repeat(s.length);
+function proseOnly(text) {
+  return text
+    .replace(/```[\s\S]*?```/g, MASK)      // fenced code blocks
+    .replace(/`[^`\n]+`/g, MASK)           // inline code spans
+    .replace(/<!--[\s\S]*?-->/g, MASK)     // html comments (contract markers)
+    .replace(/\]\([^)]*\)/g, MASK)         // markdown link targets
+    .replace(/https?:\/\/\S+/g, MASK)      // bare urls
+    // Frontmatter keys are defined by the Agent Skills spec (`allowed-tools`), so
+    // only the description value is prose. Mask the keys, keep the description.
+    .replace(/^---\n[\s\S]*?\n---/m, (fm) =>
+      fm.split('\n').map((l) => (/^description:/.test(l) ? l : MASK(l))).join('\n')
+    );
+}
+// Literal tokens the skills WRITE INTO and MATCH ON in artifacts. Renaming these
+// is a data migration, not a copy edit, so they keep their hyphens everywhere.
+const PARSED_LITERALS = new Set(['in-progress', 'gap-fill', 'whole-repo', 'Follow-up', 'follow-up']);
+const isExemptTerm = (w) => /^[A-Z0-9-]+$/.test(w) || PARSED_LITERALS.has(w);
+
 function check(path) {
   const rel = path.slice(SKILLS_DIR.length);
   const text = readFileSync(path, 'utf8');
@@ -220,6 +245,21 @@ function check(path) {
   }
 
   if (isTemplate) return; // reference data — skip prose/shell rules
+
+  // Rule 11 — no hyphen in prose. Code, paths, flags, ALL CAPS keywords, and the
+  // parsed artifact literals keep theirs; ordinary compounds become simple words.
+  {
+    const masked = proseOnly(text);
+    const seen = new Set();
+    for (const m of masked.matchAll(/[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+/g)) {
+      if (isExemptTerm(m[0])) continue;
+      const line = masked.slice(0, m.index).split('\n').length;
+      const key = `${line}:${m[0]}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      violations.push(`${rel}:${line}: hyphen in prose \`${m[0]}\` — write it as simple words (code, paths, and flags keep theirs)`);
+    }
+  }
 
   const lines = text.split('\n');
   lines.forEach((line, i) => {
@@ -324,11 +364,16 @@ for (const entry of readdirSync(SKILLS_DIR)) {
   }
 }
 
-if (violations.length) {
-  console.error('Portability check FAILED:\n' + violations.map(v => '  - ' + v).join('\n'));
-  process.exit(1);
+const failed = violations.length > 0;
+if (failed) {
+  console.error(`Portability check FAILED (${violations.length}):\n` + violations.map(v => '  - ' + v).join('\n'));
+  // Set the code and let node exit on its own once stdio has drained.
+  // `process.exit()` tears the process down before a large buffered write to a
+  // pipe has flushed, which silently truncated this list under `| grep` and in CI.
+  process.exitCode = 1;
 }
 
+if (!failed) {
 // Word-count report — the heaviest instruction files (templates excluded; they
 // are reference data), so a creeping size regression is visible before it breaks
 // a budget. Loading cost tracks words as much as bytes.
@@ -360,3 +405,4 @@ if (warnings.length) {
 }
 
 console.log('\nPortability check passed — all skills follow the cross-tool conventions.');
+}

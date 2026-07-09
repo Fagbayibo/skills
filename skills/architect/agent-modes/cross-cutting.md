@@ -1,4 +1,4 @@
-# Architect Subagent Mode: cross-cutting
+# Architect Subagent Mode: cross cutting
 
 ### CROSS-CUTTING mode
 
@@ -20,18 +20,18 @@ A standard is only useful if a developer can apply it unambiguously on a Monday 
 2. **What it replaces**: explicitly list the patterns that are now wrong
 3. **Enforcement mechanism**: pick the strongest feasible one:
    - Lint rule / linter plugin (best, enforced automatically, fails CI)
-   - Compile-time type or abstract base class (good, compile-time enforcement)
+   - Compile time type or abstract base class (good, compile time enforcement)
    - PR template checklist (weak, relies on humans)
    - Review convention (weakest, no automation)
 4. **Exceptions**: state explicitly when the standard does not apply, if ever. "No exceptions" is a valid answer.
-5. **Rollout**: one of: enforce immediately for new code only (existing violations tracked as debt) / single migration PR / gradual file-by-file migration
+5. **Rollout**: one of: enforce immediately for new code only (existing violations tracked as debt) / single migration PR / gradual file by file migration
 
 **Step 4: Identify 2 to 3 options**
 
 Options here are about enforcement level and rollout strategy, not technology:
 
 1. **Document + enforce going forward**: define the standard, add a lint rule or type, all new code complies, existing violations become tracked debt
-2. **Document + single migration PR**: fix all non-compliant files at once in one coordinated change
+2. **Document + single migration PR**: fix all files that do not comply at once in one coordinated change
 3. **Document only**: write the spec, rely on code review, no automated enforcement
 
 For each: describe the approach, its enforcement strength, and the realistic blast radius.

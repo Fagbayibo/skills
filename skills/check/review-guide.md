@@ -1,6 +1,6 @@
 # Review Guide (read by the review subagent)
 
-The review subagent reads this in full before reviewing. It holds the inspection rubric, severity scale, test-adequacy bar, and the exact findings format. Keeping it here (not in the spawn prompt) means this detail never passes through the main model's context.
+The review subagent reads this in full before reviewing. It holds the inspection rubric, severity scale, test adequacy bar, and the exact findings format. Keeping it here (not in the spawn prompt) means this detail never passes through the main model's context.
 
 ---
 
@@ -14,7 +14,7 @@ You do not modify the code. You report.
 
 ## What to inspect (in priority order)
 
-1. **Correctness**: Does it do what it claims? Logic errors, off-by-one, wrong conditionals, unhandled `null`/`undefined`, incorrect async/await, race conditions, broken state transitions, wrong return shapes. Trace the non-obvious paths, not just the happy path.
+1. **Correctness**: Does it do what it claims? Logic errors, off by one, wrong conditionals, unhandled `null`/`undefined`, incorrect async/await, race conditions, broken state transitions, wrong return shapes. Trace the paths that are not obvious, not just the happy path.
 2. **Security**: Unvalidated input, injection (SQL/command/XSS), missing authentication/authorization checks, secrets in code or logs, sensitive data in responses, unsafe deserialization, missing rate limits on expensive endpoints, IDOR (object access without ownership check).
 3. **Error handling & resilience**: Swallowed errors, empty `catch`, errors that leak internals to users, missing timeouts/retries on I/O, unhandled promise rejections, resource leaks (unclosed handles/connections).
 4. **Performance & scale**: N+1 queries, unbounded loops or memory, work inside hot loops that belongs outside, missing pagination, synchronous work blocking the event loop, redundant network/DB calls, missing indexes implied by new queries.
@@ -30,7 +30,7 @@ You do not modify the code. You report.
 The **test signal** has three states, judge accordingly:
 
 `TESTS = configured` (a runner is set up):
-- New or changed logic that isn't covered by a test is at least a **Minor**, and a **Major** if it's branching logic, error handling, or security-relevant.
+- New or changed logic that isn't covered by a test is at least a **Minor**, and a **Major** if it's branching logic, error handling, or security relevant.
 - Look for tests that assert nothing meaningful, only cover the happy path, or test mocks instead of behavior, call these out.
 - A change to existing behavior with no corresponding test update is a finding.
 
@@ -50,7 +50,7 @@ Do not write tests, that's /test's job. Flag a gap only when it's `none-yet`.
 |---|---|---|
 | 🔴 **Blocker** | Bug, security hole, data loss, or broken contract. Will cause incorrect behavior or harm in production. | Must fix before merge |
 | 🟠 **Major** | Significant correctness, performance, or maintainability problem that will bite soon. | Should fix before merge |
-| 🟡 **Minor** | Real but non-urgent: missing edge case, small inefficiency, unclear code. | Fix soon; not blocking |
+| 🟡 **Minor** | Real but not urgent: missing edge case, small inefficiency, unclear code. | Fix soon; not blocking |
 | ⚪ **Nit** | Style, naming, or preference. Optional. | Author's discretion |
 
 Be honest with severity. Inflating nits to blockers erodes trust; burying a real bug as a nit is worse. If you're unsure whether something is a bug, say so and explain the risk rather than guessing a severity.
@@ -59,7 +59,7 @@ Be honest with severity. Inflating nits to blockers erodes trust; burying a real
 
 ## Verdict
 
-Choose one, based on the highest-severity findings:
+Choose one, based on the highest severity findings:
 
 - **Approve**: no blockers or majors; nits only or nothing.
 - **Approve with nits**: no blockers/majors; some minors/nits the author can take or leave.
