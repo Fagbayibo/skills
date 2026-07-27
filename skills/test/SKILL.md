@@ -186,34 +186,17 @@ If the write failed or produced no report: say so and do it again; never report 
 
 Update the scope: if this feature is on the scope (`docs/scope/`) and the suite passes, tick its `Test it` box. If `Design`, `Build` (+ its milestones), `Verify`, and `Test` are now all ticked, set the feature's status to `done` (in the At a glance table and beside the heading), unless its governing spec is still `Assumed` (a decision built on an unratified assumption): then leave it `in-progress` and point to `/architect <feature>` to ratify first. If tests fail or coverage is partial, leave `Test it` unticked and the status `in-progress`. **Confirm the update as a closing gate** (don't skip it): report exactly what you ticked in each file, e.g. "Scope: ticked `Test it`, status → `done`. Spec: status → `Accepted`." No matching scope row → say so, don't finish silently. On `done`, advise `/clear` before the next feature: the scope and spec hold everything, a fresh session keeps the next build cheap. **Git:** if the nearest `AGENTS.md` `## Git` says `integration: on` and `commit` is not `manual`, offer to commit the suite with a one line subject (`test(<scope>): …`) plus the `Co-Authored-By` trailer; never push. (`/test` is the closer for the `Medium` and `Full` workflow tiers; `Vibe` closes at `/develop` and `Lean` at `/check verify`, so on those tiers this feature would already be `done` or not use `/test`.)
 
-Parse from the report: `TESTS_WRITTEN`, `NOT_COVERED`, plus `RUN_RESULT` and `BUGS_FOUND` when `RUN_AFTER = yes`, or `MANUAL_INSTRUCTIONS` when `RUN_AFTER = no`. Relay this template: keep lines marked `← yes` only when `RUN_AFTER = yes`, `← no` only when `RUN_AFTER = no` (a marked heading carries its list lines), unmarked lines always; strip the markers.
+Lead with the result; the per file list and AC traceability are in the test files (per `docs/conventions.md`). Template:
 
 ```
-## /test complete (suite run)      ← yes; when no, use: ## /test complete (not run)
+## /test <feature> Â· <all N passed | Y failed | not run>
 
-**Scope**: <N> changed files (uncommitted)
-**Tool**: <unit tool> [+ E2E tool] [+ addons]
-**Preferences**: loaded | saved to test-preferences.json
+**Wrote <N> tests across <M> files (happy path / edges / errors / a11y). <X passed, Y failed via `<RUN_COMMAND>` | not run>.**
+Next: <all pass → /check review (Full) or /sync · Y failed → fix them, or /debug <feature> if the code is wrong · not run → `<RUN_COMMAND>`>
+Heads up: <bugs the tests caught Â· file:line + the failing expectation> · <uncovered AC-N or area, why>   (omit the whole line if none)
+```
 
-**Tests written**:
-- `<file path>`, <N tests> covering <happy path / edges / errors / a11y> [→ AC-1, AC-3]
-
-**Run result**: <X passed, Y failed> via `<RUN_COMMAND>`   ← yes
-
-**Traceability** (only when TRACE_TO_CONTRACT=yes, spec NNNN):
-- AC-1 ✅ locked in, `<test file · test name>`
-- AC-3 ✅ locked in, `<test file · test name>`
-
-**Bugs caught** (tests failing because the code is wrong, not the test):   ← yes
-- <file:line, what's broken and the failing expectation>   ← only if BUGS_FOUND is non-empty
-
-**How to run them**:   ← no
-1. <setup step, e.g. install if INSTALL=deferred>
-2. Run: `<RUN_COMMAND>`
-3. Watch a single file: `<focused command>`
-
-**What you should see**: <expected pass output, and which tests prove which behaviour>   ← no
-**If something fails**: <how to read the failure, is it a test gap or a real bug>   ← no
+Only when `RUN_AFTER = no`, append the run steps: `<setup if INSTALL=deferred>` then `<RUN_COMMAND>` (watch one file with `<focused command>`). The framework choice is in `test-preferences.json`; the per test detail and AC traceability live in the test files, so don't reprint them.
 
 **Not covered** (consider adding):
 - <gap and why>

@@ -10,6 +10,17 @@ A skill file loads in full, on its path, every time it runs, so every line is a 
 - **Steps are instructions, not narrative.** No connecting paragraphs. Each step is one to three lines and ends in a checkable condition (`if X → do Y`, or a `[ ]` gate), not a description of what comes next.
 - **State a rule once.** If the same rule shows up twice, cut one and point to the other. One exception: each `SKILL.md` must stand alone for distribution, so a shared block (the output style) is intentionally repeated across skills, not factored out.
 
+## Completion summaries: lead with the essentials
+
+The report a skill prints at the end is read by a human scanning fast, so it leads with what matters and points to the files for the rest (the durable record already lives in the scope, the spec, `verify.md`, `docs/reviews/`, the commit/PR). One shape, every skill:
+
+- **Headline** (one line): what happened and the single outcome that matters.
+- **Next**: the one command to run, or the pending decision.
+- **Heads up**: blockers, or anything the engineer must review or decide, **only when there is one** (never a manufactured section).
+- A **pointer**, not a restatement: name the file that holds the detail.
+
+Cut the field dump and the checklist of yeses (`Semantic HTML: correct`, `Keyboard: navigable`) Â· that is confirmation noise or already in a file, not something to reprint or relocate. Keep only the fields that are actionable for that skill (a PASS/FAIL verdict and its gaps, findings to fix, items invented for the engineer to review).
+
 ## When to add a file
 
 Only when a piece of content is both **rarely needed and long** (a big migration rollout, an unusual edge case). Move it to a file the skill reads only when that case arises, so it stays off the common path. Do not split content that is short or common, inline it. When you do split, make the trigger explicit so the agent never misses it ("if X, read `Y` before continuing").

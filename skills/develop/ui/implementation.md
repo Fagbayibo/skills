@@ -247,35 +247,14 @@ The build is not done until you have checked it. Ambition in prose is not enough
 
 ## Report
 
-```
-## /develop complete (UI)
+Lead with the headline, then Next, then a Heads up only if there is one (per `docs/conventions.md`). Everything else is in the files. Template:
 
-**Build type**: Component | Screen
-**Stack**: Next.js | Vite | Nuxt | SvelteKit | Plain HTML
-**Styling**: <tailwind | shadcn | css-modules | styled-components | plain css>
-**Dark mode strategy**: .dark class | @media | both
-**Icon library**: <library name> | none (install needed)
-**Path**: Design.md (existing) | A (image) | A (multi: <what each image represented>) | B (derived: <mood> | url: <url> | custom: "<style>")
-**design.md**: pre-existing | created | fetched from <url>
-**Token conflicts**: none | <list, verify manually before next run>
-**Token file**: created | updated | unchanged (<path>)
-**Fonts**: <family> via <method> | <proprietary> to <substitute> | system
-**Assets**: project files | placeholders (<service>, swap at <where>) | none needed
-**Surface composed**: bare component | full product surface (brand, copy, layout, footer) | per spec composition
-**Self-audit**: disqualifiers checked (none found | fixed: <list>) · rendered and looked (yes: <what you saw/fixed> | no browser tool)
-**Invented (for review, swap when you have the real thing)**: <brand name/wordmark · tagline/headline · body copy · placeholder assets>, or "none (all provided)"
-**Built**: <name> (<file paths>)
-**Token adherence**: all sourced from design.md | <deviations>
-**Accessibility**: WCAG AA passed | <items deferred>
-**Semantic HTML**: correct elements used | <issues noted>
-**Keyboard**: fully navigable | <gaps>
-**Screen reader**: announced correctly | <gaps>
-**What /test should verify**:
-- <observable behaviour>
-- Keyboard-only navigation through all interactive elements
-- VoiceOver / NVDA announces interactive elements and live regions correctly
-- Dark mode rendering
-- Reduced-motion mode (all transitions suppressed)
 ```
+**Built <name> (<file paths>) Â· <full product surface | component>, WCAG AA, self check passed.**
+Next: /check verify <feature>
+Heads up: invented for you to review, swap for the real thing Â· <brand/wordmark · tagline · copy · placeholder assets>.   (omit the whole line if nothing was invented)
+```
+
+Say it plainly if the self check found and fixed a defect, or if a token/asset issue needs a manual look; otherwise do not list the passing checks (semantic HTML, keyboard, screen reader, tokens are the guide's bar, not a report field). The design source, stack, fonts, and token file are recorded in `design.md` and the code, not here. `/test` reads the acceptance criteria and `verify.md`, so it needs no "what to verify" list in this summary.
 
 ---

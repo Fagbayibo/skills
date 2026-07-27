@@ -75,25 +75,12 @@ Not a final checklist, built into every phase, enforced here:
 
 ## Report
 
-```
-## /develop complete (logical)
+Lead with the headline, then Next, then a Heads up only if there is one (per `docs/conventions.md`). The built files, data model, endpoints, and config are in the code and the spec; don't reprint them. Template:
 
-**Feature**: <name>
-**Spec**: <path (the decision implemented)>
-**Built**: <files: data layer, services, endpoints>
-**Removed (superseded)**: <old files/functions deleted after refactor/replacement, verified unreferenced> | none
-**Data model**: <tables/entities created or changed>
-**API surface**: <endpoints/actions added>
-**Integrations**: <provider(s) wired> | none
-**New config**: `ENV_VAR` (purpose) | none
-**Invariants enforced**: <where: DB constraint or app check>
-**Migration applied**: <ran + schema confirmed live: tables/relationships present> | n/a (no data-layer change)
-**Open questions left for you**: <ambiguous business rules the spec didn't settle> | none
-**Verify steps (from acceptance criteria)**: emit these, then offer to save to `verify.md` (`SKILL.md` Step 4):
-- `<command / action>` → `<expected>` → AC-N
-**What /test should verify**:
-- Happy path: <main flow end to end>
-- Failure case: <timeout / concurrent write / invalid transition>
-- Auth/permission: <who is denied and what they receive>
-- Idempotency: <retry of a mutating call is safe>
 ```
+**Built <feature>: <one line, e.g. "votes API + one-vote invariant, migration applied and schema live">.**
+Next: /check verify <feature>
+Heads up: <new env var `X` to set · a business rule the spec left open · old code removed>   (omit if none)
+```
+
+Mention only what needs the engineer: a new `ENV_VAR` to set, an open question the spec did not settle, or a migration that did not apply. The verify steps still get emitted and offered for `verify.md` per `SKILL.md` Step 4 (that panel is separate from this summary); `/test` reads the acceptance criteria itself, so no "what to verify" list here.

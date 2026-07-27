@@ -87,16 +87,14 @@ For a hunt that is not trivial, spawn an investigation subagent so the iterative
 
 ### Report
 
-```
-## /debug complete
+Lead with the root cause and the fix; the reproduction and evidence are the trail, not the headline (per `docs/conventions.md`). Template:
 
-**Symptom**: <observed vs expected>
-**Reproduction**: <how it was triggered>
-**Root cause**: <the proven cause, with the evidence that confirmed it>
-**Fix**: <the minimal change (files touched)>
-**Regression test**: <added inline | spec handed to /test>
-**Siblings**: <same cause found/fixed elsewhere | none found>
-**Deeper issue**: <if the bug reveals a design flaw, run /architect | none>
+```
+## /debug complete Â· <the bug, one line>
+
+**Root cause: <the proven cause>. Fixed by <the minimal change, files touched>.**
+Next: /test <feature>   (lock in the regression test, added inline or handed over)
+Heads up: <same cause also at <where>, fixed too · or a design flaw → /architect <what>>   (omit if none)
 ```
 
-If the cause turns out to be a flawed decision rather than a coding mistake, lead with that, the right fix may be a spec update, not a code patch.
+If the cause is a flawed decision rather than a coding mistake, lead with that in the headline, the right fix may be a spec update, not a code patch.

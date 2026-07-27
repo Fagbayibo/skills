@@ -101,19 +101,17 @@ The inputs to apply:
 
 ### 4. Relay the result
 
+Lead with the type and where it landed; for `pr` the body IS the deliverable, so show it in full (per `docs/conventions.md`). Template:
+
 ```
-## /document complete
+## /document <pr | changelog | release-note | postmortem> Â· <PR body below | CHANGELOG.md | docs/releases/<v>.md | docs/postmortems/<file> | PR #N updated>
 
-**Type**: <pr | changelog | release-note | postmortem>
-**Written to**: <PR body shown below | CHANGELOG.md | docs/releases/<v>.md | docs/postmortems/<file>>
-
-<for pr: the title + body, ready to paste, or "PR #N updated" if gh was used>
-<for the others: a 2 to 3 line preview + the file path>
+<for pr: the title + full body, ready to paste Â· always shown in chat so it works without gh>
+<for the others: a 2 to 3 line preview>
+Scope: ticked `Document it`   (or "no scope row matched"; omit if not on the scope)
 ```
 
-For `pr`, always show the full text in chat (so it's usable even without `gh`). For the file types, show a short preview and the path. This skill does not commit, push, or merge. It produces the prose.
-
-**Tick the scope box (closing gate).** If the documented feature has a row in `docs/scope/`, tick its `Document it` box and confirm it in the report ("Scope: ticked `Document it`"). No matching row → say so. This is the only scope edit `/document` makes; it writes no code or specs.
+This skill does not commit, push, or merge; it produces the prose (and ticks the `Document it` box per the closing gate above, the only scope edit it makes).
 
 ---
 

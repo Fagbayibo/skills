@@ -120,26 +120,16 @@ Resolve this skill's folder to an absolute path (you, the main agent, already re
 If the subagent errored or wrote no findings file, report the failure and offer to re-run; don't relay an empty or fabricated review. Otherwise it writes the findings file and returns a compact summary. Relay:
 
 ```
-## /check review complete
+## /check review <feature> Â· <Approve | Approve with nits | Changes requested | Blocked>
 
-**Reviewed by**: <reviewer-model> (you're on <author-model>)
-**Scope**: <N> files, <branch vs base | uncommitted>
-**Findings file**: `docs/reviews/<date>-<branch>.md`
-
-**Verdict**: <Approve | Approve with nits | Changes requested | Blocked>
-
-**Blockers** (<count>):
-- <file:line, one line each>
-
-**Major** (<count>):
-- <file:line, one line each>
-
-**Minor / nits**: <count>, see the findings file
-
-**Strengths**: <one or two genuine positives>
+Blockers (<count>) Â· fix before merge:
+- <file:line Â· one line>
+Major (<count>):
+- <file:line Â· one line>
+<count> minor/nits · strengths: <one line> · reviewed by <reviewer-model> over <N> files. Full findings in docs/reviews/<date>-<branch>.md.
 ```
 
-Show all blockers and majors in chat; collapse minors/nits to a count with a pointer to the file. If there are zero blockers and zero majors, lead with the verdict and keep it short.
+Lead with the verdict; show every blocker and major (they are the action); collapse minors/nits, strengths, and the reviewer/scope to the one tail line plus the file pointer. Zero blockers and zero majors → just the verdict line and the tail, nothing more.
 
 For a high-stakes change (verdict was Blocked or Changes requested, or the change is high/critical severity), append one line:
 > "For an independent second opinion from a different provider, switch your model with `/model` (or paste the diff into another assistant) and re-run /check review, no API keys needed."

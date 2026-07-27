@@ -132,17 +132,15 @@ When `scope.md` outgrows a comfortable scan (roughly a dozen plus features acros
 
 ## Completion report block
 
-```
-## /scope complete
+Lead with what the pass produced and the first step; the approach, tier, and full list are in the scope file itself (per `docs/conventions.md`). Template:
 
-**Product**: <one line>
-**Behavior**: <plan | replan | add (inferred from the situation, not a typed subcommand)>
-**Build approach**: <name (one-line principle)> · **Per-feature overrides**: <feature → approach, … (or "none, all inherit")>
-**Workflow**: <Vibe | Lean | Medium | Full> (<the stages it runs; why recommended for this product>) · **Per-feature tier overrides**: <feature → tier, … (or "none, all inherit")>
-**Scope file**: <docs/scope/scope.md> (<created new | updated in place | new epic file for <area>>)
-**Scope (this pass)**: <N> new features to build, <M> already on the scope, <K> deferred
-**Build order**: <feature 1> → <feature 2> → …
-**First step**: <run `/clear` first, then the first unticked box, usually `/architect <first feature>` (or `/audit` if a brownfield repo has no root AGENTS.md), each skill reads its inputs from the files just written, so a fresh session keeps every step cheap>
+```
+## /scope <plan | replan | add> Â· <product, one line>
+
+**<N> features planned (<M> already on the scope, <K> deferred), build approach <name>, workflow <tier>.**
+Next: /clear, then <the first unticked box, usually `/architect <first feature>`, or `/audit` if a brownfield repo has no root AGENTS.md>
+Heads up: <a feature bumped to a higher tier, a `needs a decision` foundation, or a genuine risk>   (omit if none)
+Scope written to <docs/scope/scope.md>.
 ```
 
 _Context hygiene: the scope, the specs, and `AGENTS.md` are the durable state, so the workflow hands off through files, not the chat. Advise `/clear` between units (after `/scope`, after each `/architect`, between features) and `/compact` mid unit if one run gets long. On Claude Code use `/clear` / `/compact`; use your agent's fresh session equivalent elsewhere._

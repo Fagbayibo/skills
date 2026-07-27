@@ -236,14 +236,12 @@ Read MODE_FILE_PATH now and follow that mode file as the only mode specific inst
 
 ## Report format
 
-```
-## /architect complete
+Lead with the decision; the mode, operation, and follow-up detail are in the spec (per `docs/conventions.md`). This block feeds the preview and the spoken summary in `after-subagent.md`. Template:
 
-**Mode**: <feature | architecture | enhancement | cross-cutting>
-**Operation**: <create | update | supersede>
-**Spec written**: <file path>
-**Decision**: <one sentence: what was decided>
-**Key tradeoff**: <one sentence: the main thing being traded away>
-**Premise challenged**: <yes, [what was challenged] | no>
-**Follow-up items**: <count or "none">
+```
+## /architect complete Â· <create | update | supersede> <mode> spec
+
+**Decided: <one sentence>.** Key tradeoff: <one sentence>.
+Spec written to <file path>.
+Heads up: <premise challenged: what · N follow-up items enrolled>   (omit if neither)
 ```

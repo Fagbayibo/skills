@@ -124,40 +124,20 @@ The inputs to apply:
 
 **If the maintenance failed or produced no parseable summary**, report that and do it again, don't fabricate a result (a genuine `NOTHING_TO_SYNC` is a valid success; a crash or empty output is not). Otherwise relay the compact summary:
 
+Lead with what it reconciled in one line; then list only what needs the engineer (per `docs/conventions.md`). The edits themselves are in the files. Template:
+
 ```
-## /sync complete
+## /sync complete Â· reconciled <N> changed files
 
-**Scope**: <N> changed files
-
-**AGENTS.md updated**:
-- `<path>`, <what was added/corrected, one line>   (or "no updates needed")
-
-**AGENTS.md created** (new area):
-- `<area>/AGENTS.md`, <what conventions it captures> (+ root pointer added)
-
-**Orphans cleaned** (after deletions):
-- `<path>`, <removed orphaned nested doc / fixed broken pointer>
-
-**Scope reconciled** (relevant workspace):
-- `<feature>`, <ticked sub-tasks / status planned→in-progress→done to match the diff>   (or "no scope, or already accurate")
-
-**Spec statuses reconciled** (Status line only):
-- `docs/specs/<file>`, <Status Proposed→In Progress→Accepted to match the feature's scope status>
-
-**Specs flagged stale** (run /architect to update or supersede):
-- `docs/specs/<file>`, <why the change makes it stale, or status mismatch sync couldn't safely resolve>
-
-**Assumed decisions, not yet ratified** (run /architect to ratify; the feature can't be `done` until then):
-- `docs/specs/<file>`, <feature> built on an assumption, decision not deliberated
-
-**Context gaps** (run /audit, area too established for /sync to document from the diff alone):
-- `<area>`, <pre-existing undocumented area only sliced by this change>
-
-**Conflicts left for you** (not auto-edited):
-- `<path>`, <curated content that would need rewriting; decide manually>
+**Updated <AGENTS.md files · scope features · spec statuses> to match the diff.**   (or "everything already current, nothing to sync")
+Heads up (need you):
+- Stale spec → /architect: `<file>` (<why, or a status mismatch /sync couldn't safely resolve>)
+- Assumed, not ratified → /architect: `<file>` (<feature>; can't be `done` until ratified)
+- Context gap → /audit: `<area>` (established area /sync can't document from the diff alone)
+- Conflict, decide manually: `<path>` (<curated content that would need rewriting>)
 ```
 
-Omit any section with no items. If everything was already current and nothing is stale, say so in one line. /sync does not run /architect or /audit for you; it points, you decide.
+Drop any Heads up bullet with no items, and drop the whole Heads up block if there are none. What `/sync` did (AGENTS.md lines, scope ticks, orphan cleanup, status reconciliation) is in the files; don't list it. `/sync` does not run `/architect` or `/audit` for you; it points, you decide.
 
 ---
 
