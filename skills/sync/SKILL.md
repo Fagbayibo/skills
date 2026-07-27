@@ -132,7 +132,7 @@ Lead with what it reconciled in one line; then list only what needs the engineer
 **Updated <AGENTS.md files · scope features · spec statuses> to match the diff.**   (or "everything already current, nothing to sync")
 Heads up (need you):
 - Stale spec → /architect: `<file>` (<why, or a status mismatch /sync couldn't safely resolve>)
-- Assumed, not ratified → /architect: `<file>` (<feature>; can't be `done` until ratified)
+- Assumed, not ratified → /architect: `<file>` (<feature>; owes ratification, doesn't block `done`)
 - Context gap → /audit: `<area>` (established area /sync can't document from the diff alone)
 - Conflict, decide manually: `<path>` (<curated content that would need rewriting>)
 ```

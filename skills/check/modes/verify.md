@@ -148,8 +148,7 @@ Overall verdict PASS requires every behavior verified with cited evidence, and (
 
 Update the scope: if this feature is on the scope (`docs/scope/`) and the verdict is PASS, tick its `Verify it` box. **Also tick, in this feature's `verify.md`, each step you actually ran and that passed** (`- [ ]` → `- [x]`); leave a step unticked if it failed or you could not run it. This is per feature: only the feature you verified gets ticked, other features' `verify.md` files stay unchecked until you verify them (expected, not a miss). What happens next depends on the workflow tier (the effective tier: the feature's own tier tag if set, else the scope header `**Workflow:**` default):
 
-- **Lean** → `/check verify` is the last required stage, so on PASS also set the feature `done` (At a glance table and heading) and mirror the governing spec's `**Status**:` line `In Progress` → `Accepted` (surgically; not `In Progress` → flag, don't clobber). Exception: an `Assumed` spec blocks `done`, leave it `in-progress` and point to `/architect <feature>` to ratify first. Then point to `/sync`.
-- **Medium / Full** → leave `Test it` and the `done` status to `/test` and `/sync`; point to `/test <feature>` next.
+- **On PASS, offer `done`, don't gate it.** If `Verify it` is the feature's last box (`Standard` tier), suggest marking it `done`: "Verified and passing, mark it `done`, or keep going, your call." On the engineer's go, set `done` and mirror the spec's `**Status**:` line `In Progress` → `Accepted` (surgically; not `In Progress` → flag). If there are later boxes (`Test it` at `Thorough`/`Full`), suggest `/test <feature>` as the next step, but the engineer may mark `done` and skip it. An `Assumed` spec does not block `done`; flag it ("owes ratification, `/architect` when you can") and let them decide.
 
 On FAIL or BLOCKED, tick nothing and report the gaps. Advise `/clear` before moving to a new feature (the spec and `verify.md` hold the state, so a fresh session loses nothing and stays cheap).
 
@@ -162,7 +161,7 @@ Lead with the verdict; list only what failed or is owed; point to verify.md for 
 ## /check verify <feature> Â· <PASS | FAIL | BLOCKED>
 
 **<PASS: all N behaviors met, every specced surface built · FAIL: M of N failed · BLOCKED: K couldn't be exercised>.**   (never PASS or ✅ if you did not actually run the app; say "not started")
-Next: <PASS → /test <feature> · FAIL → /debug <feature> · missing surface → /develop <feature> · BLOCKED → what's needed to run it>
+Next (this feature's next unticked box in the scope): PASS → `/test <feature>` if a `Test it` box remains, else the next feature · FAIL → `/debug <feature>` · missing surface → `/develop <feature>` · BLOCKED → what's needed to run it
 
 Failing / owed (omit if PASS):
 - <behavior or AC-N>: <what went wrong + evidence path> → <run /debug | build it, specced but missing | apply the migration, built but not live>

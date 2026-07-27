@@ -18,7 +18,7 @@ Before choosing any technology, pick the right foundational pattern:
 | Scale + Team | Pattern | Rationale |
 |---|---|---|
 | Small (< 1K users, team ≤ 5) | Monolith | Simplest to build, deploy, debug, and change. Extract nothing until a real bottleneck forces it. |
-| Medium (1K to 100K users, team 5 to 15) | Layered monolith (controllers → services → repositories) | Clean separation without distributed system complexity. Single deployable unit. |
+| Thorough (1K to 100K users, team 5 to 15) | Layered monolith (controllers → services → repositories) | Clean separation without distributed system complexity. Single deployable unit. |
 | Large (100K+ users, team 15+, clear ownership boundaries) | 2 to 3 focused services at domain boundaries | Service split driven by team ownership and specific scale bottleneck, not architectural taste. |
 | Data heavy | Batch vs stream decision first | Batch (cron + warehouse) is simpler and usually sufficient. Stream only when latency or volume forces it. |
 
